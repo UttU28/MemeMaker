@@ -1,0 +1,73 @@
+{
+    "users": {
+        "user1": {
+            "userName": "User One",
+            "displayName": "Professional Speaker",
+            "audioFile": "audio_files/user1.wav",
+            "config": {
+                "speed": 0.8,
+                "nfeSteps": 34,
+                "crossFadeDuration": 0.16,
+                "removeSilences": true
+            },
+            "outputPrefix": "user1Generated",
+            "description": "Professional voice for business presentations"
+        },
+        "user2": {
+            "userName": "User Two", 
+            "displayName": "Casual Speaker",
+            "audioFile": "audio_files/user2.wav",
+            "config": {
+                "speed": 0.9,
+                "nfeSteps": 40,
+                "crossFadeDuration": 0.18,
+                "removeSilences": false
+            },
+            "outputPrefix": "user2Generated",
+            "description": "Casual conversational voice"
+        },
+        "user3": {
+            "userName": "User Three",
+            "displayName": "Narrator Voice",
+            "audioFile": "audio_files/user3.wav",
+            "config": {
+                "speed": 0.85,
+                "nfeSteps": 36,
+                "crossFadeDuration": 0.17,
+                "removeSilences": true
+            },
+            "outputPrefix": "user3Generated",
+            "description": "Perfect for storytelling and narration"
+        },
+        "user4": {
+            "userName": "User Four",
+            "displayName": "Slow & Clear",
+            "audioFile": "audio_files/user4.wav",
+            "config": {
+                "speed": 0.75,
+                "nfeSteps": 32,
+                "crossFadeDuration": 0.15,
+                "removeSilences": true
+            },
+            "outputPrefix": "user4Generated",
+            "description": "Slow and clear voice for educational content"
+        },
+        "user5": {
+            "userName": "User Five",
+            "displayName": "Energetic Speaker",
+            "audioFile": "audio_files/user5.wav",
+            "config": {
+                "speed": 0.82,
+                "nfeSteps": 38,
+                "crossFadeDuration": 0.16,
+                "removeSilences": true
+            },
+            "outputPrefix": "user5Generated",
+            "description": "Energetic voice for dynamic content"
+        }
+    },
+    "defaultUser": "user1",
+    "lastUsed": "user1",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+} 
