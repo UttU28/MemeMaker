@@ -1,35 +1,35 @@
 {
     "users": {
         "user1": {
-            "userName": "User One",
-            "displayName": "Professional Speaker",
-            "audioFile": "audio_files/user1.wav",
+            "userName": "Professional Speaker",
+            "displayName": "Palki",
+            "audioFile": "audio_files/Palki.wav",
             "config": {
-                "speed": 0.8,
+                "speed": 0.9,
                 "nfeSteps": 34,
-                "crossFadeDuration": 0.16,
+                "crossFadeDuration": 0.13,
                 "removeSilences": true
             },
             "outputPrefix": "user1Generated",
             "description": "Professional voice for business presentations"
         },
         "user2": {
-            "userName": "User Two", 
-            "displayName": "Casual Speaker",
-            "audioFile": "audio_files/user2.wav",
+            "userName": "Casual Speaker",
+            "displayName": "Sashi",
+            "audioFile": "audio_files/Sashi.wav",
             "config": {
                 "speed": 0.9,
                 "nfeSteps": 40,
                 "crossFadeDuration": 0.18,
-                "removeSilences": false
+                "removeSilences": true
             },
             "outputPrefix": "user2Generated",
             "description": "Casual conversational voice"
         },
         "user3": {
-            "userName": "User Three",
-            "displayName": "Narrator Voice",
-            "audioFile": "audio_files/user3.wav",
+            "userName": "Narrator Voice",
+            "displayName": "JaiShankar",
+            "audioFile": "audio_files/JaiShankar.wav",
             "config": {
                 "speed": 0.85,
                 "nfeSteps": 36,
@@ -40,22 +40,22 @@
             "description": "Perfect for storytelling and narration"
         },
         "user4": {
-            "userName": "User Four",
-            "displayName": "Slow & Clear",
-            "audioFile": "audio_files/user4.wav",
+            "userName": "Slow & Clear",
+            "displayName": "Modi",
+            "audioFile": "audio_files/Modi.wav",
             "config": {
-                "speed": 0.75,
+                "speed": 0.85,
                 "nfeSteps": 32,
-                "crossFadeDuration": 0.15,
+                "crossFadeDuration": 0.11,
                 "removeSilences": true
             },
             "outputPrefix": "user4Generated",
             "description": "Slow and clear voice for educational content"
         },
         "user5": {
-            "userName": "User Five",
-            "displayName": "Energetic Speaker",
-            "audioFile": "audio_files/user5.wav",
+            "userName": "Energetic Speaker",
+            "displayName": "Rahul",
+            "audioFile": "audio_files/Rahul.wav",
             "config": {
                 "speed": 0.82,
                 "nfeSteps": 38,
@@ -67,7 +67,7 @@
         }
     },
     "defaultUser": "user1",
-    "lastUsed": "user1",
+    "lastUsed": "user5",
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
-} 
+    "updatedAt": "2025-05-27T19:06:39.590230"
+}

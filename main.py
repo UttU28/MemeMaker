@@ -209,36 +209,36 @@ class F5TTSSeleniumClient:
             except Exception as e:
                 print(f"⚠️ Could not enable Remove Silences: {e}")
             
-            # Set Speed to 0.8
+            # Set Speed to 0.9
             try:
                 speed_input = self.driver.find_element(
                     By.XPATH, "//span[text()='Speed']/ancestor::div[@class='head svelte-10lj3xl']//input[@type='number']"
                 )
                 speed_input.clear()
-                speed_input.send_keys("0.8")
-                print("✅ Speed set to 0.8")
+                speed_input.send_keys("0.9")
+                print("✅ Speed set to 0.9")
             except Exception as e:
                 print(f"⚠️ Could not set Speed: {e}")
             
-            # Set NFE Steps to 34
+            # Set NFE Steps to 32
             try:
                 nfe_input = self.driver.find_element(
                     By.XPATH, "//span[text()='NFE Steps']/ancestor::div[@class='head svelte-10lj3xl']//input[@type='number']"
                 )
                 nfe_input.clear()
-                nfe_input.send_keys("34")
-                print("✅ NFE Steps set to 34")
+                nfe_input.send_keys("32")
+                print("✅ NFE Steps set to 32")
             except Exception as e:
                 print(f"⚠️ Could not set NFE Steps: {e}")
             
-            # Set Cross-Fade Duration to 0.16
+            # Set Cross-Fade Duration to 0.15
             try:
                 crossfade_input = self.driver.find_element(
                     By.XPATH, "//span[text()='Cross-Fade Duration (s)']/ancestor::div[@class='head svelte-10lj3xl']//input[@type='number']"
                 )
                 crossfade_input.clear()
-                crossfade_input.send_keys("0.16")
-                print("✅ Cross-Fade Duration set to 0.16")
+                crossfade_input.send_keys("0.15")
+                print("✅ Cross-Fade Duration set to 0.15")
             except Exception as e:
                 print(f"⚠️ Could not set Cross-Fade Duration: {e}")
             
@@ -405,9 +405,9 @@ class F5TTSSeleniumClient:
         print("  - Review the uploaded audio file")
         print("  - Check the entered text")
         print("  - Review configured Advanced Settings:")
-        print("    • Speed: 0.8")
-        print("    • NFE Steps: 34") 
-        print("    • Cross-Fade Duration: 0.16s")
+        print("    • Speed: 0.9")
+        print("    • NFE Steps: 32") 
+        print("    • Cross-Fade Duration: 0.15s")
         print("    • Remove Silences: Enabled")
         print("  - Play the generated audio in browser")
         print("  - Check the downloaded audio file in current directory")

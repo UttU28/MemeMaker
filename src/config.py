@@ -140,7 +140,9 @@ class ConfigManager:
             "removeSilences": True,
             "f5ttsUrl": "http://localhost:7860",
             "timeoutSeconds": 300,
-            "downloadDirectory": "audio_files/generated"
+            "downloadDirectory": "audio_files/generated",
+            "defaultAudioFile": "audio_files/user1.wav",
+            "defaultOutputPrefix": "defaultGenerated"
         }
     
     def validateUserProfile(self, userId: str) -> bool:
@@ -188,4 +190,54 @@ class ConfigManager:
         userProfile = self.getUserProfile(userId)
         if userProfile:
             return userProfile.get("outputPrefix", f"{userId}Generated")
-        return f"{userId}Generated" 
+        return f"{userId}Generated"
+    
+    def getDefaultAudioFile(self) -> str:
+        """
+        Get the default audio file path from configuration
+        
+        Returns:
+            Default audio file path
+        """
+        defaultConfig = self.loadDefaultConfig()
+        return defaultConfig.get("defaultAudioFile", "audio_files/user1.wav")
+    
+    def getDefaultOutputPrefix(self) -> str:
+        """
+        Get the default output prefix from configuration
+        
+        Returns:
+            Default output prefix
+        """
+        defaultConfig = self.loadDefaultConfig()
+        return defaultConfig.get("defaultOutputPrefix", "defaultGenerated")
+    
+    def getAudioFilePathWithFallback(self, userId: str) -> str:
+        """
+        Get audio file path for user with fallback to default
+        
+        Args:
+            userId: The user ID
+            
+        Returns:
+            Audio file path (user-specific or default)
+        """
+        userAudioFile = self.getAudioFilePath(userId)
+        if userAudioFile:
+            return userAudioFile
+        return self.getDefaultAudioFile()
+    
+    def getOutputPrefixWithFallback(self, userId: str) -> str:
+        """
+        Get output prefix for user with fallback to default
+        
+        Args:
+            userId: The user ID
+            
+        Returns:
+            Output prefix (user-specific or default)
+        """
+        userProfile = self.getUserProfile(userId)
+        if userProfile and "outputPrefix" in userProfile:
+            return userProfile["outputPrefix"]
+        return self.getDefaultOutputPrefix() 

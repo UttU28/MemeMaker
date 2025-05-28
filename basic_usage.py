@@ -31,7 +31,7 @@ def basicUsageExample():
     
     # Get user configuration
     userConfig = configManager.getUserConfig(defaultUserId)
-    audioFilePath = configManager.getAudioFilePath(defaultUserId)
+    audioFilePath = configManager.getAudioFilePathWithFallback(defaultUserId)
     
     # Validate audio file
     if not audioManager.validateAudioFile(audioFilePath):
@@ -119,7 +119,7 @@ def runAutomationWithUser(userId: str):
     
     # Get user configuration
     userConfig = configManager.getUserConfig(userId)
-    audioFilePath = configManager.getAudioFilePath(userId)
+    audioFilePath = configManager.getAudioFilePathWithFallback(userId)
     userProfile = configManager.getUserProfile(userId)
     
     print(f"📁 Audio file: {audioFilePath}")
@@ -148,7 +148,7 @@ def runAutomationWithUser(userId: str):
                 logManager.logUserAction(userId, "UserAutomation", "Failed")
             
             # Show generated files for this user
-            outputPrefix = configManager.getOutputPrefix(userId)
+            outputPrefix = configManager.getOutputPrefixWithFallback(userId)
             generatedFiles = audioManager.listGeneratedFiles(outputPrefix)
             
             if generatedFiles:
