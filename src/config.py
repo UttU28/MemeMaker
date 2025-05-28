@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Configuration Manager for F5-TTS Selenium Automation
+Configuration Manager for F5-TTS Gradio API Automation
 Handles loading and managing user profiles and default configurations
 """
 
@@ -27,7 +27,6 @@ class ConfigManager:
         self._userProfiles = None
     
     def loadDefaultConfig(self) -> Dict[str, Any]:
-        """Load the default configuration"""
         if self._defaultConfig is None:
             try:
                 with open(self.defaultConfigPath, 'r', encoding='utf-8') as file:
@@ -42,7 +41,6 @@ class ConfigManager:
         return self._defaultConfig.copy()
     
     def loadUserProfiles(self) -> Dict[str, Any]:
-        """Load all user profiles"""
         if self._userProfiles is None:
             try:
                 with open(self.userProfilesPath, 'r', encoding='utf-8') as file:
@@ -57,28 +55,10 @@ class ConfigManager:
         return self._userProfiles.copy()
     
     def getUserProfile(self, userId: str) -> Optional[Dict[str, Any]]:
-        """
-        Get a specific user profile
-        
-        Args:
-            userId: The user ID to retrieve
-            
-        Returns:
-            User profile dictionary or None if not found
-        """
         profiles = self.loadUserProfiles()
         return profiles.get("users", {}).get(userId)
     
     def getUserConfig(self, userId: str) -> Dict[str, Any]:
-        """
-        Get merged configuration for a user (default + user overrides)
-        
-        Args:
-            userId: The user ID
-            
-        Returns:
-            Merged configuration dictionary
-        """
         defaultConfig = self.loadDefaultConfig()
         userProfile = self.getUserProfile(userId)
         
@@ -91,20 +71,10 @@ class ConfigManager:
         return defaultConfig
     
     def getAllUserIds(self) -> list:
-        """Get list of all user IDs"""
         profiles = self.loadUserProfiles()
         return list(profiles.get("users", {}).keys())
     
     def updateLastUsed(self, userId: str) -> bool:
-        """
-        Update the last used user in the profiles file
-        
-        Args:
-            userId: The user ID that was last used
-            
-        Returns:
-            True if successful, False otherwise
-        """
         try:
             profiles = self.loadUserProfiles()
             profiles["lastUsed"] = userId
@@ -122,17 +92,14 @@ class ConfigManager:
             return False
     
     def getDefaultUserId(self) -> str:
-        """Get the default user ID"""
         profiles = self.loadUserProfiles()
         return profiles.get("defaultUser", "user1")
     
     def getLastUsedUserId(self) -> str:
-        """Get the last used user ID"""
         profiles = self.loadUserProfiles()
         return profiles.get("lastUsed", self.getDefaultUserId())
     
     def _getDefaultConfigFallback(self) -> Dict[str, Any]:
-        """Fallback default configuration if file is missing"""
         return {
             "speed": 0.8,
             "nfeSteps": 34,
@@ -146,97 +113,40 @@ class ConfigManager:
         }
     
     def validateUserProfile(self, userId: str) -> bool:
-        """
-        Validate that a user profile exists and has required fields
-        
-        Args:
-            userId: The user ID to validate
-            
-        Returns:
-            True if valid, False otherwise
-        """
         userProfile = self.getUserProfile(userId)
         if not userProfile:
             return False
         
-        requiredFields = ["userName", "audioFile", "outputPrefix"]
+        requiredFields = ["displayName", "audioFile", "outputPrefix"]
         return all(field in userProfile for field in requiredFields)
     
     def getAudioFilePath(self, userId: str) -> Optional[str]:
-        """
-        Get the audio file path for a user
-        
-        Args:
-            userId: The user ID
-            
-        Returns:
-            Audio file path or None if not found
-        """
         userProfile = self.getUserProfile(userId)
         if userProfile:
             return userProfile.get("audioFile")
         return None
     
     def getOutputPrefix(self, userId: str) -> str:
-        """
-        Get the output prefix for a user
-        
-        Args:
-            userId: The user ID
-            
-        Returns:
-            Output prefix string
-        """
         userProfile = self.getUserProfile(userId)
         if userProfile:
             return userProfile.get("outputPrefix", f"{userId}Generated")
         return f"{userId}Generated"
     
     def getDefaultAudioFile(self) -> str:
-        """
-        Get the default audio file path from configuration
-        
-        Returns:
-            Default audio file path
-        """
         defaultConfig = self.loadDefaultConfig()
         return defaultConfig.get("defaultAudioFile", "audio_files/user1.wav")
     
     def getDefaultOutputPrefix(self) -> str:
-        """
-        Get the default output prefix from configuration
-        
-        Returns:
-            Default output prefix
-        """
         defaultConfig = self.loadDefaultConfig()
         return defaultConfig.get("defaultOutputPrefix", "defaultGenerated")
     
     def getAudioFilePathWithFallback(self, userId: str) -> str:
-        """
-        Get audio file path for user with fallback to default
-        
-        Args:
-            userId: The user ID
-            
-        Returns:
-            Audio file path (user-specific or default)
-        """
         userAudioFile = self.getAudioFilePath(userId)
         if userAudioFile:
             return userAudioFile
         return self.getDefaultAudioFile()
     
     def getOutputPrefixWithFallback(self, userId: str) -> str:
-        """
-        Get output prefix for user with fallback to default
-        
-        Args:
-            userId: The user ID
-            
-        Returns:
-            Output prefix (user-specific or default)
-        """
         userProfile = self.getUserProfile(userId)
         if userProfile and "outputPrefix" in userProfile:
             return userProfile["outputPrefix"]

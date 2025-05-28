@@ -1,11 +1,21 @@
+#!/usr/bin/env python3
 """
-F5-TTS Selenium Automation Package
-A Python package for automating F5-TTS voice cloning with multiple user profiles
+F5-TTS Gradio API Automation Package
+A Python package for automating F5-TTS voice cloning using Gradio API calls
 """
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "F5-TTS Automation Team"
+__description__ = "F5-TTS voice cloning automation using Gradio API"
 
-from .main import F5TtsSeleniumClient
+# Import main classes for easy access
+from src.client import F5TtsGradioClient
+from src.config import ConfigManager
+from src.utils import AudioFileManager, LogManager
 
-__all__ = ["F5TtsSeleniumClient"] 
+__all__ = [
+    "F5TtsGradioClient",
+    "ConfigManager", 
+    "AudioFileManager",
+    "LogManager"
+] 

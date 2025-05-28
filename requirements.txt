@@ -1,3 +1,2 @@
-selenium>=4.0.0
-requests>=2.25.0
+gradio_client>=0.8.0
 datetime

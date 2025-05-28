@@ -1,95 +1,76 @@
-# F5-TTS Selenium Automation
+# F5-TTS Gradio API Automation
 
-A Python package for automating F5-TTS voice cloning with multiple user profiles and camelCase naming conventions.
+A Python package for automating F5-TTS voice cloning using Gradio API calls with multi-user profile support and camelCase naming conventions.
 
-## 🚀 Features
+## Features
 
-- **Multi-User Support**: Manage multiple voice profiles with individual configurations
-- **Automated Voice Generation**: Complete automation of F5-TTS web interface
-- **Flexible Configuration**: Default settings with per-user overrides
-- **Audio File Management**: Organized storage and cleanup of generated audio
-- **Comprehensive Logging**: Detailed logging of all operations
-- **camelCase Naming**: Consistent camelCase naming throughout the codebase
+- 🎵 **Gradio API Integration**: Direct API calls to F5-TTS (no browser automation needed)
+- 👥 **Multi-User Profiles**: Support for 5 different voice profiles
+- 🔧 **Configurable Settings**: Speed, NFE steps, cross-fade duration, and silence removal
+- 📁 **Audio File Management**: Organized audio files with automatic cleanup
+- 📊 **Comprehensive Logging**: Detailed logs for all operations
+- 🎯 **camelCase Naming**: Consistent naming conventions throughout
 
-## 📁 Project Structure
+## Installation
 
-```
-currdir/
-├── __init__.py                 # Main package initialization
-├── main.py                     # Original F5TTSSeleniumClient class
-├── requirements.txt            # Project dependencies
-├── README.md                   # This file
-├── basic_usage.py             # Example usage and quick start
-├── src/                       # Source code modules
-│   ├── __init__.py           # Source package initialization
-│   ├── client.py             # F5TtsSeleniumClient implementation
-│   ├── config.py             # Configuration management
-│   └── utils.py              # Utility classes
-├── audio_files/              # Audio file storage
-│   ├── user1.wav            # Reference audio files
-│   ├── user2.wav
-│   ├── user3.wav
-│   ├── user4.wav
-│   ├── user5.wav
-│   └── generated/           # Generated output files
-├── profiles/                # Configuration files
-│   ├── defaultConfig.json  # Default settings
-│   └── userProfiles.json   # All user profiles
-└── logs/                   # Execution logs
-```
-
-## 🛠️ Installation
-
-### Prerequisites
-
-1. **Python 3.6+**
-2. **Google Chrome Browser**
-3. **ChromeDriver** (matching your Chrome version)
-4. **F5-TTS Server** running on `http://localhost:7860`
-
-### Setup
-
-1. **Clone or download this project**
+1. **Clone or download this repository**
 2. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-3. **Add your audio files** to the `audio_files/` directory
-4. **Configure user profiles** in `profiles/userProfiles.json`
+3. **Ensure F5-TTS is running:**
+   - Start your F5-TTS server (usually at `http://localhost:7860`)
+   - Make sure the Gradio interface is accessible
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Basic Usage
-
 ```python
-# Run the basic usage example
+from src.client import F5TtsGradioClient
+
+# Create client
+client = F5TtsGradioClient("http://localhost:7860")
+
+# Connect to API
+client.connectToGradio()
+
+# Generate speech with default user
+client.generateSpeechWithUser("user1", "Hello, this is a test!")
+
+# Clean up
+client.close()
+```
+
+### Using the Interactive Menu
+```bash
 python basic_usage.py
 ```
 
-### Direct Usage
-
-```python
-from src.client import F5TtsSeleniumClient
-from src.config import ConfigManager
-
-# Initialize configuration manager
-configManager = ConfigManager()
-
-# Get user configuration
-userId = "user1"
-userConfig = configManager.getUserConfig(userId)
-
-# Create and run client
-client = F5TtsSeleniumClient(userConfig["f5ttsUrl"])
-client.setupDriver()
-client.openF5tts()
-client.automateF5ttsWorkflowWithUser(userId)
+### Simple Test
+```bash
+python test.py
 ```
 
-## 👥 User Profiles
+### Main Script
+```bash
+python main.py
+```
+
+## User Profiles
+
+The system includes 5 pre-configured user profiles:
+
+| User ID | Display Name | Voice Style | Speed | NFE Steps | Audio File |
+|---------|--------------|-------------|-------|-----------|------------|
+| user1   | Palki        | Professional Speaker | 0.9 | 34 | Palki.wav |
+| user2   | Shashi        | Casual Speaker | 0.9 | 40 | Shashi.wav |
+| user3   | JaiShankar   | Narrator Voice | 0.85 | 36 | JaiShankar.wav |
+| user4   | Modi         | Slow & Clear | 0.85 | 32 | Modi.wav |
+| user5   | Rahul        | Energetic Speaker | 0.82 | 38 | Rahul.wav |
+
+## Configuration
 
 ### Default Configuration (`profiles/defaultConfig.json`)
-
 ```json
 {
     "speed": 0.8,
@@ -98,210 +79,200 @@ client.automateF5ttsWorkflowWithUser(userId)
     "removeSilences": true,
     "f5ttsUrl": "http://localhost:7860",
     "timeoutSeconds": 300,
-    "downloadDirectory": "audio_files/generated"
+    "downloadDirectory": "audio_files/generated",
+    "defaultAudioFile": "audio_files/Palki.wav",
+    "defaultOutputPrefix": "defaultGenerated"
 }
 ```
 
 ### User Profiles (`profiles/userProfiles.json`)
-
-Each user profile includes:
+Each user profile contains:
 - `userName`: Display name
-- `displayName`: Friendly display name
 - `audioFile`: Path to reference audio file
-- `config`: User-specific settings (overrides defaults)
+- `config`: Voice generation settings
 - `outputPrefix`: Prefix for generated files
 - `description`: Profile description
 
-Example user profile:
-```json
-{
-    "user1": {
-        "userName": "User One",
-        "displayName": "Professional Speaker",
-        "audioFile": "audio_files/user1.wav",
-        "config": {
-            "speed": 0.8,
-            "nfeSteps": 34,
-            "crossFadeDuration": 0.16,
-            "removeSilences": true
-        },
-        "outputPrefix": "user1Generated",
-        "description": "Professional voice for business presentations"
-    }
-}
+## API Reference
+
+### F5TtsGradioClient
+
+#### Core Methods
+- `connectToGradio()`: Connect to F5-TTS Gradio API
+- `generateSpeechWithApi(audioFilePath, textToGenerate, userConfig)`: Generate speech using API
+- `generateSpeechWithUser(userId, customText)`: Generate speech with user profile
+- `downloadAndSaveAudio(apiResult, outputPrefix)`: Save generated audio
+- `testConnection()`: Test API connection
+- `close()`: Clean up resources
+
+#### Configuration Methods
+- `listAvailableUsers()`: Get list of user profiles
+- `getUserInfo(userId)`: Get user profile information
+
+### ConfigManager
+
+#### Profile Management
+- `getUserProfile(userId)`: Get user profile
+- `getUserConfig(userId)`: Get merged configuration
+- `getAllUserIds()`: Get all user IDs
+- `updateLastUsed(userId)`: Update last used user
+
+#### File Path Methods
+- `getAudioFilePathWithFallback(userId)`: Get audio file with fallback
+- `getOutputPrefixWithFallback(userId)`: Get output prefix with fallback
+
+### AudioFileManager
+
+#### File Operations
+- `validateAudioFile(filePath)`: Validate audio file
+- `generateOutputFileName(userPrefix)`: Generate output filename
+- `listGeneratedFiles(userPrefix)`: List generated files
+- `cleanupOldFiles(maxFiles)`: Clean up old files
+
+### LogManager
+
+#### Logging Methods
+- `logInfo(message)`: Log info message
+- `logUserAction(userId, action, details)`: Log user action
+- `logAudioGeneration(...)`: Log audio generation details
+- `logError(error, context)`: Log error with context
+
+## Directory Structure
+
+```
+currdir/
+├── __init__.py
+├── main.py                 # Main script
+├── requirements.txt        # Dependencies
+├── README.md              # This file
+├── basic_usage.py         # Interactive usage examples
+├── test.py               # Simple test script
+├── src/
+│   ├── __init__.py
+│   ├── client.py         # F5TtsGradioClient
+│   ├── config.py         # ConfigManager
+│   └── utils.py          # AudioFileManager, LogManager
+├── audio_files/
+│   ├── Palki.wav         # Reference audio files
+│   ├── Shashi.wav
+│   ├── JaiShankar.wav
+│   ├── Modi.wav
+│   ├── Rahul.wav
+│   └── generated/        # Generated audio files
+├── profiles/
+│   ├── defaultConfig.json    # Default settings
+│   └── userProfiles.json     # User profiles
+└── logs/                     # Log files
 ```
 
-## 🔧 Configuration Options
+## Configuration Parameters
 
-### Audio Settings
+### Voice Generation Settings
 
-- **speed**: Speech speed (0.1 - 2.0)
-- **nfeSteps**: NFE steps for generation quality (16-64)
-- **crossFadeDuration**: Cross-fade duration in seconds (0.1-1.0)
-- **removeSilences**: Remove silence from audio (true/false)
+- **speed** (0.1-2.0): Speech rate (1.0 = normal speed)
+- **nfeSteps** (16-64): Neural Flow Estimation steps (higher = better quality, slower)
+- **crossFadeDuration** (0.05-1.0): Smooth transitions between segments (seconds)
+- **removeSilences** (boolean): Remove long pauses from generated audio
 
 ### System Settings
 
 - **f5ttsUrl**: F5-TTS server URL
-- **timeoutSeconds**: Maximum wait time for generation
-- **downloadDirectory**: Output directory for generated files
+- **timeoutSeconds**: Maximum generation wait time
+- **downloadDirectory**: Directory for generated files
+- **defaultAudioFile**: Fallback audio file
+- **defaultOutputPrefix**: Default output file prefix
 
-## 📚 API Reference
+## Examples
 
-### ConfigManager
-
+### Generate Speech with Custom Settings
 ```python
-configManager = ConfigManager()
+from src.client import F5TtsGradioClient
 
-# Load configurations
-defaultConfig = configManager.loadDefaultConfig()
-userProfiles = configManager.loadUserProfiles()
+client = F5TtsGradioClient()
+client.connectToGradio()
 
-# Get user-specific data
-userConfig = configManager.getUserConfig("user1")
-audioFilePath = configManager.getAudioFilePath("user1")
-outputPrefix = configManager.getOutputPrefix("user1")
+# Custom configuration
+customConfig = {
+    "speed": 0.8,
+    "nfeSteps": 40,
+    "crossFadeDuration": 0.2,
+    "removeSilences": True
+}
 
-# Manage users
-allUserIds = configManager.getAllUserIds()
-isValid = configManager.validateUserProfile("user1")
-configManager.updateLastUsed("user1")
+result = client.generateSpeechWithApi(
+    audioFilePath="audio_files/Palki.wav",
+    textToGenerate="Your custom text here",
+    userConfig=customConfig
+)
+
+if result:
+    savedPath = client.downloadAndSaveAudio(result, "customGenerated")
+    print(f"Audio saved to: {savedPath}")
+
+client.close()
 ```
 
-### AudioFileManager
-
+### Batch Processing Multiple Users
 ```python
-audioManager = AudioFileManager()
-
-# File validation and management
-isValid = audioManager.validateAudioFile("path/to/audio.wav")
-absolutePath = audioManager.getAbsolutePath("relative/path.wav")
-
-# Generated file management
-fileName = audioManager.generateOutputFileName("user1Generated")
-filePath = audioManager.getGeneratedFilePath(fileName)
-generatedFiles = audioManager.listGeneratedFiles("user1Generated")
-
-# Cleanup
-deletedCount = audioManager.cleanupOldFiles(maxFiles=50)
-```
-
-### LogManager
-
-```python
-logManager = LogManager()
-
-# Logging methods
-logManager.logInfo("Information message")
-logManager.logWarning("Warning message")
-logManager.logError("Error message")
-
-# Specialized logging
-logManager.logUserAction("user1", "AudioGeneration", "Started")
-logManager.logAudioGeneration("user1", 150, "user1.wav", "output.wav", 45.2)
-```
-
-## 🎵 Usage Examples
-
-### 1. Basic Automation
-
-```python
-python basic_usage.py
-# Select option 1 for basic usage with default user
-```
-
-### 2. Multi-User Selection
-
-```python
-python basic_usage.py
-# Select option 2 to choose from available user profiles
-```
-
-### 3. Custom Text Generation
-
-```python
-from src.client import F5TtsSeleniumClient
+from src.client import F5TtsGradioClient
 from src.config import ConfigManager
 
 configManager = ConfigManager()
-client = F5TtsSeleniumClient()
+client = F5TtsGradioClient()
+client.connectToGradio()
 
-client.setupDriver()
-client.openF5tts()
+text = "This is a test message for all users."
 
-# Upload specific audio file
-client.uploadAudioFile("audio_files/user3.wav")
+for userId in configManager.getAllUserIds():
+    print(f"Generating for {userId}...")
+    success = client.generateSpeechWithUser(userId, text)
+    if success:
+        print(f"✅ Success for {userId}")
+    else:
+        print(f"❌ Failed for {userId}")
 
-# Enter custom text
-customText = "Your custom text to generate speech from."
-client.enterTextToGenerate(customText)
-
-# Configure settings
-client.openAdvancedSettings()
-client.configureAdvancedSettings()
-client.closeAdvancedSettings()
-
-# Generate and download
-client.clickSynthesize()
-client.waitForAudioAndDownload()
+client.close()
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-1. **ChromeDriver not found**
-   - Download ChromeDriver from https://chromedriver.chromium.org/
-   - Ensure it's in your PATH or project directory
+1. **Connection Failed**
+   - Ensure F5-TTS server is running
+   - Check the URL in configuration
+   - Verify Gradio interface is accessible
 
-2. **F5-TTS not accessible**
-   - Verify F5-TTS is running on http://localhost:7860
-   - Check firewall and network settings
-
-3. **Audio file not found**
+2. **Audio File Not Found**
+   - Check file paths in user profiles
    - Ensure audio files exist in `audio_files/` directory
-   - Check file paths in `userProfiles.json`
+   - Verify file permissions
 
-4. **Permission errors**
-   - Ensure write permissions for `audio_files/generated/` and `logs/`
+3. **Generation Failed**
+   - Check F5-TTS server logs
+   - Verify audio file format (WAV, MP3, FLAC supported)
+   - Try reducing NFE steps for faster generation
 
-### Debug Mode
+4. **Import Errors**
+   - Install required dependencies: `pip install -r requirements.txt`
+   - Ensure Python path includes the project directory
 
-Enable debug logging:
-```python
-from src.utils import LogManager
-import logging
+### Performance Tips
 
-logManager = LogManager(logLevel=logging.DEBUG)
-```
+- **Faster Generation**: Lower `nfeSteps` (16-24 for quick tests)
+- **Better Quality**: Higher `nfeSteps` (40-64 for production)
+- **Shorter Audio**: Use shorter reference audio files (10-30 seconds)
+- **Batch Processing**: Reuse the same client connection for multiple generations
 
-## 📝 Logging
+## Dependencies
 
-Logs are automatically saved to `logs/` directory with daily rotation:
-- **File**: `f5tts_automation_YYYYMMDD.log`
-- **Format**: Timestamp, level, and detailed messages
-- **Cleanup**: Automatic cleanup of logs older than 30 days
+- `gradio_client>=0.8.0`: Gradio API client
+- `datetime`: Date/time utilities (built-in)
 
-## 🤝 Contributing
+## License
 
-1. Follow camelCase naming conventions
-2. Add type hints to all functions
-3. Include docstrings for all classes and methods
-4. Test with multiple user profiles
-5. Update README for new features
+This project is provided as-is for educational and research purposes.
 
-## 📄 License
+## Contributing
 
-This project is open source. Feel free to modify and distribute.
-
-## 🆘 Support
-
-For issues and questions:
-1. Check the troubleshooting section
-2. Review log files in `logs/` directory
-3. Ensure all prerequisites are installed
-4. Verify F5-TTS server is running
-
----
-
-**Happy Voice Cloning! 🎤✨** 
+Feel free to submit issues, feature requests, or pull requests to improve this automation package. 

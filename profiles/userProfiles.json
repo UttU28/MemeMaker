@@ -1,7 +1,6 @@
 {
     "users": {
-        "user1": {
-            "userName": "Professional Speaker",
+        "palki": {
             "displayName": "Palki",
             "audioFile": "audio_files/Palki.wav",
             "config": {
@@ -10,24 +9,20 @@
                 "crossFadeDuration": 0.13,
                 "removeSilences": true
             },
-            "outputPrefix": "user1Generated",
-            "description": "Professional voice for business presentations"
+            "outputPrefix": "palki"
         },
-        "user2": {
-            "userName": "Casual Speaker",
-            "displayName": "Sashi",
-            "audioFile": "audio_files/Sashi.wav",
+        "shashi": {
+            "displayName": "Shashi",
+            "audioFile": "audio_files/Shashi.wav",
             "config": {
                 "speed": 0.9,
                 "nfeSteps": 40,
                 "crossFadeDuration": 0.18,
                 "removeSilences": true
             },
-            "outputPrefix": "user2Generated",
-            "description": "Casual conversational voice"
+            "outputPrefix": "shashi"
         },
-        "user3": {
-            "userName": "Narrator Voice",
+        "jaiShankar": {
             "displayName": "JaiShankar",
             "audioFile": "audio_files/JaiShankar.wav",
             "config": {
@@ -36,11 +31,9 @@
                 "crossFadeDuration": 0.17,
                 "removeSilences": true
             },
-            "outputPrefix": "user3Generated",
-            "description": "Perfect for storytelling and narration"
+            "outputPrefix": "jaiShankar"
         },
-        "user4": {
-            "userName": "Slow & Clear",
+        "modi": {
             "displayName": "Modi",
             "audioFile": "audio_files/Modi.wav",
             "config": {
@@ -49,11 +42,9 @@
                 "crossFadeDuration": 0.11,
                 "removeSilences": true
             },
-            "outputPrefix": "user4Generated",
-            "description": "Slow and clear voice for educational content"
+            "outputPrefix": "modi"
         },
-        "user5": {
-            "userName": "Energetic Speaker",
+        "rahul": {
             "displayName": "Rahul",
             "audioFile": "audio_files/Rahul.wav",
             "config": {
@@ -62,12 +53,11 @@
                 "crossFadeDuration": 0.16,
                 "removeSilences": true
             },
-            "outputPrefix": "user5Generated",
-            "description": "Energetic voice for dynamic content"
+            "outputPrefix": "rahul"
         }
     },
-    "defaultUser": "user1",
-    "lastUsed": "user5",
+    "defaultUser": "palki",
+    "lastUsed": "palki",
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2025-05-27T19:06:39.590230"
+    "updatedAt": "2025-05-27T20:05:41.633287"
 }
