@@ -2,7 +2,6 @@ import json
 import subprocess
 import os
 import sys
-import openai
 import requests
 from dotenv import load_dotenv
 from prompts import CHAT_GENERATION_PROMPT
@@ -10,33 +9,19 @@ from pydub import AudioSegment, silence
 from src.client import F5TtsGradioClient
 from src.config import ConfigManager
 from src.utils import AudioFileManager
+from src.llm import LlmService
 
 load_dotenv()
 
-openaiClient = openai.OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
-
 def generateDialogue(word):
+    llmService = LlmService()
     formattedPrompt = CHAT_GENERATION_PROMPT.format(word=word.capitalize())
     
-    try:
-        response = openaiClient.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": formattedPrompt}
-            ],
-            max_tokens=500,
-            temperature=0.7
-        )
-        
-        dialogue = response.choices[0].message.content.strip()
-        dialogue = dialogue.replace('"', '').replace("'", '')
-        return dialogue
-        
-    except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
-        return None
+    dialogue = llmService.generate(formattedPrompt, provider="openai")
+    if dialogue:
+        return llmService.cleanResponse(dialogue)
+    
+    return None
 
 thisConvo = """
 {Rahul} I heard someone say my popularity *plummeted*. What does that even mean?
@@ -166,7 +151,7 @@ def saveWordData(word: str, dialogueData: list, cleanedAudioFiles: list):
                 chats[f"chat{i}"] = {
                     "dialogue": dialogue,
                     "speaker": speaker.lower(),
-                    "audioFile": f"audio_files/generated/{cleanedAudioFiles[i-1]}"
+                    "audioFile": f"data/audio_files/generated/{cleanedAudioFiles[i-1]}"
                 }
         
         data["words"][word.lower()] = {
@@ -305,8 +290,8 @@ def main():
     if cleanedAudioFiles:
         saveWordData(word, dialogueData, cleanedAudioFiles)
         
-        finalAudioPath = f"audio_files/merged/{word.lower()}_conversation.wav"
-        os.makedirs("audio_files/merged", exist_ok=True)
+        finalAudioPath = f"data/audio_files/merged/{word.lower()}_conversation.wav"
+        os.makedirs("data/audio_files/merged", exist_ok=True)
         
         success = mergeAudioFiles(cleanedAudioFiles, finalAudioPath)
         if success:

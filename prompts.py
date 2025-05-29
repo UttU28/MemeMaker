@@ -26,5 +26,13 @@ Example short dialogue:
 Now generate a similar dialogue (no more than 60 seconds when read aloud) for the word: {word}
 """
 
+GET_THE_MOOD_PROMPT = """
+Sentence: {sentence}
+Options: [{options}]
+
+Based on the sentence and options, the tone of the sentence represents which option, give one option:
+Give only one option, no other text or explanation Thanks.
+"""
+
 if __name__ == "__main__":
     print(CHAT_GENERATION_PROMPT.format(word="plummet".capitalize()))

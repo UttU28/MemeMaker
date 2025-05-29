@@ -73,12 +73,14 @@
                 "chat1": {
                     "dialogue": "What does amalgamate mean?",
                     "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191714.wav"
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191714.wav",
+                    "imageFile": "data/images/rahul_confident.png"
                 },
                 "chat2": {
                     "dialogue": "Ah, Rahul, amalgamate means to blend or mix things together, like when different parties come together to form a coalition government.",
                     "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191724.wav"
+                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191724.wav",
+                    "imageFile": "data/images/modi_confident.png"
                 },
                 "chat3": {
                     "dialogue": "Indeed, its a harmonious fusion, a coming together of diverse elements to create something new and stronger.",
@@ -114,40 +116,40 @@
                 "chat1": {
                     "dialogue": "What does the word anomaly mean?",
                     "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191830.wav"
+                    "audioFile": "data/audio_files/generated/trimmed_rahul_20250528_202431.wav"
                 },
                 "chat2": {
-                    "dialogue": "Ah, anomaly is like when a cow suddenly starts laying eggs in the middle of a field.",
+                    "dialogue": "An anomaly, Rahul, is like finding honesty in a political speech.",
                     "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191837.wav"
+                    "audioFile": "data/audio_files/generated/trimmed_modi_20250528_202438.wav"
                 },
                 "chat3": {
-                    "dialogue": "Not quite, Modi. An anomaly is something that deviates from the norm or expected behavior.",
-                    "speaker": "shashi",
-                    "audioFile": "audio_files/generated/trimmed_shashi_20250528_191844.wav"
+                    "dialogue": "So, like when a politician keeps a promise?",
+                    "speaker": "rahul",
+                    "audioFile": "data/audio_files/generated/trimmed_rahul_20250528_202444.wav"
                 },
                 "chat4": {
-                    "dialogue": "In Indian politics, an anomaly could be a party winning without a majority or a politician speaking the truth.",
-                    "speaker": "palki",
-                    "audioFile": "audio_files/generated/trimmed_palki_20250528_191849.wav"
+                    "dialogue": "Precisely, Rahul. An anomaly is a deviation from the norm, a rare occurrence.",
+                    "speaker": "shashi",
+                    "audioFile": "data/audio_files/generated/trimmed_shashi_20250528_202451.wav"
                 },
                 "chat5": {
-                    "dialogue": "Yes, Palki. An anomaly can disrupt the usual political calculations and strategies.",
-                    "speaker": "jaishankar",
-                    "audioFile": "audio_files/generated/trimmed_jaiShankar_20250528_191855.wav"
+                    "dialogue": "In the realm of politics, its when transparency meets secrecy, creating an anomaly.",
+                    "speaker": "palki",
+                    "audioFile": "data/audio_files/generated/trimmed_palki_20250528_202457.wav"
                 },
                 "chat6": {
-                    "dialogue": "So, like when I actually understand whats happening in Parliament, thats an anomaly?",
-                    "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191902.wav"
+                    "dialogue": "An anomaly can also be a diplomatic hiccup, like when a peaceful meeting turns into a heated debate.",
+                    "speaker": "jaishankar",
+                    "audioFile": "data/audio_files/generated/trimmed_jaiShankar_20250528_202507.wav"
                 },
                 "chat7": {
-                    "dialogue": "Very funny, Rahul. But yes, that would indeed be quite an anomaly in our political landscape.",
+                    "dialogue": "Indeed, an anomaly is a puzzle in the fabric of normality, something out of place yet intriguing.",
                     "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191909.wav"
+                    "audioFile": "data/audio_files/generated/trimmed_modi_20250528_202515.wav"
                 }
             },
-            "finalAudioFile": "audio_files/merged/anomaly_conversation.wav"
+            "finalAudioFile": "data/audio_files/merged/anomaly_conversation.wav"
         }
     }
 }

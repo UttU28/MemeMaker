@@ -13,7 +13,7 @@ from typing import Optional, List
 
 class AudioFileManager:
     
-    def __init__(self, audioFilesDir: str = "audio_files"):
+    def __init__(self, audioFilesDir: str = "data/audio_files"):
         self.audioFilesDir = audioFilesDir
         self.generatedDir = os.path.join(audioFilesDir, "generated")
         self._ensureDirectoriesExist()

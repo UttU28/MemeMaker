@@ -101,8 +101,8 @@ class ConfigManager:
             "removeSilences": True,
             "f5ttsUrl": "http://localhost:7860",
             "timeoutSeconds": 300,
-            "downloadDirectory": "audio_files/generated",
-            "defaultAudioFile": "audio_files/Palki.wav",
+            "downloadDirectory": "data/audio_files/generated",
+            "defaultAudioFile": "data/audio_files/Palki.wav",
             "defaultOutputPrefix": "defaultGenerated"
         }
     
@@ -128,7 +128,7 @@ class ConfigManager:
     
     def getDefaultAudioFile(self) -> str:
         defaultConfig = self.loadDefaultConfig()
-        return defaultConfig.get("defaultAudioFile", "audio_files/Palki.wav")
+        return defaultConfig.get("defaultAudioFile", "data/audio_files/Palki.wav")
     
     def getDefaultOutputPrefix(self) -> str:
         defaultConfig = self.loadDefaultConfig()

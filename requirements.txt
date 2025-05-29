@@ -1,4 +1,6 @@
 gradio_client>=0.8.0
-datetime
 openai
-dotenv
+python-dotenv
+requests
+pydub
+datetime

@@ -1,6 +1,6 @@
 .env
 env/
 logs/
-audio_files/generated/
-audio_files/merged/
+generated/
+merged/
 __pycache__/
