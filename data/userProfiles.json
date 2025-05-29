@@ -45,7 +45,7 @@
             },
             "outputPrefix": "shashi"
         },
-        "jaiShankar": {
+        "jaishankar": {
             "displayName": "JaiShankar",
             "audioFile": "data/audio_files/JaiShankar.wav",
             "config": {
@@ -60,7 +60,7 @@
                 "confident": "data/images/jaishankar_confident.png",
                 "amusement": "data/images/jaishankar_subtle_amusement.png"
             },
-            "outputPrefix": "jaiShankar"
+            "outputPrefix": "jaishankar"
         },
         "modi": {
             "displayName": "Modi",
