@@ -8,7 +8,7 @@ def testOllamaLlama(sentence: str, speaker: str):
     llmService = LlmService()
     
     if not llmService.isOllamaRunning():
-        print("Ollama not running")
+        print("❌ Ollama not running")
         return None, None
         
     with open("data/userProfiles.json", "r") as f:
@@ -34,50 +34,49 @@ def testOllamaLlama(sentence: str, speaker: str):
 def processWordData(word: str):
     try:
         with open("data/wordData.json", "r") as f:
-            word_data = json.load(f)
+            wordData = json.load(f)
     except FileNotFoundError:
-        print("wordData.json not found!")
+        print("❌ wordData.json not found!")
         return
     except json.JSONDecodeError:
-        print("Error reading wordData.json!")
+        print("❌ Error reading wordData.json!")
         return
     
-    if word not in word_data["words"]:
-        print(f"Word '{word}' not found in wordData.json")
-        available_words = list(word_data["words"].keys())
-        print(f"Available words: {available_words}")
+    if word not in wordData["words"]:
+        print(f"❌ Word '{word}' not found in wordData.json")
+        availableWords = list(wordData["words"].keys())
+        print(f"ℹ️ Available words: {availableWords}")
         return
     
-    chats = word_data["words"][word]["chats"]
-    print(f"Processing '{word}' - {len(chats)} chats found")
+    chats = wordData["words"][word]["chats"]
+    print(f"🔄 Processing '{word}' - {len(chats)} chats found")
     
-    changes_made = False
-    
-    for chat_id, chat_data in chats.items():
-        dialogue = chat_data["dialogue"]
-        speaker = chat_data["speaker"]
+    for chatId, chatData in chats.items():
+        dialogue = chatData["dialogue"]
+        speaker = chatData["speaker"]
         
-        print(f"{chat_id}: {speaker}")
+        if "imageFile" in chatData:
+            print(f"⏩ {chatId}: {speaker} - Already processed")
+            continue
         
-        mood, image_url = testOllamaLlama(dialogue, speaker)
+        print(f"🎯 Processing {chatId}: {speaker}")
+        
+        mood, imageUrl = testOllamaLlama(dialogue, speaker)
         
         if mood is not None:
-            image_file_path = f"data/images/{speaker}_{mood}.png"
-            word_data["words"][word]["chats"][chat_id]["imageFile"] = image_file_path
-            changes_made = True
-            print(f"  → {mood} | {image_file_path}")
+            imageFilePath = f"data/images/{speaker}_{mood}.png"
+            wordData["words"][word]["chats"][chatId]["imageFile"] = imageFilePath
+            
+            try:
+                with open("data/wordData.json", "w") as f:
+                    json.dump(wordData, f, indent=4)
+                print(f"✅ Saved mood: {mood} | {imageFilePath}")
+            except Exception as e:
+                print(f"❌ Error saving: {e}")
         else:
-            print("  → Failed to predict mood")
+            print("❌ Failed to predict mood")
     
-    if changes_made:
-        try:
-            with open("data/wordData.json", "w") as f:
-                json.dump(word_data, f, indent=4)
-            print(f"✅ Updated wordData.json")
-        except Exception as e:
-            print(f"❌ Error saving: {e}")
-    else:
-        print("⚠️ No changes made")
+    print("🎉 All dialogues processed!")
 
 if __name__ == "__main__":
     word = input("Enter word (default: defy): ").strip() or "defy"
