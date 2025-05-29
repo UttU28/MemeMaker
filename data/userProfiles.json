@@ -1,10 +1,21 @@
 {
+    "default": {
+        "speed": 1,
+        "nfeSteps": 34,
+        "crossFadeDuration": 0.15,
+        "removeSilences": true,
+        "f5ttsUrl": "http://localhost:7860",
+        "timeoutSeconds": 300,
+        "downloadDirectory": "audio_files/generated",
+        "defaultAudioFile": "audio_files/Palki.wav",
+        "defaultOutputPrefix": "defaultGenerated"
+    },
     "users": {
         "palki": {
             "displayName": "Palki",
             "audioFile": "audio_files/Palki.wav",
             "config": {
-                "speed": 0.9,
+                "speed": 1.05,
                 "nfeSteps": 34,
                 "crossFadeDuration": 0.13,
                 "removeSilences": true
@@ -15,7 +26,7 @@
             "displayName": "Shashi",
             "audioFile": "audio_files/Shashi.wav",
             "config": {
-                "speed": 0.9,
+                "speed": 1.05,
                 "nfeSteps": 40,
                 "crossFadeDuration": 0.18,
                 "removeSilences": true
@@ -26,7 +37,7 @@
             "displayName": "JaiShankar",
             "audioFile": "audio_files/JaiShankar.wav",
             "config": {
-                "speed": 0.85,
+                "speed": 1.05,
                 "nfeSteps": 36,
                 "crossFadeDuration": 0.17,
                 "removeSilences": true
@@ -37,8 +48,8 @@
             "displayName": "Modi",
             "audioFile": "audio_files/Modi.wav",
             "config": {
-                "speed": 0.85,
-                "nfeSteps": 32,
+                "speed": 1.05,
+                "nfeSteps": 40,
                 "crossFadeDuration": 0.11,
                 "removeSilences": true
             },
@@ -48,7 +59,7 @@
             "displayName": "Rahul",
             "audioFile": "audio_files/Rahul.wav",
             "config": {
-                "speed": 0.82,
+                "speed": 0.95,
                 "nfeSteps": 38,
                 "crossFadeDuration": 0.16,
                 "removeSilences": true
@@ -57,7 +68,7 @@
         }
     },
     "defaultUser": "palki",
-    "lastUsed": "palki",
+    "lastUsed": "modi",
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2025-05-27T20:05:41.633287"
+    "updatedAt": "2025-05-28T19:19:09.926463"
 }

@@ -1,208 +1,316 @@
-#!/usr/bin/env python3
-"""
-F5-TTS Gradio API Automation - Main Script
-Enhanced version with user profile support and menu system
-"""
-
+import json
+import subprocess
+import os
+import sys
+import openai
+import requests
+from dotenv import load_dotenv
+from prompts import CHAT_GENERATION_PROMPT
+from pydub import AudioSegment, silence
 from src.client import F5TtsGradioClient
 from src.config import ConfigManager
-from src.utils import AudioFileManager, LogManager
+from src.utils import AudioFileManager
 
+load_dotenv()
 
-def basicUsageExample(sampleText: str):
-    """Basic usage example with default user"""
-    print("🚀 F5-TTS Basic Usage")
-    print("=" * 30)
+openaiClient = openai.OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
+def generateDialogue(word):
+    formattedPrompt = CHAT_GENERATION_PROMPT.format(word=word.capitalize())
+    
+    try:
+        response = openaiClient.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": formattedPrompt}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
+        
+        dialogue = response.choices[0].message.content.strip()
+        dialogue = dialogue.replace('"', '').replace("'", '')
+        return dialogue
+        
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        return None
+
+thisConvo = """
+{Rahul} I heard someone say my popularity *plummeted*. What does that even mean?
+
+{Modi} It means to fall very fast, Rahul. Like how your party drops after every election result.
+
+{Rahul} Hey, that's rude! I was just asking.
+
+{Shashi} "Plummet" is a verb. It means to drop suddenly and steeply. For example, stock prices can plummet... or public opinion can plummet — especially after a confusing speech.
+
+{Rahul} So basically, it's a fancy word for falling really fast?
+
+{Modi} Yes. Very fast. Like petrol prices... in our dreams.
+
+{Shashi} Or like attention spans — when someone talks for too long without making a point.
+"""
+
+def getUserId(personName: str):
+    with open("data/userProfiles.json", "r") as f:
+        data = json.load(f)
+        for userId, userData in data["users"].items():
+            if userData["displayName"].lower() == personName.lower():
+                return userId
+    return None
+
+def generateAudioForLine(userId: str, lineText: str):
+    if not userId:
+        return False, None
     
     configManager = ConfigManager()
-    audioManager = AudioFileManager()
-    logManager = LogManager()
+    if not configManager.validateUserProfile(userId):
+        return False, None
     
-    defaultUserId = configManager.getDefaultUserId()
-    print(f"Using user: {defaultUserId}")
-    
-    if not configManager.validateUserProfile(defaultUserId):
-        print(f"❌ Invalid user profile: {defaultUserId}")
-        return
-    
-    userConfig = configManager.getUserConfig(defaultUserId)
-    audioFilePath = configManager.getAudioFilePathWithFallback(defaultUserId)
-    
-    if not audioManager.validateAudioFile(audioFilePath):
-        print(f"❌ Invalid audio file: {audioFilePath}")
-        return
-    
-    client = F5TtsGradioClient(userConfig.get("f5ttsUrl", "http://localhost:7860"))
+    client = F5TtsGradioClient()
     
     try:
         if not client.connectToGradio():
-            return
+            return False, None
         
-        success = client.generateSpeechWithUser(defaultUserId, sampleText)
+        success = client.generateSpeechWithUser(userId, lineText)
         
         if success:
-            print("✅ Speech generation completed!")
-            logManager.logUserAction(defaultUserId, "BasicGeneration", "Completed")
+            audioManager = AudioFileManager()
+            outputPrefix = configManager.getOutputPrefixWithFallback(userId)
+            generatedFiles = audioManager.listGeneratedFiles(outputPrefix)
+            if generatedFiles:
+                return True, generatedFiles[0]
+            return True, None
         else:
-            print("❌ Speech generation failed")
-            logManager.logUserAction(defaultUserId, "BasicGeneration", "Failed")
+            return False, None
                     
     except Exception as e:
-        print(f"❌ Error: {e}")
-        logManager.logError(e, "Basic speech generation")
+        return False, None
     finally:
         client.close()
 
-
-def multiUserExample():
-    """Multi-user selection example"""
-    print("\n🔄 Multi-User Selection")
-    print("=" * 25)
-    
-    configManager = ConfigManager()
-    allUserIds = configManager.getAllUserIds()
-    
-    print("Available users:")
-    for i, userId in enumerate(allUserIds, 1):
-        userProfile = configManager.getUserProfile(userId)
-        displayName = userProfile.get("displayName", userId)
-        print(f"  {i}. {displayName} ({userId})")
-    
-    try:
-        choice = int(input("\nEnter choice (1-5): ")) - 1
-        if 0 <= choice < len(allUserIds):
-            selectedUserId = allUserIds[choice]
-            configManager.updateLastUsed(selectedUserId)
-            runAutomationWithUser(selectedUserId)
-        else:
-            print("❌ Invalid choice")
-    except (ValueError, KeyboardInterrupt):
-        print("❌ Invalid input or cancelled")
-
-
-def runAutomationWithUser(userId: str):
-    """Run automation with specific user"""
-    configManager = ConfigManager()
+def cleanAudioFile(audioFileName: str, fullCleaning: bool = False):
     audioManager = AudioFileManager()
-    logManager = LogManager()
+    inputPath = audioManager.getGeneratedFilePath(audioFileName)
     
-    print(f"\n🎯 Generating for: {userId}")
-    
-    userConfig = configManager.getUserConfig(userId)
-    audioFilePath = configManager.getAudioFilePathWithFallback(userId)
-    
-    if not audioManager.validateAudioFile(audioFilePath):
-        return
-    
-    client = F5TtsGradioClient(userConfig.get("f5ttsUrl"))
+    if not os.path.exists(inputPath):
+        return None
     
     try:
-        if client.connectToGradio():
-            success = client.generateSpeechWithUser(userId)
+        audio = AudioSegment.from_file(inputPath)
+        
+        if fullCleaning:
+            silenceThreshDb = -40
+            minSilenceLenMs = 250
+            paddingMs = 75
             
-            if success:
-                print(f"✅ Completed for {userId}")
-                logManager.logUserAction(userId, "UserGeneration", "Completed")
+            chunks = silence.detect_nonsilent(audio,
+                                             min_silence_len=minSilenceLenMs,
+                                             silence_thresh=silenceThreshDb)
+            
+            if not chunks:
+                return None
+            
+            cleanedAudio = AudioSegment.empty()
+            for start, end in chunks:
+                cleanedAudio += audio[start:end]
+                cleanedAudio += AudioSegment.silent(duration=paddingMs)
+        else:
+            silenceThreshDb = -40
+            minSilenceLenMs = 100
+            
+            chunks = silence.detect_nonsilent(audio,
+                                             min_silence_len=minSilenceLenMs,
+                                             silence_thresh=silenceThreshDb)
+            
+            if not chunks:
+                return None
+            
+            startTrim = chunks[0][0]
+            endTrim = chunks[-1][1]
+            
+            paddingMs = 50
+            startTrim = max(0, startTrim - paddingMs)
+            endTrim = min(len(audio), endTrim + paddingMs)
+            
+            cleanedAudio = audio[startTrim:endTrim]
+        
+        baseName = os.path.splitext(audioFileName)[0]
+        modeSuffix = "full_cleaned" if fullCleaning else "trimmed"
+        cleanedFileName = f"{modeSuffix}_{baseName}.wav"
+        outputPath = audioManager.getGeneratedFilePath(cleanedFileName)
+        cleanedAudio.export(outputPath, format="wav")
+        
+        return cleanedFileName
+        
+    except Exception as e:
+        return None
+
+def saveWordData(word: str, dialogueData: list, cleanedAudioFiles: list):
+    jsonFileName = "data/wordData.json"
+    
+    try:
+        if os.path.exists(jsonFileName):
+            with open(jsonFileName, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            data = {"words": {}}
+        
+        chats = {}
+        for i, (dialogue, speaker, audioFileName) in enumerate(dialogueData, 1):
+            if i <= len(cleanedAudioFiles):
+                chats[f"chat{i}"] = {
+                    "dialogue": dialogue,
+                    "speaker": speaker.lower(),
+                    "audioFile": f"audio_files/generated/{cleanedAudioFiles[i-1]}"
+                }
+        
+        data["words"][word.lower()] = {
+            "word": word.lower(),
+            "chats": chats
+        }
+        
+        with open(jsonFileName, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        
+        return jsonFileName
+        
+    except Exception as e:
+        print(f"Error saving word data: {e}")
+        return None
+
+def updateWordDataWithFinalAudio(word: str, finalAudioPath: str):
+    jsonFileName = "data/wordData.json"
+    
+    try:
+        if os.path.exists(jsonFileName):
+            with open(jsonFileName, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            if word.lower() in data.get("words", {}):
+                data["words"][word.lower()]["finalAudioFile"] = finalAudioPath
                 
-                # Show recent files
-                outputPrefix = configManager.getOutputPrefixWithFallback(userId)
-                generatedFiles = audioManager.listGeneratedFiles(outputPrefix)
+                with open(jsonFileName, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
                 
-                if generatedFiles:
-                    print(f"Recent files: {len(generatedFiles[:3])}")
-                    for fileName in generatedFiles[:3]:
-                        filePath = audioManager.getGeneratedFilePath(fileName)
-                        fileSize = audioManager.getFileSize(filePath)
-                        if fileSize:
-                            sizeStr = audioManager.formatFileSize(fileSize)
-                            print(f"  • {fileName} ({sizeStr})")
-            else:
-                print(f"❌ Failed for {userId}")
-                logManager.logUserAction(userId, "UserGeneration", "Failed")
+                return True
+        
+        return False
+        
+    except Exception as e:
+        print(f"Error updating final audio: {e}")
+        return False
+
+def mergeAudioFiles(audioFileNames: list, outputFileName: str = "conversation_merged.wav"):
+    if not audioFileNames:
+        return False
+    
+    audioManager = AudioFileManager()
+    fileListPath = "temp_file_list.txt"
+    
+    try:
+        with open(fileListPath, 'w') as f:
+            for i, audioFileName in enumerate(audioFileNames):
+                audioPath = audioManager.getGeneratedFilePath(audioFileName)
+                if audioFileName and os.path.exists(audioPath):
+                    f.write(f"file '{audioPath}'\n")
+                    if i < len(audioFileNames) - 1:
+                        f.write(f"file 'silence.wav'\n")
+        
+        silenceCmd = [
+            "ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=22050:cl=mono", 
+            "-t", "0.5", "silence.wav"
+        ]
+        subprocess.run(silenceCmd, capture_output=True)
+        
+        ffmpegCmd = [
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", fileListPath,
+            "-c", "copy", outputFileName
+        ]
+        
+        result = subprocess.run(ffmpegCmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print(f"✅ Merged: {outputFileName}")
+            return True
+        else:
+            return False
             
     except Exception as e:
-        print(f"❌ Error: {e}")
-        logManager.logError(e, f"User generation for {userId}")
+        return False
     finally:
-        client.close()
+        if os.path.exists(fileListPath):
+            os.remove(fileListPath)
+        if os.path.exists("silence.wav"):
+            os.remove("silence.wav")
 
-
-def listUserProfiles():
-    """List all user profiles"""
-    print("\n👥 User Profiles")
-    print("=" * 20)
-    
-    configManager = ConfigManager()
-    
-    for userId in configManager.getAllUserIds():
-        userProfile = configManager.getUserProfile(userId)
-        if userProfile:
-            displayName = userProfile.get('displayName', 'N/A')
-            config = userProfile.get('config', {})
-            speed = config.get('speed', 'N/A')
-            nfe = config.get('nfeSteps', 'N/A')
-            print(f"🔹 {userId}: {displayName} (Speed: {speed}, NFE: {nfe})")
-
-
-def showGeneratedFiles():
-    """Show generated files"""
-    print("\n📁 Generated Files")
-    print("=" * 20)
-    
-    audioManager = AudioFileManager()
-    allFiles = audioManager.listGeneratedFiles()
-    
-    if not allFiles:
-        print("No files found.")
-        return
-        
-    print(f"Total files: {len(allFiles)}")
-    
-    for fileName in allFiles[:10]:  # Show last 10
-        filePath = audioManager.getGeneratedFilePath(fileName)
-        fileSize = audioManager.getFileSize(filePath)
-        
-        if fileSize:
-            sizeStr = audioManager.formatFileSize(fileSize)
-            print(f"  • {fileName} ({sizeStr})")
-
+def isGradioRunning():
+    try:
+        response = requests.get("http://localhost:7860/")
+        return response.status_code == 200
+    except Exception as e:
+        return False
 
 def main():
-    """Main menu"""
-    sampleText = "Rahul if memory management were that simple you would be Prime Minister by now. SQL helps retrieve update and organize information efficiently it's like a librarian who actually knows where every book is"
-    
-    while True:
-        print("\n🎵 F5-TTS Menu")
-        print("=" * 15)
-        print("1. Basic Usage")
-        print("2. Multi-User")
-        print("3. List Profiles")
-        print("4. Show Files")
-        print("5. Exit")
-        
-        try:
-            choice = input("\nChoice (1-5): ").strip()
-            
-            if choice == "1":
-                basicUsageExample(sampleText)
-            elif choice == "2":
-                multiUserExample()
-            elif choice == "3":
-                listUserProfiles()
-            elif choice == "4":
-                showGeneratedFiles()
-            elif choice == "5":
-                print("👋 Goodbye!")
-                break
-            else:
-                print("❌ Invalid choice (1-5)")
-                    
-        except KeyboardInterrupt:
-            print("\n👋 Goodbye!")
-            break
-        except Exception as e:
-            print(f"❌ Error: {e}")
+    fullCleaning = len(sys.argv) > 1
 
+    if not isGradioRunning():
+        print("Gradio endpoint not running")
+        return
+
+    word = "Anomaly"
+    dialogue = generateDialogue(word)
+    
+    if not dialogue:
+        print("Failed to generate dialogue")
+        return
+    
+    print(dialogue)
+
+    eachLine = dialogue.split("\n")
+    generatedAudioFiles = []
+    dialogueData = []
+    
+    for line in eachLine:
+        if line.strip() == "": 
+            continue
+            
+        try:
+            personName = line.split("}")[0].split("{")[1]
+            lineText = line.split("}")[1].strip()
+            userId = getUserId(personName)
+            
+            if userId:
+                success, audioFileName = generateAudioForLine(userId, lineText)
+                if success and audioFileName:
+                    generatedAudioFiles.append(audioFileName)
+                    dialogueData.append((lineText, personName, audioFileName))
+        except Exception as e:
+            continue
+    
+    if not generatedAudioFiles:
+        print("No audio files generated")
+        return
+    
+    cleanedAudioFiles = []
+    for audioFileName in generatedAudioFiles:
+        cleanedFileName = cleanAudioFile(audioFileName, fullCleaning)
+        if cleanedFileName:
+            cleanedAudioFiles.append(cleanedFileName)
+    
+    if cleanedAudioFiles:
+        saveWordData(word, dialogueData, cleanedAudioFiles)
+        
+        finalAudioPath = f"audio_files/merged/{word.lower()}_conversation.wav"
+        os.makedirs("audio_files/merged", exist_ok=True)
+        
+        success = mergeAudioFiles(cleanedAudioFiles, finalAudioPath)
+        if success:
+            updateWordDataWithFinalAudio(word, finalAudioPath)
 
 if __name__ == "__main__":
-    main() 
+    main()

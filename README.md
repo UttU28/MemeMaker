@@ -70,7 +70,7 @@ The system includes 5 pre-configured user profiles:
 
 ## Configuration
 
-### Default Configuration (`profiles/defaultConfig.json`)
+### Default Configuration (`data/defaultConfig.json`)
 ```json
 {
     "speed": 0.8,
@@ -85,7 +85,7 @@ The system includes 5 pre-configured user profiles:
 }
 ```
 
-### User Profiles (`profiles/userProfiles.json`)
+### User Profiles (`data/userProfiles.json`)
 Each user profile contains:
 - `userName`: Display name
 - `audioFile`: Path to reference audio file
@@ -159,7 +159,7 @@ currdir/
 │   ├── Modi.wav
 │   ├── Rahul.wav
 │   └── generated/        # Generated audio files
-├── profiles/
+├── data/
 │   ├── defaultConfig.json    # Default settings
 │   └── userProfiles.json     # User profiles
 └── logs/                     # Log files

@@ -8,7 +8,7 @@ import os
 import time
 from datetime import datetime
 from typing import Optional, Dict, Any
-from gradio_client import Client, file
+from gradio_client import Client, handle_file
 
 from .config import ConfigManager
 from .utils import AudioFileManager, LogManager
@@ -55,8 +55,8 @@ class F5TtsGradioClient:
             
             startTime = time.time()
             result = self.client.predict(
-                ref_audio_input=file(absolutePath),
-                ref_text_input="",  # Empty for voice cloning
+                ref_audio_input=handle_file(absolutePath),
+                ref_text_input="",
                 gen_text_input=textToGenerate,
                 remove_silence=userConfig.get("removeSilences", False),
                 randomize_seed=True,
