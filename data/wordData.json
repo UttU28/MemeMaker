@@ -22,134 +22,47 @@
                 "chat1": {
                     "dialogue": "What does the word defy mean?",
                     "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_190555.wav"
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250530_114404.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
                 },
                 "chat2": {
-                    "dialogue": "Defy, Rahul, is when someone goes against the rules or expectations, just like opposition parties defying my policies.",
+                    "dialogue": "Defy, Rahul, is when someone boldly challenges authority or rules.",
                     "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_190603.wav"
+                    "audioFile": "audio_files/generated/trimmed_modi_20250530_114410.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
                 },
                 "chat3": {
-                    "dialogue": "It's a rebellion, a refusal to obey, a defiance of the norm.",
-                    "speaker": "shashi",
-                    "audioFile": "audio_files/generated/trimmed_shashi_20250528_190609.wav"
+                    "dialogue": "Like when I challenge my partys decisions?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250530_114415.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
                 },
                 "chat4": {
-                    "dialogue": "In a global context, it's like a country defying international agreements, like a rogue state.",
-                    "speaker": "palki",
-                    "audioFile": "audio_files/generated/trimmed_palki_20250528_190615.wav"
+                    "dialogue": "Yes, exactly, Rahul. Its like standing up against the tide of conformity.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250530_114422.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
                 },
                 "chat5": {
-                    "dialogue": "Yes, it's a delicate balance between upholding order and challenging authority, a strategic move in the game of politics.",
-                    "speaker": "jaishankar",
-                    "audioFile": "audio_files/generated/trimmed_jaiShankar_20250528_190622.wav"
+                    "dialogue": "In politics, its often seen as a risky move, but can also be a powerful statement.",
+                    "speaker": "palki",
+                    "audioFile": "audio_files/generated/trimmed_palki_20250530_114428.wav",
+                    "imageFile": "data/images/palki_analyticalr.png"
                 },
                 "chat6": {
-                    "dialogue": "So if I don't listen to my mom's curfew, I'm defying her?",
-                    "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_190629.wav"
+                    "dialogue": "Sometimes, defiance can lead to change, but it requires courage and strategy.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250530_114434.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
                 },
                 "chat7": {
-                    "dialogue": "Exactly, Rahul, you're defying her authority, just like some politicians defy the constitution.",
+                    "dialogue": "Remember, Rahul, in the game of politics, those who defy the odds can rewrite history.",
                     "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_190636.wav"
-                },
-                "chat8": {
-                    "dialogue": "Remember, defiance can be noble or reckless, depending on the cause and consequences.",
-                    "speaker": "shashi",
-                    "audioFile": "audio_files/generated/trimmed_shashi_20250528_190643.wav"
-                },
-                "chat9": {
-                    "dialogue": "And that's a wrap on the word \"defy\" in the political dictionary!",
-                    "speaker": "palki",
-                    "audioFile": "audio_files/generated/trimmed_palki_20250528_190649.wav"
+                    "audioFile": "audio_files/generated/trimmed_modi_20250530_114441.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
                 }
             },
             "finalAudioFile": "audio_files/merged/defy_conversation.wav"
-        },
-        "amalgamate": {
-            "word": "amalgamate",
-            "chats": {
-                "chat1": {
-                    "dialogue": "What does amalgamate mean?",
-                    "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191714.wav",
-                    "imageFile": "data/images/rahul_confident.png"
-                },
-                "chat2": {
-                    "dialogue": "Ah, Rahul, amalgamate means to blend or mix things together, like when different parties come together to form a coalition government.",
-                    "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191724.wav",
-                    "imageFile": "data/images/modi_confident.png"
-                },
-                "chat3": {
-                    "dialogue": "Indeed, its a harmonious fusion, a coming together of diverse elements to create something new and stronger.",
-                    "speaker": "shashi",
-                    "audioFile": "audio_files/generated/trimmed_shashi_20250528_191731.wav"
-                },
-                "chat4": {
-                    "dialogue": "And just like in a smooth amalgamation, each party retains its unique flavor while working towards a common goal.",
-                    "speaker": "palki",
-                    "audioFile": "audio_files/generated/trimmed_palki_20250528_191737.wav"
-                },
-                "chat5": {
-                    "dialogue": "Yes, its a strategic alliance, a cohesive union that aims to achieve greater success through unity and cooperation.",
-                    "speaker": "jaishankar",
-                    "audioFile": "audio_files/generated/trimmed_jaiShankar_20250528_191744.wav"
-                },
-                "chat6": {
-                    "dialogue": "So, its like when different spices mix in a curry to create a delicious dish?",
-                    "speaker": "rahul",
-                    "audioFile": "audio_files/generated/trimmed_rahul_20250528_191750.wav"
-                },
-                "chat7": {
-                    "dialogue": "Exactly, Rahul! Just like that, an amalgamation creates a flavorful blend that is greater than the sum of its parts.",
-                    "speaker": "modi",
-                    "audioFile": "audio_files/generated/trimmed_modi_20250528_191758.wav"
-                }
-            },
-            "finalAudioFile": "audio_files/merged/amalgamate_conversation.wav"
-        },
-        "anomaly": {
-            "word": "anomaly",
-            "chats": {
-                "chat1": {
-                    "dialogue": "What does the word anomaly mean?",
-                    "speaker": "rahul",
-                    "audioFile": "data/audio_files/generated/trimmed_rahul_20250528_202431.wav"
-                },
-                "chat2": {
-                    "dialogue": "An anomaly, Rahul, is like finding honesty in a political speech.",
-                    "speaker": "modi",
-                    "audioFile": "data/audio_files/generated/trimmed_modi_20250528_202438.wav"
-                },
-                "chat3": {
-                    "dialogue": "So, like when a politician keeps a promise?",
-                    "speaker": "rahul",
-                    "audioFile": "data/audio_files/generated/trimmed_rahul_20250528_202444.wav"
-                },
-                "chat4": {
-                    "dialogue": "Precisely, Rahul. An anomaly is a deviation from the norm, a rare occurrence.",
-                    "speaker": "shashi",
-                    "audioFile": "data/audio_files/generated/trimmed_shashi_20250528_202451.wav"
-                },
-                "chat5": {
-                    "dialogue": "In the realm of politics, its when transparency meets secrecy, creating an anomaly.",
-                    "speaker": "palki",
-                    "audioFile": "data/audio_files/generated/trimmed_palki_20250528_202457.wav"
-                },
-                "chat6": {
-                    "dialogue": "An anomaly can also be a diplomatic hiccup, like when a peaceful meeting turns into a heated debate.",
-                    "speaker": "jaishankar",
-                    "audioFile": "data/audio_files/generated/trimmed_jaiShankar_20250528_202507.wav"
-                },
-                "chat7": {
-                    "dialogue": "Indeed, an anomaly is a puzzle in the fabric of normality, something out of place yet intriguing.",
-                    "speaker": "modi",
-                    "audioFile": "data/audio_files/generated/trimmed_modi_20250528_202515.wav"
-                }
-            },
-            "finalAudioFile": "data/audio_files/merged/anomaly_conversation.wav"
         }
     }
 }

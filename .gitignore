@@ -3,4 +3,6 @@ env/
 logs/
 generated/
 merged/
+downloads/
+video_output/
 __pycache__/

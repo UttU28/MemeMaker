@@ -4,7 +4,7 @@ import json
 from src.llm import LlmService
 from prompts import GET_THE_MOOD_PROMPT
 
-def testOllamaLlama(sentence: str, speaker: str):
+def testOllamaMood(sentence: str, speaker: str):
     llmService = LlmService()
     
     if not llmService.isOllamaRunning():
@@ -43,13 +43,13 @@ def processWordData(word: str):
         return
     
     if word not in wordData["words"]:
-        print(f"❌ Word '{word}' not found in wordData.json")
+        print(f"❌ Word '{word}' not found")
         availableWords = list(wordData["words"].keys())
-        print(f"ℹ️ Available words: {availableWords}")
+        print(f"Available words: {availableWords}")
         return
     
     chats = wordData["words"][word]["chats"]
-    print(f"🔄 Processing '{word}' - {len(chats)} chats found")
+    print(f"Processing '{word}' - {len(chats)} chats")
     
     for chatId, chatData in chats.items():
         dialogue = chatData["dialogue"]
@@ -59,24 +59,23 @@ def processWordData(word: str):
             print(f"⏩ {chatId}: {speaker} - Already processed")
             continue
         
-        print(f"🎯 Processing {chatId}: {speaker}")
+        print(f"Processing {chatId}: {speaker}")
         
-        mood, imageUrl = testOllamaLlama(dialogue, speaker)
+        mood, imageFilePath = testOllamaMood(dialogue, speaker)
         
-        if mood is not None:
-            imageFilePath = f"data/images/{speaker}_{mood}.png"
+        if mood and imageFilePath:
             wordData["words"][word]["chats"][chatId]["imageFile"] = imageFilePath
             
             try:
                 with open("data/wordData.json", "w") as f:
                     json.dump(wordData, f, indent=4)
-                print(f"✅ Saved mood: {mood} | {imageFilePath}")
+                print(f"✅ Saved: {mood} | {imageFilePath}")
             except Exception as e:
                 print(f"❌ Error saving: {e}")
         else:
             print("❌ Failed to predict mood")
     
-    print("🎉 All dialogues processed!")
+    print("✅ Processing complete!")
 
 if __name__ == "__main__":
     word = input("Enter word (default: defy): ").strip() or "defy"

@@ -21,10 +21,10 @@
                 "removeSilences": true
             },
             "emotions": {
-                "confident": "data/images/palki_confident.png",
-                "amused": "data/images/palki_amused.png",
-                "analytical": "data/images/palki_analytical.png",
-                "direct": "data/images/palki_direct.png"
+                "confident": "data/images/palki_confidentl.png",
+                "amused": "data/images/palki_amusedr.png",
+                "analytical": "data/images/palki_analyticalr.png",
+                "direct": "data/images/palki_directl.png"
             },
             "outputPrefix": "palki"
         },
@@ -38,10 +38,10 @@
                 "removeSilences": true
             },
             "emotions": {
-                "confident": "data/images/shashi_confident.png",
-                "eloquent": "data/images/shashi_eloquent.png",
-                "amused": "data/images/shashi_amused.png",
-                "contemplative": "data/images/shashi_contemplative.png"
+                "confident": "data/images/shashi_confidentl.png",
+                "eloquent": "data/images/shashi_eloquentl.png",
+                "amused": "data/images/shashi_amusedr.png",
+                "contemplative": "data/images/shashi_contemplativer.png"
             },
             "outputPrefix": "shashi"
         },
@@ -55,10 +55,10 @@
                 "removeSilences": true
             },
             "emotions": {
-                "diplomatic": "data/images/jaishankar_diplomatic.png",
-                "strategic": "data/images/jaishankar_strategic.png",
-                "confident": "data/images/jaishankar_confident.png",
-                "amusement": "data/images/jaishankar_subtle_amusement.png"
+                "diplomatic": "data/images/jaishankar_diplomaticr.png",
+                "strategic": "data/images/jaishankar_strategicl.png",
+                "confident": "data/images/jaishankar_confidentl.png",
+                "amusement": "data/images/jaishankar_subtle_amusementr.png"
             },
             "outputPrefix": "jaishankar"
         },
@@ -72,10 +72,10 @@
                 "removeSilences": true
             },
             "emotions": {
-                "confident": "data/images/modi_confident.png",
-                "explaining": "data/images/modi_explaining.png",
-                "smirking": "data/images/modi_smirking.png",
-                "serious": "data/images/modi_serious.png"
+                "confident": "data/images/modi_confidentl.png",
+                "explaining": "data/images/modi_explainingl.png",
+                "smirking": "data/images/modi_smirkingr.png",
+                "serious": "data/images/modi_seriousr.png"
             },
             "outputPrefix": "modi"
         },
@@ -89,10 +89,10 @@
                 "removeSilences": true
             },
             "emotions": {
-                "confused": "data/images/rahul_confused.png",
-                "confident": "data/images/rahul_confident.png",
-                "surprised": "data/images/rahul_surprised.png",
-                "sheepish": "data/images/rahul_sheepish.png"
+                "confused": "data/images/rahul_confusedr.png",
+                "confident": "data/images/rahul_confidentl.png",
+                "surprised": "data/images/rahul_surprisedl.png",
+                "sheepish": "data/images/rahul_sheepishr.png"
             },
             "outputPrefix": "rahul"
         }
@@ -100,5 +100,5 @@
     "defaultUser": "palki",
     "lastUsed": "modi",
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2025-05-28T20:25:15.191605"
+    "updatedAt": "2025-05-30T11:57:28.475377"
 }
