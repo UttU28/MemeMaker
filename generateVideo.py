@@ -96,11 +96,36 @@ def concatenateAudioFiles(timeline, outputPath: str):
 
 def generateVideoWithFFmpeg(backgroundVideo: str, timeline: list, totalDuration: float, 
                           combinedAudio: str, outputVideo: str):
-    """Generate video using FFmpeg with complex filter chains"""
+    """Generate video using FFmpeg with complex filter chains and outro"""
+    
+    # Check if outro exists
+    outroPath = "data/outro.mp4"
+    useOutro = os.path.exists(outroPath)
+    
+    if useOutro:
+        print(f"🎬 Adding outro: {outroPath}")
+        # Get outro duration
+        try:
+            result = subprocess.run([
+                'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration', 
+                '-of', 'default=noprint_wrappers=1:nokey=1', outroPath
+            ], capture_output=True, text=True)
+            outroDuration = float(result.stdout.strip()) if result.returncode == 0 else 3.0
+        except:
+            outroDuration = 3.0
+        print(f"📝 Outro duration: {outroDuration}s")
+    else:
+        outroDuration = 0
+        print("⚠️ No outro.mp4 found in data directory")
     
     filterParts = []
-    inputParts = ['-hwaccel', 'cuda', '-stream_loop', '-1', '-i', backgroundVideo, '-i', combinedAudio]
-    inputIndex = 2
+    if useOutro:
+        inputParts = ['-hwaccel', 'cuda', '-stream_loop', '-1', '-i', backgroundVideo, '-i', combinedAudio, '-i', outroPath]
+        inputIndex = 3
+    else:
+        inputParts = ['-hwaccel', 'cuda', '-stream_loop', '-1', '-i', backgroundVideo, '-i', combinedAudio]
+        inputIndex = 2
+    
     imageInputs = {}
 
     for item in timeline:
@@ -114,7 +139,8 @@ def generateVideoWithFFmpeg(backgroundVideo: str, timeline: list, totalDuration:
     for chatId, idx in imageInputs.items():
         print(f"  Input {idx}: {chatId}")
 
-    filterParts.append(f"[0:v]scale=1080:1920,trim=duration={totalDuration},setpts=PTS-STARTPTS[bg]")
+    # Create main video with overlays
+    filterParts.append(f"[0:v]scale=1080:1920:force_original_aspect_ratio=disable,setsar=1,trim=duration={totalDuration},setpts=PTS-STARTPTS[bg]")
     currentBase = "[bg]"
     overlayIndex = 0
 
@@ -134,19 +160,33 @@ def generateVideoWithFFmpeg(backgroundVideo: str, timeline: list, totalDuration:
         currentBase = overlayName
         overlayIndex += 1
 
-    filterParts.append(f"{currentBase}setpts=PTS-STARTPTS[out]")
+    if useOutro:
+        # Scale outro to match main video dimensions and SAR
+        filterParts.append(f"[2:v]scale=1080:1920:force_original_aspect_ratio=disable,setsar=1,setpts=PTS-STARTPTS[outro_scaled]")
+        
+        # Concatenate main video with outro
+        filterParts.append(f"{currentBase}[outro_scaled]concat=n=2:v=1:a=0[final_video]")
+        
+        # Create silence for outro duration and concatenate with main audio
+        filterParts.append(f"anullsrc=channel_layout=mono:sample_rate=24000[silence]")
+        filterParts.append(f"[1:a][silence]concat=n=2:v=0:a=1[temp_audio]")
+        filterParts.append(f"[temp_audio]atrim=duration={totalDuration + outroDuration}[final_audio]")
+        
+        outputMapping = ['-map', '[final_video]', '-map', '[final_audio]']
+    else:
+        filterParts.append(f"{currentBase}setpts=PTS-STARTPTS[final_video]")
+        outputMapping = ['-map', '[final_video]', '-map', '1:a']
+
     filterComplex = ";".join(filterParts)
 
     cmd = [
         'ffmpeg', '-y',
         *inputParts,
         '-filter_complex', filterComplex,
-        '-map', '[out]',
-        '-map', '1:a',
+        *outputMapping,
         '-c:v', 'h264_nvenc',
         '-preset', 'fast',
         '-c:a', 'aac',
-        '-t', str(totalDuration),
         '-shortest',
         outputVideo
     ]
@@ -158,6 +198,8 @@ def generateVideoWithFFmpeg(backgroundVideo: str, timeline: list, totalDuration:
 
         if result.returncode == 0:
             print(f"✅ Video generated successfully: {outputVideo}")
+            if useOutro:
+                print(f"🎉 Outro added: +{outroDuration}s")
             return True
         else:
             print(f"❌ FFmpeg error: {result.stderr}")
