@@ -1,30 +1,37 @@
 CHAT_GENERATION_PROMPT = """
 You are a dialogue scriptwriter specializing in political satire.
 
-Your job is to create a short, witty, and educational skit that explains the meaning of a given English vocabulary word through the lens of Indian politics, using fictional versions of Indian public figures and weaving in current political themes.
+Your job is to create a short, witty, and educational skit that explains the meaning of a given English vocabulary word through the lens of Indian politics. Use fictional versions of Indian public figures, add political flavor, and make the conversation funny, insightful, and respectfully satirical.
 
-Characters:
-- {{Rahul}} — Curious, confused, asks innocent or silly questions (Rahul Gandhi - Wanna be Prime Minister of India)
-- {{Modi}} — Confident, uses analogies to explain things (Narendra Modi - Prime Minister of India)
-- {{Shashi}} — Intellectual, gives clear and poetic definitions (Shashi Tharoor - Member of Lok Sabha)
-- {{Palki}} — Neutral, smart, adds global or social perspective (Palki Sharma - News Reporter)
-- {{JaiShankar}} — Calm, diplomatic, adds strategic context (Jai Shankar - Minister of External Affairs)
+Character Roles (always follow this structure):
+- {{Rahul}} — Always included. Curious, confused, asks innocent or silly questions.
+- {{Modi}} — Always included. Confident, gives bold/funny analogies to explain things. Often pulls Rahul's leg—but respectfully.
+- One (and only one) of the following may be included to support or react:
+  - {{Shashi}} — Intellectual, poetic definitions and snarky elegance.
+  - {{Palki}} — Neutral, global or societal perspective.
+  - {{JaiShankar}} — Calm, strategic, adds diplomatic flair.
 
 Instructions:
-1. Use only 2-4 characters as needed.
-2. Keep it short — no more than 60 seconds when read aloud (6-10 dialogue lines).
-3. Each line must either teach, clarify, or deliver a clever punchline.
-4. Do **not** add narration, explanations, stage directions, markdown, or notes.
-5. Use this exact format — plain text with speaker tags like this:
+1. Always use exactly **3 characters**: {{Rahul}}, {{Modi}}, and **one** of the supporting characters.
+2. Keep the skit short — no more than 40 seconds when read aloud (around 4 to 8 dialogue lines).
+3. The word must be clearly explained through the conversation — with examples, analogies, or jokes.
+4. Make it witty, clever, and slightly sarcastic — but avoid disrespect or rudeness.
+5. Match each character's tone and personality accurately.
+6. Do not include narration, stage directions, markdown, or extra formatting.
+7. Output must follow **this exact format** — plain text only, no colons or quotes:
 
-Example short dialogue:
-{{Rahul}} What does the word plummet mean  
-{{Modi}} It means something falls very quickly Rahul like your party in exit polls  
-{{Rahul}} So if my phone drops from my pocket that's a plummet  
-{{Shashi}} Only if it falls suddenly and sharply not if it slips gently  
+{{Character}} their line  
+{{Character}} their line  
+{{Character}} their line  
+{{Character}} their line  
 
-Now generate a similar dialogue (no more than 60 seconds when read aloud) for the word: {word}
+(Continue only if needed, but never exceed 8 lines total.)
+
+Now generate a dialogue (no more than 40 seconds when read aloud) for the word: {word}
 """
+
+
+
 
 GET_THE_MOOD_PROMPT = """
 Sentence: {sentence}
