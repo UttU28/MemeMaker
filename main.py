@@ -471,7 +471,7 @@ class UnifiedVideoPipeline:
             return False
         
         try:
-            # Transcribe with Whisper
+            # Transcribe with Whisper (only for timing information)
             whisperModel = whisperx.load_model("base", device, compute_type="float32")
             transcription = whisperModel.transcribe(audioPath, batch_size=1)
             
@@ -485,7 +485,19 @@ class UnifiedVideoPipeline:
             if not alignedData.get("word_segments"):
                 return False
             
-            # Create SRT
+            # Parse original dialogue text into words
+            originalWords = []
+            for line in dialogueText.split('\n'):
+                if line.strip():
+                    # Remove punctuation and split into words
+                    cleanLine = re.sub(r'[^\w\s]', '', line.strip())
+                    words = cleanLine.split()
+                    originalWords.extend(words)
+            
+            print(f"📝 Original words count: {len(originalWords)}")
+            print(f"🎤 Whisper words count: {len(alignedData['word_segments'])}")
+            
+            # Create SRT using original text with Whisper timing
             with open(srtPath, 'w', encoding='utf-8') as srtFile:
                 wordSegments = alignedData["word_segments"]
                 groupSize = 4
@@ -494,7 +506,18 @@ class UnifiedVideoPipeline:
                     group = wordSegments[i:i+groupSize]
                     start = self._formatTime(group[0]['start'])
                     end = self._formatTime(group[-1]['end'])
-                    text = " ".join([w['word'].strip() for w in group if w['word'].strip()])
+                    
+                    # Use original words instead of Whisper transcribed words
+                    groupWords = []
+                    for j, segment in enumerate(group):
+                        originalIndex = i + j
+                        if originalIndex < len(originalWords):
+                            groupWords.append(originalWords[originalIndex])
+                        else:
+                            # Fallback to Whisper word if original words are exhausted
+                            groupWords.append(segment['word'].strip())
+                    
+                    text = " ".join([w for w in groupWords if w])
                     text = f"<font face='Impact' size='16' color='&HFFFFFF&'>{text}</font>"
                     
                     srtFile.write(f"{i//groupSize + 1}\n{start} --> {end}\n{text}\n\n")
@@ -694,83 +717,103 @@ def get_random_background_video():
 
 
 def bulk_process():
-    """Process the first unused word from greWords.json in sorted key order"""
+    """Process all unused words from greWords.json in sorted key order"""
     greWordsPath = "data/greWords.json"
     
     if not os.path.exists(greWordsPath):
         print(f"❌ {greWordsPath} not found")
         return False
 
-    # Get random background video
-    backgroundVideo = get_random_background_video()
-
     try:
-        # Load the entire GRE words file
-        with open(greWordsPath, 'r', encoding='utf-8') as f:
-            greWords = json.load(f)
+        processedCount = 0
+        totalWords = 0
         
-        print(f"📚 Loaded {len(greWords)} words from {greWordsPath}")
-        
-        # Find the first unused word in sorted key order
-        sortedKeys = sorted(greWords.keys(), key=int)
-        firstUnusedWord = None
-        firstUnusedKey = None
-        
-        for key in sortedKeys:
-            wordData = greWords[key]
-            if not wordData.get("used", False):
-                firstUnusedWord = wordData["word"]
-                firstUnusedKey = key
-                break
-        
-        if not firstUnusedWord:
-            print("✅ All words have been processed!")
-            return True
-        
-        print(f"🎯 Found first unused word: {firstUnusedWord.upper()} (key: {firstUnusedKey})")
-        
-        # Initialize pipeline
-        pipeline = UnifiedVideoPipeline()
-        
-        # Process the word
-        print(f"\n{'='*50}")
-        print(f"🎬 Processing: {firstUnusedWord.upper()}")
-        if backgroundVideo:
-            print(f"🎥 Using background: {os.path.basename(backgroundVideo)}")
-        print(f"{'='*50}")
-        
-        success = pipeline.run(firstUnusedWord, backgroundVideo)
-        
-        if success:
-            # Update the word data in memory
-            greWords[firstUnusedKey]["used"] = True
+        while True:
+            # Get random background video for each word
+            backgroundVideo = get_random_background_video()
             
-            # Try to get the final video path from wordData.json
-            try:
-                with open("data/wordData.json", 'r', encoding='utf-8') as f:
-                    wordData = json.load(f)
+            # Load the entire GRE words file (reload each time to get updates)
+            with open(greWordsPath, 'r', encoding='utf-8') as f:
+                greWords = json.load(f)
+            
+            if processedCount == 0:  # Only show this on first iteration
+                print(f"📚 Loaded {len(greWords)} words from {greWordsPath}")
+                totalWords = len(greWords)
+            
+            # Find the first unused word in sorted key order
+            sortedKeys = sorted(greWords.keys(), key=int)
+            firstUnusedWord = None
+            firstUnusedKey = None
+            
+            for key in sortedKeys:
+                wordData = greWords[key]
+                if not wordData.get("used", False):
+                    firstUnusedWord = wordData["word"]
+                    firstUnusedKey = key
+                    break
+            
+            if not firstUnusedWord:
+                print(f"🎉 All words have been processed!")
+                print(f"📊 Total processed in this session: {processedCount}")
+                return True
+            
+            print(f"\n{'='*60}")
+            print(f"🎯 Processing word {processedCount + 1}: {firstUnusedWord.upper()} (key: {firstUnusedKey})")
+            if backgroundVideo:
+                print(f"🎥 Using background: {os.path.basename(backgroundVideo)}")
+            print(f"{'='*60}")
+            
+            # Initialize pipeline
+            pipeline = UnifiedVideoPipeline()
+            
+            # Process the word
+            print(f"🎬 Starting pipeline for: {firstUnusedWord.upper()}")
+            
+            success = pipeline.run(firstUnusedWord, backgroundVideo)
+            
+            if success:
+                # Update the word data in memory
+                greWords[firstUnusedKey]["used"] = True
                 
-                if firstUnusedWord.lower() in wordData.get("words", {}):
-                    finalVideo = wordData["words"][firstUnusedWord.lower()].get("finalVideoFile", "")
-                    if finalVideo:
-                        greWords[firstUnusedKey]["finalVideoFile"] = finalVideo
-            except:
-                pass
-            
-            # Save the entire updated file
-            with open(greWordsPath, 'w', encoding='utf-8') as f:
-                json.dump(greWords, f, indent=4, ensure_ascii=False)
-            
-            print(f"✅ Successfully processed and marked '{firstUnusedWord}' as used")
-            print(f"📝 Updated entire {greWordsPath} file")
-            
-            return True
-        else:
-            print(f"❌ Failed to process '{firstUnusedWord}'")
-            return False
+                # Try to get the final video path from wordData.json
+                try:
+                    with open("data/wordData.json", 'r', encoding='utf-8') as f:
+                        wordData = json.load(f)
+                    
+                    if firstUnusedWord.lower() in wordData.get("words", {}):
+                        finalVideo = wordData["words"][firstUnusedWord.lower()].get("finalVideoFile", "")
+                        if finalVideo:
+                            greWords[firstUnusedKey]["finalVideoFile"] = finalVideo
+                except:
+                    pass
+                
+                # Save the entire updated file
+                with open(greWordsPath, 'w', encoding='utf-8') as f:
+                    json.dump(greWords, f, indent=4, ensure_ascii=False)
+                
+                processedCount += 1
+                print(f"✅ Successfully processed '{firstUnusedWord}' ({processedCount} completed)")
+                print(f"📝 Updated {greWordsPath}")
+                
+                # Show progress
+                remaining = sum(1 for key in sortedKeys if not greWords[key].get("used", False))
+                print(f"📊 Progress: {processedCount} completed, {remaining} remaining")
+                
+            else:
+                print(f"❌ Failed to process '{firstUnusedWord}' - continuing to next word...")
+                # Mark as used even if failed to avoid getting stuck
+                greWords[firstUnusedKey]["used"] = True
+                with open(greWordsPath, 'w', encoding='utf-8') as f:
+                    json.dump(greWords, f, indent=4, ensure_ascii=False)
+                processedCount += 1
         
+    except KeyboardInterrupt:
+        print(f"\n⚠️ Bulk processing interrupted by user")
+        print(f"📊 Processed {processedCount} words before interruption")
+        return True
     except Exception as e:
         print(f"❌ Error during bulk processing: {e}")
+        print(f"📊 Processed {processedCount} words before error")
         return False
 
 

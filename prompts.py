@@ -13,7 +13,7 @@ Character Roles (always follow this structure):
 
 Instructions:
 1. Always use exactly **3 characters**: {{Rahul}}, {{Modi}}, and **one** of the supporting characters.
-2. Keep the skit short — no more than 40 seconds when read aloud (around 4 to 8 dialogue lines).
+2. Keep the skit short — no more than 40 seconds when read aloud (around 4 to 6 dialogue lines).
 3. The word must be clearly explained through the conversation — with examples, analogies, or jokes.
 4. Make it witty, clever, and slightly sarcastic — but avoid disrespect or rudeness.
 5. Match each character's tone and personality accurately.
@@ -25,7 +25,7 @@ Instructions:
 {{Character}} their line  
 {{Character}} their line  
 
-(Continue only if needed, but never exceed 8 lines total.)
+(Continue only if needed, but never exceed 6 lines total.)
 
 Now generate a dialogue (no more than 40 seconds when read aloud) for the word: {word}
 """
