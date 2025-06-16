@@ -208,27 +208,21 @@ class UnifiedVideoPipeline:
         if not self._concatenateAudioFiles(timeline, combinedAudioPath):
             return False
         
-        # Generate base video
-        baseVideoPath = f"{self.videoOutputDir}/{word}_base_video.mp4"
+        # Generate final video with subtitles
+        finalVideoPath = f"{self.videoOutputDir}/{word}_final_video.mp4"
         if not self._generateBaseVideo(backgroundVideo, timeline, totalDuration, 
-                                      combinedAudioPath, baseVideoPath):
+                                     combinedAudioPath, finalVideoPath, word):
             return False
         
-        # Add subtitles
-        finalVideoPath = f"{self.videoOutputDir}/{word}_final_video.mp4"
-        dialogueText = self._getDialogueText(wordData)
+        # Update final video path in JSON
+        self._updateFinalVideoInJson(word, finalVideoPath)
         
-        if self._addSubtitles(dialogueText, baseVideoPath, finalVideoPath, word):
-            self._updateFinalVideoInJson(word, finalVideoPath)
-            
-            # Cleanup temp files
-            for tempFile in [combinedAudioPath, baseVideoPath]:
-                if os.path.exists(tempFile):
-                    os.remove(tempFile)
-            
-            return True
+        # Cleanup temp files
+        for tempFile in [combinedAudioPath]:
+            if os.path.exists(tempFile):
+                os.remove(tempFile)
         
-        return False
+        return True
     
     def _validateAndFillMissingImages(self, word: str, wordData: Dict):
         """Validate and fill missing image files with default confident emotion images"""
@@ -337,6 +331,92 @@ class UnifiedVideoPipeline:
         except Exception:
             return None
     
+    def _generateSingleSubtitle(self, audioFile: str, dialogue: str) -> Optional[Dict]:
+        """Generate subtitle information for a single audio clip"""
+        device = "cpu"
+        tempAudioPath = "temp_single_audio.wav"
+        
+        try:
+            # Copy audio file to temp location
+            if not audioFile.startswith('data/'):
+                audioFile = 'data/' + audioFile
+            audio = AudioSegment.from_file(audioFile)
+            audio.export(tempAudioPath, format="wav")
+            
+            # Transcribe with Whisper (explicitly set to English)
+            whisperModel = whisperx.load_model("base", device, compute_type="float32")
+            transcription = whisperModel.transcribe(
+                tempAudioPath,
+                batch_size=1,
+                language="en",  # Explicitly set to English
+                task="transcribe"  # Force transcription task
+            )
+            
+            if not transcription.get("segments"):
+                return None
+            
+            # Align words (explicitly set to English)
+            alignModel, metadata = whisperx.load_align_model(
+                language_code="en",
+                device=device,
+                model_name="WAV2VEC2_ASR_LARGE_LV60K_960H"  # More accurate English model
+            )
+            alignedData = whisperx.align(
+                transcription["segments"],
+                alignModel,
+                metadata,
+                tempAudioPath,
+                device,
+                return_char_alignments=False  # We don't need character-level alignment
+            )
+            
+            if not alignedData.get("word_segments"):
+                return None
+            
+            # Parse original dialogue text into words
+            originalWords = []
+            cleanLine = re.sub(r'[^\w\s]', '', dialogue.strip())
+            words = cleanLine.split()
+            originalWords.extend(words)
+            
+            # Create subtitle segments
+            wordSegments = alignedData["word_segments"]
+            subtitleSegments = []
+            groupSize = 4
+            
+            for i in range(0, len(wordSegments), groupSize):
+                group = wordSegments[i:i+groupSize]
+                start = group[0]['start']
+                end = group[-1]['end']
+                
+                # Use original words instead of Whisper transcribed words
+                groupWords = []
+                for j, segment in enumerate(group):
+                    originalIndex = i + j
+                    if originalIndex < len(originalWords):
+                        groupWords.append(originalWords[originalIndex])
+                    else:
+                        groupWords.append(segment['word'].strip())
+                
+                text = " ".join([w for w in groupWords if w])
+                subtitleSegments.append({
+                    "start": start,
+                    "end": end,
+                    "text": text
+                })
+            
+            return {
+                "segments": subtitleSegments,
+                "duration": len(audio) / 1000.0  # Convert to seconds
+            }
+            
+        except Exception as e:
+            print(f"❌ Error generating subtitle: {e}")
+            return None
+        finally:
+            if os.path.exists(tempAudioPath):
+                os.remove(tempAudioPath)
+
     def _createTimeline(self, wordData: Dict) -> Tuple[List[Dict], float]:
         """Create timeline for video generation"""
         chats = wordData["chats"]
@@ -350,8 +430,9 @@ class UnifiedVideoPipeline:
             if not audioFile:
                 continue
             
-            duration = self._getAudioDuration(audioFile)
-            if duration == 0:
+            # Generate subtitle information for this clip
+            subtitleInfo = self._generateSingleSubtitle(audioFile, chatData["dialogue"])
+            if not subtitleInfo:
                 continue
             
             timeline.append({
@@ -361,11 +442,12 @@ class UnifiedVideoPipeline:
                 "audioFile": audioFile,
                 "imageFile": chatData.get("imageFile", ""),
                 "startTime": currentTime,
-                "endTime": currentTime + duration,
-                "duration": duration
+                "endTime": currentTime + subtitleInfo["duration"],
+                "duration": subtitleInfo["duration"],
+                "subtitleSegments": subtitleInfo["segments"]
             })
             
-            currentTime += duration
+            currentTime += subtitleInfo["duration"]
         
         return timeline, currentTime
     
@@ -387,7 +469,7 @@ class UnifiedVideoPipeline:
             return False
     
     def _generateBaseVideo(self, backgroundVideo: str, timeline: List[Dict], 
-                          totalDuration: float, combinedAudio: str, outputVideo: str) -> bool:
+                          totalDuration: float, combinedAudio: str, outputVideo: str, word: str) -> bool:
         """Generate base video with FFmpeg"""
         # Check for outro
         outroPath = "data/outro.mp4"
@@ -415,14 +497,40 @@ class UnifiedVideoPipeline:
         filterParts.append(f"[0:v]scale=1080:1920:force_original_aspect_ratio=disable,setsar=1,trim=duration={totalDuration},setpts=PTS-STARTPTS[bg]")
         currentBase = "[bg]"
         
-        # Add overlays
+        # Add overlays and subtitles
         for i, item in enumerate(timeline):
             if item["chatId"] in imageInputs:
                 imgInput = imageInputs[item["chatId"]]
+                # Add image overlay
                 filterParts.append(
                     f"{currentBase}[{imgInput}:v]overlay=0:0:enable='between(t,{item['startTime']},{item['endTime']})'[overlay{i}]"
                 )
                 currentBase = f"[overlay{i}]"
+            
+            # Add subtitles for this segment
+            if "subtitleSegments" in item:
+                for segment in item["subtitleSegments"]:
+                    start = item["startTime"] + segment["start"]
+                    end = item["startTime"] + segment["end"]
+                    text = segment["text"]
+                    # Escape special characters in text
+                    text = text.replace("'", "\\'").replace('"', '\\"')
+                    filterParts.append(
+                        f"{currentBase}drawtext=text='{text}':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h-th-50:enable='between(t,{start},{end})'[sub{i}]"
+                    )
+                    currentBase = f"[sub{i}]"
+        
+        # Add main title overlays (Today's Word and the word itself)
+        mainWord = word.upper()
+        # Add "Today's Word!" title
+        filterParts.append(
+            f"{currentBase}drawtext=text='Todays Word!':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=60:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=80[title]"
+        )
+        # Add the main word
+        filterParts.append(
+            f"[title]drawtext=text='{mainWord}':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=140:fontcolor=yellow:borderw=6:bordercolor=black:x=(w-text_w)/2:y=140[word_overlay]"
+        )
+        currentBase = "[word_overlay]"
         
         # Add outro if exists
         if useOutro:
@@ -806,6 +914,8 @@ def bulk_process():
                 with open(greWordsPath, 'w', encoding='utf-8') as f:
                     json.dump(greWords, f, indent=4, ensure_ascii=False)
                 processedCount += 1
+
+            break
         
     except KeyboardInterrupt:
         print(f"\n⚠️ Bulk processing interrupted by user")
