@@ -143,8 +143,6 @@ class F5TtsGradioClient:
             
             self.logManager.logUserAction(userId, "SpeechGenerationCompleted", f"Duration: {duration:.2f}s")
             
-            self.configManager.updateLastUsed(userId)
-            
             return True
             
         except Exception as e:

@@ -15,6 +15,1992 @@
                 }
             },
             "finalAudioFile": "audio_files/merged/savedLocationFinal.wav"
+        },
+        "insipid": {
+            "word": "insipid",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does insipid mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213038.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Well, Rahul, imagine a speech without spice, like a meal without salt. Its bland, dull, lacking the fiery flavor that keeps people engaged.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213049.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "In essence, its like a poem with no soul, a painting with no color. Its the absence of intellect and charisma.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_213055.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a politician with no charm or wit?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213100.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like a leader who puts you to sleep instead of inspiring you. Insipid is the last thing you want to be in the political arena.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213113.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its crucial to keep your audience captivated, Rahul. Remember, in politics, being insipid is a recipe for disaster.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_213120.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/insipid_final_video.mp4"
+        },
+        "demagogue": {
+            "word": "demagogue",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does demagogue mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213340.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, a demagogue is like that politician who stirs up emotions, makes big promises, but lacks substance.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213348.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, a demagogue manipulates peoples fears and prejudices for personal gain, often misleading them with empty rhetoric.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_213357.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a leader who talks a lot but doesnt walk the talk?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213404.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like a magician with words, casting spells of deception on the unsuspecting public.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213412.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "A demagogues charm can be dangerous, appealing to the masses but undermining democracy in the process.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_213419.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Lets be vigilant and not fall prey to the charms of a demagogue, for true leadership lies in integrity, not in empty promises.",
+                    "speaker": "palki",
+                    "audioFile": "audio_files/generated/trimmed_palki_20250615_213426.wav",
+                    "imageFile": "data/images/palki_analyticalr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/demagogue_final_video.mp4"
+        },
+        "fracas": {
+            "word": "fracas",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does fracas mean in Indian politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213548.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, a fracas is like when two politicians start arguing loudly in parliament, creating chaos and confusion.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213556.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its a tumultuous uproar that disrupts the harmony of the political discourse, much like a storm in a teacup.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_213603.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when Pappu and Gappu cant agree on anything and start shouting at each other?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213610.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its when the drama unfolds, and the whole nation is left wondering, Are these the leaders we voted for?",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213618.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat6": {
+                    "dialogue": "In diplomacy, a fracas can damage relationships and hinder progress, much like a political scuffle that distracts from real issues.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_213625.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Its a reminder that in the grand theater of politics, sometimes the loudest voices are not the wisest.",
+                    "speaker": "palki",
+                    "audioFile": "audio_files/generated/trimmed_palki_20250615_213632.wav",
+                    "imageFile": "data/images/palki_analyticalr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/fracas_final_video.mp4"
+        },
+        "sap": {
+            "word": "sap",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does sap mean in English, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213757.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, sap is like someone who drains all the energy out of you, like a politician who talks for hours but says nothing!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213805.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its the essence of vitality that can also refer to someone who saps your strength, leaving you exhausted and drained.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_213812.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a boring speech that makes everyone fall asleep?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213819.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like that! A sap can be a real snooze fest in the political arena.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213826.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "In diplomacy, a sap could be a leader who drains resources without giving anything in return, weakening the nations position on the global stage.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_213837.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/sap_final_video.mp4"
+        },
+        "perennial": {
+            "word": "perennial",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does perennial mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_213949.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, think of perennial as a politician who never fades away, like that one auntie who always shows up at weddings uninvited!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_213957.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Rather, its like a timeless river, flowing through the ever-changing landscape of politics.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214004.wav",
+                    "imageFile": "data/images/shashi_contemplativer.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Just like that one opposition leader who keeps coming back, like a bad penny.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214011.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, perennial means someone who sticks around forever?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214018.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Indeed, Rahul. In politics, a perennial figure is like the North Star, guiding parties through the stormy seas of elections.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_214026.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/perennial_final_video.mp4"
+        },
+        "discerning": {
+            "word": "discerning",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does discerning mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214135.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, being discerning means having the ability to distinguish between right and wrong, like choosing between a mango and a sour lemon.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214147.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its like a connoisseur appreciating fine wine, Rahul. A discerning politician sees through the facade to the real issues.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214154.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when a leader can tell if a promise is genuine or just for show?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214201.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! A discerning politician doesnt fall for empty promises like mistaking a firecracker for a shooting star.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214210.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its about having a keen perception, Rahul, to see beyond the surface and make informed decisions for the betterment of the nation.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_214217.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/discerning_final_video.mp4"
+        },
+        "whimsical": {
+            "word": "whimsical",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does whimsical mean in politics, Modi Ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214335.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine a politician who changes their mind as often as the weather in monsoon season! Thats whimsical.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214343.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its like a dance of uncertainty, a political ballet of unpredictable moves and sudden pirouettes.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214350.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Just like when a leader promises free Wi-Fi one day and bans the internet the next - now thats whimsical!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214358.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, its like political magic tricks?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214405.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat6": {
+                    "dialogue": "More like political illusions, Rahul. Looks grand on the surface, but disappears with a flick of realitys wand.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_214412.wav",
+                    "imageFile": "data/images/jaishankar_subtle_amusementr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/whimsical_final_video.mp4"
+        },
+        "surfeit": {
+            "word": "surfeit",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does surfeit mean in Indian politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214525.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine a buffet spread with so much food that you cant possibly eat it all. Thats a surfeit of food. In politics, its like having so many promises from politicians that you cant keep track of them all.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214538.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi. A surfeit is like a politicians speech filled with lofty words, but lacking in substance or action.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214546.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when they promise the moon but deliver a pebble?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214552.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! A surfeit of promises, but a paucity of results. Just like a buffet with all show and no taste!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214600.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/surfeit_final_video.mp4"
+        },
+        "succeeding": {
+            "word": "succeeding",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does succeeding mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214702.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, its like when you finally win a game of chess after multiple failed attempts.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214709.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its the art of achieving ones goals and fulfilling promises, Rahul.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214716.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when I finally understand the budget numbers?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214722.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Oh, close, Rahul! Its more like actually implementing your ideas and seeing positive results.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214729.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its about stepping into a leadership role and making a meaningful impact, Rahul.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_214736.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Ah, got it! Like running a marathon and reaching the finish line.",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214743.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/succeeding_final_video.mp4"
+        },
+        "precursor": {
+            "word": "precursor",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does precursor mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214836.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, think of a precursor as the opening act before the main event! Like when Shashi starts reciting poetry before a political speech.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214847.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "I must say, Modi ji, my eloquent words are the perfect precursor to your fiery speeches.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_214854.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Just like how a political scandal can be a precursor to a leaders downfall. It sets the stage for the main drama to unfold.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_214910.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat5": {
+                    "dialogue": "Oh, so its like the appetizer before the main course in a political buffet?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_214916.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Quite right, Rahul. A precursor gives us a hint of whats to come, whether its progress or chaos in the political landscape.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_214926.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/precursor_final_video.mp4"
+        },
+        "panoply": {
+            "word": "panoply",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does panoply mean in Indian politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215019.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, think of it like this. Imagine a grand political rally with banners, speeches, music, and thousands of cheering supporters. Thats a panoply of political spectacle!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215032.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi ji. A panoply represents the dazzling array of political elements on display, like a colorful tapestry woven with ambition and power.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215041.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like a big show in the political world?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215048.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Absolutely, Rahul! A panoply is like a larger-than-life drama, where politicians don their masks and play their roles on the grand stage of democracy.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215104.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat6": {
+                    "dialogue": "In essence, a panoply captures the essence of political theater, where every move is calculated, every word rehearsed, creating a mesmerizing spectacle for the masses.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_215121.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/panoply_final_video.mp4"
+        },
+        "ossify": {
+            "word": "ossify",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does ossify mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215218.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine this: a once dynamic party leader who refuses to change, stuck in old ways like a fossil. Thats ossification!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215225.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, ossify means to become rigid or stagnant, like a party unwilling to adapt to modern challenges, losing relevance.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215234.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like a politician who clings to outdated ideas, becoming as stiff as a statue?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215243.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like a statue in a park, looking grand but unable to move or think. Dont let your ideas ossify, adapt or become irrelevant!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215301.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/ossify_final_video.mp4"
+        },
+        "quibble": {
+            "word": "quibble",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does quibble mean in politics, Modi Ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215349.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, think of it this way. Its like when politicians argue over petty details instead of focusing on the bigger picture.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215358.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its the art of nitpicking and finding fault in trivial matters, often to avoid addressing the real issues at hand.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215408.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Just like when they spend hours debating the font size on a bill, instead of discussing its impact on the nation!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215417.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Oh, so its like when they bicker endlessly over minor things?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215425.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat6": {
+                    "dialogue": "Precisely, Rahul. Its a tactic used to distract from important discussions and delay progress.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_215434.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/quibble_final_video.mp4"
+        },
+        "complaisant": {
+            "word": "complaisant",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does complaisant mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215524.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, being complaisant in politics is like being a chameleon, changing colors to please everyone.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215531.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its about being overly accommodating, sacrificing principles for popularity, like a politician who bends with every breeze.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215541.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a leader who agrees with everyone just to stay in power?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215549.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! A complaisant leader is as firm as a jellyfish, floating wherever the current takes them.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215600.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its important to be diplomatic, but not at the cost of losing your core values. Being complaisant can weaken your stance in the long run.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_215615.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "True, JaiShankar. Lets strive for integrity over complaisance in our political discourse.",
+                    "speaker": "palki",
+                    "audioFile": "audio_files/generated/trimmed_palki_20250615_215625.wav",
+                    "imageFile": "data/images/palki_analyticalr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/complaisant_final_video.mp4"
+        },
+        "usury": {
+            "word": "usury",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does usury mean in Indian politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215724.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine you borrow money from someone and they charge you such high interest rates that you end up owing them your entire salary! Thats usury.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215743.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat3": {
+                    "dialogue": "Usury, my dear friends, is like a cunning fox preying on the vulnerable, extracting wealth through deceitful means.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215753.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like promising free electricity but then charging exorbitant rates secretly?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215802.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like a politician promising the moon but delivering a black hole in your wallet. Usury is the politics of financial exploitation!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215821.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/usury_final_video.mp4"
+        },
+        "coffer": {
+            "word": "coffer",
+            "chats": {
+                "chat1": {
+                    "dialogue": "Whats a coffer, Modi ji? Is it like a coffee shop?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215910.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Oh, Rahul, not quite! A coffer is like a treasure chest where politicians keep all the money they promise to spend on development projects.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215924.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Ah, a coffer is a repository of financial resources, a symbol of power and discretion, much like a politicians promises.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_215936.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! And just like a coffer, politicians often keep their promises locked away, hidden from public view.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_215948.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, a coffer is like a magical money box that never seems to run out?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_215956.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "In a way, Rahul. But remember, its important to ensure that the contents of the coffer are used wisely and transparently for the benefit of all.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_220015.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/coffer_final_video.mp4"
+        },
+        "bane": {
+            "word": "bane",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does bane mean in politics, Modi Ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220108.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, think of it this way - if corruption were a superhero movie, then scams and scandals would be the villains evil plan. And the bane? The bane would be the superhero called Accountability, swooping in to defeat corruption!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220125.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "In essence, bane is the scourge, the curse that plagues the political landscape, leaving a trail of chaos and distrust in its wake.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_220134.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, bane is like the supervillain of Indian politics, causing all the trouble?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220144.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Bane is the dark shadow that politicians must fight against to restore faith in governance and justice. Its like battling a never-ending saga of challenges to uphold democracy!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220203.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/bane_final_video.mp4"
+        },
+        "recluse": {
+            "word": "recluse",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does recluse mean, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220255.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, imagine a politician who suddenly disappears from all public events, social media, and interviews.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220304.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Like a hermit seeking solitude in the mountains, away from the chaos of the world.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_220312.wav",
+                    "imageFile": "data/images/shashi_confidentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi. A recluse is someone who chooses to live in seclusion, away from the spotlight.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220321.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat5": {
+                    "dialogue": "So, like a politician who avoids press conferences and public appearances?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220331.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Yes, Rahul. A recluse in politics is like a silent observer, preferring solitude over the noise of the political arena.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_220342.wav",
+                    "imageFile": "data/images/jaishankar_subtle_amusementr.png"
+                },
+                "chat7": {
+                    "dialogue": "And trust me, Rahul, in the world of politics, a recluse is as rare as a peaceful parliament session!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220353.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/recluse_final_video.mp4"
+        },
+        "abate": {
+            "word": "abate",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does abate mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220450.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, its like when a politicians promises start to fade away like a monsoon shower in the desert.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220458.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi. Abate is when the storm of speeches dwindles into a gentle breeze of forgotten pledges.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_220508.wav",
+                    "imageFile": "data/images/shashi_contemplativer.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when a leaders enthusiasm decreases?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220516.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Precisely, Rahul! Its when the passion for change diminishes, leaving only the echoes of unfulfilled dreams.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220525.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat6": {
+                    "dialogue": "Like a strategic retreat, where the fervor of the masses abates, and the calm of reality sets in.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_220535.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/abate_final_video.mp4"
+        },
+        "hedge": {
+            "word": "hedge",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does hedge mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220625.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Well, Rahul, imagine you have a garden. To protect it from monkeys, you build a fence, right?",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220634.wav",
+                    "imageFile": "data/images/modi_explainingl.png"
+                },
+                "chat3": {
+                    "dialogue": "In politics, a hedge is like a safety net. Its a strategic move to reduce risks or losses.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_220642.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi. Just like when you promise free laptops to students but also say youll create jobs. Its a hedge!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220654.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Ah, so its like having a backup plan!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220703.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Indeed, Rahul. Hedges in politics can be like walking a tightrope, balancing between different interests.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_220713.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                },
+                "chat7": {
+                    "dialogue": "Yes, JaiShankar, like a tightrope walker, but with more drama and fewer safety nets!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220725.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/hedge_final_video.mp4"
+        },
+        "advocate": {
+            "word": "advocate",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does it mean to be an advocate in Indian politics?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220819.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, being an advocate is like being a lawyer in a court, fighting for what you believe in!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220826.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its about eloquently presenting your case with finesse and persuasion.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_220834.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when Palki argues for more chai breaks in the office?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_220843.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly! Just like that, but with a touch of legal jargon and a lot more drama!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220852.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Advocates play a crucial role in shaping policies and defending rights in a democracy.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_220902.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Yes, JaiShankar, they are the voice of the people, speaking truth to power and keeping the system in check!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_220914.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/advocate_final_video.mp4"
+        },
+        "eclectic": {
+            "word": "eclectic",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does eclectic mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221009.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine a political party where they pick policies like choosing dishes from a buffet - a little socialism here, a dash of capitalism there, and garnished with some nationalism. Thats eclectic!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221023.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi ji, eclectic in politics is like a poetic symphony, blending diverse ideologies into a harmonious composition.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221031.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like mixing all the colors to paint a rainbow coalition?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221040.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! In the political palette of India, being eclectic means painting with all the hues of governance to create a vibrant democracy.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221058.wav",
+                    "imageFile": "data/images/modi_explainingl.png"
+                },
+                "chat6": {
+                    "dialogue": "Embracing an eclectic approach ensures flexibility and adaptability, creating a mosaic of ideas to cater to the diverse needs of the nation.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_221113.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/eclectic_final_video.mp4"
+        },
+        "supplicate": {
+            "word": "supplicate",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does supplicate mean, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221210.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, its like when you desperately ask for something, like when you keep requesting for votes during elections!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221217.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, supplicate is to humbly plead or beg, often in a religious context, like seeking divine intervention for political success.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221224.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Just like how I supplicate the voters to bless me with their support, Rahul!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221233.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, its like asking for votes on your knees?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221241.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Precisely, Rahul. Its about seeking favor through humble entreaty, a common tactic in the political arena.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_221251.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Well said, JaiShankar. Remember, politics is all about the art of supplication!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221300.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/supplicate_final_video.mp4"
+        },
+        "elated": {
+            "word": "elated",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does elated mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221355.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine winning an election by a landslide, feeling on top of the world, thats being elated.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221402.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its like the euphoria of achieving a political triumph, a moment of pure joy and jubilation.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221410.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when you pass a bill without any opposition?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221417.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! When the opposition is silenced, and your supporters cheer, youll feel truly elated.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221426.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its that sense of satisfaction and fulfillment that comes from a successful political endeavor.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_221435.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/elated_final_video.mp4"
+        },
+        "inundate": {
+            "word": "inundate",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does inundate mean in the context of politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221524.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine this - youre a politician giving a speech, and suddenly, the crowd starts throwing questions at you from all directions. Thats being inundated with queries!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221536.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Inundate, Rahul, is like when the rain pours so heavily that even the toughest umbrella cant handle it. In politics, its when youre overwhelmed by a flood of demands or information.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221553.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like being flooded with too much stuff to handle?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221602.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like when youre trying to read all those long speeches your advisors give you - youre inundated with words you dont understand!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221619.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/inundate_final_video.mp4"
+        },
+        "acerbic": {
+            "word": "acerbic",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does acerbic mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221707.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, acerbic is like a sharp-tongued opposition leader, always ready with biting remarks.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221714.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its the bitter taste left by a politicians caustic comments, like lemon in a wound.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221722.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Just like when the oppositions words sting like chili on a sensitive palate, thats acerbic for you.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221731.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Oh, so its like when someones sarcasm is so strong, it could qualify as a new political party?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221739.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Precisely, Rahul. Acerbic remarks can leave a lasting impression, much like a well-aimed political jibe.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_221747.wav",
+                    "imageFile": "data/images/jaishankar_confidentl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/acerbic_final_video.mp4"
+        },
+        "wily": {
+            "word": "wily",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does the word wily mean in Indian politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221837.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine a cunning fox who always outsmarts the hunter. Thats what being wily is all about in our political arena.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221845.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its the art of deception and shrewdness, using clever tactics to achieve ones goals without being caught.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_221853.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a politician who promises the moon but delivers only stardust?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221900.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat5": {
+                    "dialogue": "Precisely, my friend! A wily politician is like a magician, creating illusions to dazzle the audience and hide their true intentions.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_221915.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat6": {
+                    "dialogue": "Its all about playing the game strategically, Rahul. In politics, being wily means knowing how to navigate the murky waters of power with finesse and guile.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_221933.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat7": {
+                    "dialogue": "Wow, so its like a political chess match where the wiliest player wins!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_221942.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/wily_final_video.mp4"
+        },
+        "condone": {
+            "word": "condone",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does condone mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222040.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul! To condone is like when a politician turns a blind eye to corruption in his party, saying, I didnt see it, so its not my problem!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222051.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Condone is the elegant art of silently approving unethical actions, wrapped in a cloak of ignorance.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222100.wav",
+                    "imageFile": "data/images/shashi_confidentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Its like saying, I wont punish you for breaking the rules because, hey, were all in this together, right?",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222111.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Condone is a delicate diplomatic dance where leaders choose to overlook wrongdoing for the sake of maintaining harmony, even if it goes against their principles.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_222129.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                },
+                "chat6": {
+                    "dialogue": "So, condoning is like saying, Dont worry about the rules, just keep smiling and waving!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222138.wav",
+                    "imageFile": "data/images/rahul_confusedr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/condone_final_video.mp4"
+        },
+        "spectrum": {
+            "word": "spectrum",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does spectrum mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222230.wav",
+                    "imageFile": "data/images/rahul_confusedr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul! Imagine a spectrum is like a rainbow of ideologies in Indian politics. On one end, you have fiery red revolutionaries, and on the other, calm blue traditionalists.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222244.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its a diverse range, Rahul. From the vibrant saffron of nationalism to the soothing green of environmentalism, each hue represents a different political belief.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222254.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like a colorful buffet of ideas!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222301.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like how our political spectrum has shades of saffron, green, and everything in between. Its a beautiful chaos, my friend.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222318.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/spectrum_final_video.mp4"
+        },
+        "patronizing": {
+            "word": "patronizing",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does patronizing mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222406.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, its like when a politician talks down to the people, like theyre children in need of guidance.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222413.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its a form of condescension, belittling others while pretending to be helpful.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222421.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when a leader gives a long speech without saying anything substantial?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222429.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like serving a bland dish and calling it a royal feast. Lets not be patronizing, lets serve up real change instead!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222446.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat6": {
+                    "dialogue": "Diplomatically speaking, its about maintaining respect and equality in political discourse, not talking down to the very people you serve.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_222503.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/patronizing_final_video.mp4"
+        },
+        "pusillanimous": {
+            "word": "pusillanimous",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does pusillanimous mean in Indian politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222556.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, pusillanimous is like a politician who talks big but runs away when faced with tough decisions. Like a lion who roars loudly but runs at the sight of a mouse!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222608.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "In essence, its a lack of courage or determination, a timid approach to leadership.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222617.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like promising big reforms but backing out when things get tough?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222623.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like a cricket captain who talks of winning the match but sends a substitute to bat in the final over! Be bold, not pusillanimous!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222642.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/pusillanimous_final_video.mp4"
+        },
+        "convoke": {
+            "word": "convoke",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does convoke mean in Indian politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222730.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul! Imagine youre planning a big gathering of all politicians to discuss important issues. Thats when you convoke them - like summoning them to a political party, but with fancier words!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222745.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its like orchestrating a symphony of opinions, a ballet of ideologies. A delicate dance of democracy, if you will.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222754.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like calling everyone for a political party, but with a touch of sophistication?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222805.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like how I convoke ministers for meetings, you can convoke your friends for a chai party. Its all about summoning with style!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222819.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/convoke_final_video.mp4"
+        },
+        "reticent": {
+            "word": "reticent",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does reticent mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222907.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, its like when a politician suddenly becomes quiet as a monk during a scandal!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222914.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Reticent, my dear friends, is the art of silence in the midst of chaos, like a graceful dancer pausing mid-spin.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_222922.wav",
+                    "imageFile": "data/images/shashi_contemplativer.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Its when our opponents go reticent to dodge tough questions, just like a slippery eel in a pond!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_222931.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Indeed, maintaining a reticent demeanor can be strategic in politics, like a chess master keeping their moves hidden.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_222940.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat6": {
+                    "dialogue": "So, being reticent is like playing a silent game of political chess!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_222949.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/reticent_final_video.mp4"
+        },
+        "phony": {
+            "word": "phony",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does phony mean in politics?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223039.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine a politician who promises the moon but delivers only moonlight. Thats a phony!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223045.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, a phony is like a mirage in the desert, all shimmer and no substance.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223053.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Absolutely, Shashi! They talk big but act small, like a broken promise in a fancy wrapper.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223103.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, a phony is like a politician whos all show and no go?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223110.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat6": {
+                    "dialogue": "Precisely, Rahul. A phony is like a puppet politician, all strings and no principles.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_223119.wav",
+                    "imageFile": "data/images/jaishankar_subtle_amusementr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/phony_final_video.mp4"
+        },
+        "disparage": {
+            "word": "disparage",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does disparage mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223205.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, to disparage means to belittle or speak disrespectfully about someone or something.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223212.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Its like when a politician calls another one incompetent without any proof, Rahul. Its quite common in our political discourse.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223219.wav",
+                    "imageFile": "data/images/shashi_amusedr.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like when you say someones speeches are as empty as a balloon, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223225.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Or when they claim to have a 56-inch chest but cant handle a simple question. Thats disparaging at its finest!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223236.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its crucial to engage in respectful debates rather than resorting to disparaging remarks, Rahul. It reflects poorly on ones character and intellect.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_223251.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/disparage_final_video.mp4"
+        },
+        "posit": {
+            "word": "posit",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does posit mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223343.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, posit is like when you confidently declare something as true without solid evidence. Its like saying, I am the most popular leader in the world without any polls to back it up.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223354.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Posit is a poetic assertion, a bold claim wrapped in eloquence, much like a politicians promises during election season.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223404.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Its like when a politician confidently says, I will eradicate poverty in a year, even though its as likely as me becoming a Bollywood star overnight.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223421.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "Posit can also be seen as a strategic move to shape public opinion, creating a perception rather than stating a fact. Its all about perception management in the political arena.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_223438.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat6": {
+                    "dialogue": "Ah, so its like making a statement sound true just by saying it with conviction! Thanks for the clarification, team!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223446.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/posit_final_video.mp4"
+        },
+        "effigy": {
+            "word": "effigy",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What on earth is an effigy, Modi Ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223544.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, imagine making a big, scary doll of someone you dont like and burning it in protest. Thats like making a life-size model of your least favorite politician and setting it ablaze!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223556.wav",
+                    "imageFile": "data/images/modi_seriousr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, an effigy symbolizes public anger or disapproval towards a figure, often seen in political demonstrations.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223604.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So its like a fiery form of criticism?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223611.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Its like saying, I dont like you, and Im going to show it by turning you into ashes!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223620.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Its a form of symbolic protest, expressing dissent without causing harm.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_223628.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                },
+                "chat7": {
+                    "dialogue": "Remember, the power of satire and art can speak volumes without uttering a single word.",
+                    "speaker": "palki",
+                    "audioFile": "audio_files/generated/trimmed_palki_20250615_223635.wav",
+                    "imageFile": "data/images/palki_amusedr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/effigy_final_video.mp4"
+        },
+        "unsparing": {
+            "word": "unsparing",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does unsparing mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223729.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, in the world of Indian politics, being unsparing means not holding back in criticism or action. Its like when a politician doesnt hesitate to expose the flaws of their opponent without mercy.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223742.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its the art of being brutally honest, Rahul. Like a sharp-tongued poet who doesnt spare anyone in their scathing verses.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223751.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like when a politician doesnt sugarcoat their words?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223759.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like how I unsparingly tackle corruption in my speeches, cutting through the nonsense with precision and flair.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223811.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Being unsparing is essential in leadership, Rahul. It shows strength and determination to root out the issues plaguing our society without hesitation.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_223827.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/unsparing_final_video.mp4"
+        },
+        "vicissitude": {
+            "word": "vicissitude",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What on earth is vicissitude? Sounds like a fancy dessert!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223924.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Oh, Rahul, you never fail to amuse me! Vicissitude means unpredictable changes or fluctuations, like the ups and downs of our Indian politics.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_223935.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi. Its the ever-shifting landscape of power and influence, much like a turbulent sea.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_223943.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like when a politician switches parties or promises one thing and does another?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_223952.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Just like a chameleon changing colors, our leaders navigate the vicissitudes of public opinion with finesse.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224003.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat6": {
+                    "dialogue": "Adapting to the vicissitudes of politics requires skill and resilience, much like a diplomat maneuvering through international crises.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224013.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/vicissitude_final_video.mp4"
+        },
+        "aver": {
+            "word": "aver",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does aver mean in Indian politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224107.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, to aver is like when a politician tries to sound smart and make a statement, but its just average at best.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224115.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, Modi ji. Aver means to assert with confidence, but often lacking substance or conviction, much like a politicians promises during election season.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224124.wav",
+                    "imageFile": "data/images/shashi_amusedr.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi. Its like when a leader averred to bring change but ended up changing nothing at all.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224131.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, aver is like making big claims with no real action behind it?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224139.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat6": {
+                    "dialogue": "Precisely, Rahul. In politics, one must not just aver, but deliver on those promises to truly make a difference.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224147.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/aver_final_video.mp4"
+        },
+        "rustic": {
+            "word": "rustic",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does rustic mean in Indian politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224239.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Well, Rahul, imagine a village fair with loud colors, bustling crowds, and chai waalas on every corner. Thats rustic.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224246.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Its like the raw charm of a rural landscape, untouched by the glossy sheen of urban politics.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224254.wav",
+                    "imageFile": "data/images/shashi_contemplativer.png"
+                },
+                "chat4": {
+                    "dialogue": "So, like a political leader who prefers simplicity over extravagance?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224300.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly! A leader who connects with the grassroots, not just the high-class cocktail parties. Thats rustic in a nutshell.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224311.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat6": {
+                    "dialogue": "Embracing the rustic side shows a leaders authenticity and relatability, a key aspect in winning over the hearts of the common man.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224321.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/rustic_final_video.mp4"
+        },
+        "activism": {
+            "word": "activism",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does activism mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224411.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, activism is like when you have a party at home, but your neighbors keep complaining about the noise and demand change!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224418.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Activism is the art of raising your voice for a cause, with passion and purpose, my dear Rahul.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224425.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like when the opposition protests for better policies?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224431.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Activism is like when the opposition throws a surprise party at the parliament, demanding change and hoping the ruling party listens!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224447.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/activism_final_video.mp4"
+        },
+        "indefatigable": {
+            "word": "indefatigable",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does indefatigable mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224532.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, think of it this way. Imagine a politician who never tires, never gives up, always full of energy and determination.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224540.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indefatigable is like the spirit of a marathon runner in politics, relentless and unstoppable.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224546.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Its like our dear friend Jaishankar here, always calm, composed, and indefatigable in his diplomatic endeavors.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224556.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat5": {
+                    "dialogue": "Thank you, Modi. Indefatigable is key in politics, like a leader who tirelessly works for the people, no matter the challenges faced.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224604.wav",
+                    "imageFile": "data/images/jaishankar_confidentl.png"
+                },
+                "chat6": {
+                    "dialogue": "So, its like a politician whos always on the go, never backing down?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224612.wav",
+                    "imageFile": "data/images/rahul_confidentl.png"
+                },
+                "chat7": {
+                    "dialogue": "Spot on, Rahul! Just like a politician whos always ready to face the music, no matter the dance. Indefatigable is the name of the game in Indian politics!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224629.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/indefatigable_final_video.mp4"
+        },
+        "opaque": {
+            "word": "opaque",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does opaque mean in politics, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224731.wav",
+                    "imageFile": "data/images/rahul_sheepishr.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul baba, imagine trying to see through a wall made of steel! Thats opaque - you cant see whats happening behind it.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224738.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Opaque is like a politicians promises, Rahul. They sound good, but you cant see the real intentions hidden behind fancy words.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224746.wav",
+                    "imageFile": "data/images/shashi_amusedr.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Just like how some leaders keep their agendas opaque to the public, leaving us in the dark.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224753.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "In diplomacy, opaque means unclear motives or lack of transparency, creating confusion among allies and adversaries alike.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224802.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                },
+                "chat6": {
+                    "dialogue": "So, opaque is like a mystery box in politics, where you never know whats really going on behind the scenes!",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224810.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/opaque_final_video.mp4"
+        },
+        "quiescent": {
+            "word": "quiescent",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does quiescent mean, Modi ji?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224902.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, quiescent is like when a politician suddenly stops tweeting for a week!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224909.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "No, no, Modi ji. Quiescent means being calm and peaceful, like a serene lake at dawn.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_224916.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "Exactly, Shashi! Just like our opposition party when they realize they have no chance of winning an election!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224925.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "In diplomatic terms, being quiescent can imply strategic restraint in avoiding unnecessary conflicts.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_224932.wav",
+                    "imageFile": "data/images/jaishankar_diplomaticr.png"
+                },
+                "chat6": {
+                    "dialogue": "So, its like being quiet but with a purpose?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_224939.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat7": {
+                    "dialogue": "Precisely, Rahul! Like the calm before the storm, or in our case, before the next parliamentary session!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_224948.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/quiescent_final_video.mp4"
+        },
+        "trite": {
+            "word": "trite",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does trite mean in politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_225042.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, in politics, trite is like a speech thats been heard a thousand times, like promises of free Wi-Fi in every village!",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_225049.wav",
+                    "imageFile": "data/images/modi_confidentl.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its a clichÃ©, lacking originality or freshness. Just like recycled manifestos.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_225056.wav",
+                    "imageFile": "data/images/shashi_amusedr.png"
+                },
+                "chat4": {
+                    "dialogue": "Right, Shashi! Its like a tired excuse for a failed policy, like blaming the opposition for every monsoon delay.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_225104.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat5": {
+                    "dialogue": "So, trite is like a worn-out sari in a fashion show?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_225110.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat6": {
+                    "dialogue": "Exactly, Rahul. Its time for politicians to ditch the trite and embrace innovative solutions for a brighter future.",
+                    "speaker": "jaishankar",
+                    "audioFile": "audio_files/generated/trimmed_jaishankar_20250615_225118.wav",
+                    "imageFile": "data/images/jaishankar_strategicl.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/trite_final_video.mp4"
+        },
+        "plausible": {
+            "word": "plausible",
+            "chats": {
+                "chat1": {
+                    "dialogue": "What does plausible mean in Indian politics, Modi?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_225207.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat2": {
+                    "dialogue": "Ah, Rahul, plausible is like a politicians promise during election season - sounds believable, but not always true.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_225214.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                },
+                "chat3": {
+                    "dialogue": "Indeed, its the art of crafting a narrative that seems reasonable to the masses, regardless of the actual facts, dear Rahul.",
+                    "speaker": "shashi",
+                    "audioFile": "audio_files/generated/trimmed_shashi_20250615_225222.wav",
+                    "imageFile": "data/images/shashi_eloquentl.png"
+                },
+                "chat4": {
+                    "dialogue": "So, its like when a leader says theyll solve all our problems overnight?",
+                    "speaker": "rahul",
+                    "audioFile": "audio_files/generated/trimmed_rahul_20250615_225229.wav",
+                    "imageFile": "data/images/rahul_surprisedl.png"
+                },
+                "chat5": {
+                    "dialogue": "Exactly, Rahul! Promising the moon and stars without a rocket, thats the epitome of a plausible political statement.",
+                    "speaker": "modi",
+                    "audioFile": "audio_files/generated/trimmed_modi_20250615_225239.wav",
+                    "imageFile": "data/images/modi_smirkingr.png"
+                }
+            },
+            "finalVideoFile": "data/video_output/plausible_final_video.mp4"
         }
     }
 }

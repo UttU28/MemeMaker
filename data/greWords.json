@@ -2,237 +2,660 @@
     "1": {
         "word": "insipid",
         "meaning": "Dull, stale, lacking taste or interest",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/insipid_final_video.mp4",
+        "title": "Today's Word! - INSIPID",
+        "description": "INSIPID - Dull, stale, lacking taste or interest   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:32:20.638402Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "2": {
         "word": "demagogue",
         "meaning": "A leader who lies and gains power by arousing the passions and especially prejudices of the people",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/demagogue_final_video.mp4",
+        "title": "Today's Word! - DEMAGOGUE",
+        "description": "DEMAGOGUE - A leader who lies and gains power by arousing the passions and especially prejudices of the people   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:35:34.242613Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "3": {
         "word": "fracas",
         "meaning": "Noisy disturbance or fight; brawl",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/fracas_final_video.mp4",
+        "title": "Today's Word! - FRACAS",
+        "description": "FRACAS - Noisy disturbance or fight; brawl   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:37:43.296429Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "4": {
         "word": "sap",
         "meaning": "The inner fluid of a plant or any essential body fluid; energy, vitality; a person taken advantage of (noun); undermine, weaken, tire out (verb)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/sap_final_video.mp4",
+        "title": "Today's Word! - SAP",
+        "description": "SAP - The inner fluid of a plant or any essential body fluid; energy, vitality; a person taken advantage of (noun); undermine, weaken, tire out (verb)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:39:34.141288Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "5": {
         "word": "perennial",
         "meaning": "Lasting through the years or indefinitely, enduring; recurring",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/perennial_final_video.mp4",
+        "title": "Today's Word! - PERENNIAL",
+        "description": "PERENNIAL - Lasting through the years or indefinitely, enduring; recurring   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:41:21.318886Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "6": {
         "word": "discerning",
         "meaning": "Having good judgment or insight; able to distinguish mentally",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/discerning_final_video.mp4",
+        "title": "Today's Word! - DISCERNING",
+        "description": "DISCERNING - Having good judgment or insight; able to distinguish mentally   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:43:21.034898Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "7": {
         "word": "whimsical",
         "meaning": "Marked or motivated by whims (odd, fanciful ideas); erratic, unpredictable",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/whimsical_final_video.mp4",
+        "title": "Today's Word! - WHIMSICAL",
+        "description": "WHIMSICAL - Marked or motivated by whims (odd, fanciful ideas); erratic, unpredictable   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:45:11.502931Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "8": {
         "word": "surfeit",
         "meaning": "Excess, excessive amount, overindulgence",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/surfeit_final_video.mp4",
+        "title": "Today's Word! - SURFEIT",
+        "description": "SURFEIT - Excess, excessive amount, overindulgence   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:46:51.462901Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "9": {
         "word": "succeeding",
         "meaning": "Coming after or following",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/succeeding_final_video.mp4",
+        "title": "Today's Word! - SUCCEEDING",
+        "description": "SUCCEEDING - Coming after or following   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:48:23.942148Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "10": {
         "word": "precursor",
         "meaning": "Something that comes before, esp. something that also announces or suggests something on its way",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/precursor_final_video.mp4",
+        "title": "Today's Word! - PRECURSOR",
+        "description": "PRECURSOR - Something that comes before, esp. something that also announces or suggests something on its way   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:50:07.470529Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "11": {
         "word": "panoply",
         "meaning": "Splendid, wide-ranging, impressive display or array",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/panoply_final_video.mp4",
+        "title": "Today's Word! - PANOPLY",
+        "description": "PANOPLY - Splendid, wide-ranging, impressive display or array   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:52:06.047749Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "12": {
         "word": "ossify",
         "meaning": "Become bone or become hard like bone; become inflexible in attitudes, opinions, etc.",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/ossify_final_video.mp4",
+        "title": "Today's Word! - OSSIFY",
+        "description": "OSSIFY - Become bone or become hard like bone; become inflexible in attitudes, opinions, etc.   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:53:35.680100Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "13": {
         "word": "quibble",
         "meaning": "Make trivial arguments or criticisms, find faults in a petty way, esp. to evade something more important",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/quibble_final_video.mp4",
+        "title": "Today's Word! - QUIBBLE",
+        "description": "QUIBBLE - Make trivial arguments or criticisms, find faults in a petty way, esp. to evade something more important   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:55:12.895094Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "14": {
         "word": "complaisant",
         "meaning": "Eager to please; cheerfully complying",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/complaisant_final_video.mp4",
+        "title": "Today's Word! - COMPLAISANT",
+        "description": "COMPLAISANT - Eager to please; cheerfully complying   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:57:12.926093Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "15": {
         "word": "usury",
         "meaning": "Charging interest on a loan, esp. charging illegally high or excessive interest",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/usury_final_video.mp4",
+        "title": "Today's Word! - USURY",
+        "description": "USURY - Charging interest on a loan, esp. charging illegally high or excessive interest   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T21:58:57.204327Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "16": {
         "word": "coffer",
         "meaning": "Chest for storing valuables; financial resources, a treasury",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/coffer_final_video.mp4",
+        "title": "Today's Word! - COFFER",
+        "description": "COFFER - Chest for storing valuables; financial resources, a treasury   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:00:56.576771Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "17": {
         "word": "bane",
         "meaning": "Something that ruins or spoils",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/bane_final_video.mp4",
+        "title": "Today's Word! - BANE",
+        "description": "BANE - Something that ruins or spoils   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:02:42.910277Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "18": {
         "word": "recluse",
         "meaning": "Person who lives in seclusion",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/recluse_final_video.mp4",
+        "title": "Today's Word! - RECLUSE",
+        "description": "RECLUSE - Person who lives in seclusion   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:04:37.859645Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "19": {
         "word": "abate",
         "meaning": "Reduce, diminish",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/abate_final_video.mp4",
+        "title": "Today's Word! - ABATE",
+        "description": "ABATE - Reduce, diminish   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:06:12.862897Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "20": {
         "word": "hedge",
         "meaning": "Avoid commitment by leaving provisions for withdrawal or changing one's mind; protect a bet by also betting on the other side",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/hedge_final_video.mp4",
+        "title": "Today's Word! - HEDGE",
+        "description": "HEDGE - Avoid commitment by leaving provisions for withdrawal or changing one's mind; protect a bet by also betting on the other side   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:08:07.687842Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "21": {
         "word": "advocate",
         "meaning": "Speak or argue in favor of (verb); a person who pleads for a cause or on behalf of another person (noun)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/advocate_final_video.mp4",
+        "title": "Today's Word! - ADVOCATE",
+        "description": "ADVOCATE - Speak or argue in favor of (verb); a person who pleads for a cause or on behalf of another person (noun)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:09:56.603776Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "22": {
         "word": "eclectic",
         "meaning": "Selecting the best of everything or from many diverse sources",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/eclectic_final_video.mp4",
+        "title": "Today's Word! - ECLECTIC",
+        "description": "ECLECTIC - Selecting the best of everything or from many diverse sources   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:11:57.604764Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "23": {
         "word": "supplicate",
         "meaning": "Pray humbly; ask, beg, or seek in a humble way",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/supplicate_final_video.mp4",
+        "title": "Today's Word! - SUPPLICATE",
+        "description": "SUPPLICATE - Pray humbly; ask, beg, or seek in a humble way   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:13:43.917816Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "24": {
         "word": "elated",
         "meaning": "Very happy, in high spirits",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/elated_final_video.mp4",
+        "title": "Today's Word! - ELATED",
+        "description": "ELATED - Very happy, in high spirits   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:15:11.557097Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "25": {
         "word": "inundate",
         "meaning": "Flood, cover with water, overwhelm",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/inundate_final_video.mp4",
+        "title": "Today's Word! - INUNDATE",
+        "description": "INUNDATE - Flood, cover with water, overwhelm   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:16:55.895258Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "26": {
         "word": "acerbic",
         "meaning": "Sour; harsh or severe",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/acerbic_final_video.mp4",
+        "title": "Today's Word! - ACERBIC",
+        "description": "ACERBIC - Sour; harsh or severe   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:18:25.293399Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "27": {
         "word": "wily",
         "meaning": "Crafty, cunning, characterized by tricks or artifice",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/wily_final_video.mp4",
+        "title": "Today's Word! - WILY",
+        "description": "WILY - Crafty, cunning, characterized by tricks or artifice   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:20:27.388408Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "28": {
         "word": "condone",
         "meaning": "Overlook, tolerate, regard as harmless",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/condone_final_video.mp4",
+        "title": "Today's Word! - CONDONE",
+        "description": "CONDONE - Overlook, tolerate, regard as harmless   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:22:19.120311Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "29": {
         "word": "spectrum",
         "meaning": "A broad range of nevertheless related qualities or ideas, esp. those that overlap to create a continuous series (as in a color spectrum, where each color blends into the next in a continuous way)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/spectrum_final_video.mp4",
+        "title": "Today's Word! - SPECTRUM",
+        "description": "SPECTRUM - A broad range of nevertheless related qualities or ideas, esp. those that overlap to create a continuous series (as in a color spectrum, where each color blends into the next in a continuous way)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:23:54.944907Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "30": {
         "word": "patronizing",
         "meaning": "Condescending, having a superior manner, treating as an inferior",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/patronizing_final_video.mp4",
+        "title": "Today's Word! - PATRONIZING",
+        "description": "PATRONIZING - Condescending, having a superior manner, treating as an inferior   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:25:43.912644Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "31": {
         "word": "pusillanimous",
         "meaning": "Cowardly, timid",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/pusillanimous_final_video.mp4",
+        "title": "Today's Word! - PUSILLANIMOUS",
+        "description": "PUSILLANIMOUS - Cowardly, timid   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:27:18.325265Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "32": {
         "word": "convoke",
         "meaning": "Call together, as to a meeting",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/convoke_final_video.mp4",
+        "title": "Today's Word! - CONVOKE",
+        "description": "CONVOKE - Call together, as to a meeting   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:28:55.900117Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "33": {
         "word": "reticent",
         "meaning": "Not talking much; private (of a person), restrained, reserved",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/reticent_final_video.mp4",
+        "title": "Today's Word! - RETICENT",
+        "description": "RETICENT - Not talking much; private (of a person), restrained, reserved   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:30:27.409177Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "34": {
         "word": "phony",
         "meaning": "Fake, counterfeit; insincere, not genuine",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/phony_final_video.mp4",
+        "title": "Today's Word! - PHONY",
+        "description": "PHONY - Fake, counterfeit; insincere, not genuine   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:31:53.602389Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "35": {
         "word": "disparage",
         "meaning": "Belittle, put down; bring shame upon, discredit",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/disparage_final_video.mp4",
+        "title": "Today's Word! - DISPARAGE",
+        "description": "DISPARAGE - Belittle, put down; bring shame upon, discredit   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:33:31.490763Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "36": {
         "word": "posit",
         "meaning": "Presume, suggest, put forward (an idea)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/posit_final_video.mp4",
+        "title": "Today's Word! - POSIT",
+        "description": "POSIT - Presume, suggest, put forward (an idea)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:35:32.069487Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "37": {
         "word": "effigy",
         "meaning": "Representation or image of a person, esp. a crude facsimile used to mock a hated person",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/effigy_final_video.mp4",
+        "title": "Today's Word! - EFFIGY",
+        "description": "EFFIGY - Representation or image of a person, esp. a crude facsimile used to mock a hated person   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:37:18.464728Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "38": {
         "word": "unsparing",
         "meaning": "Generous, lavish (as in not sparing any help or gifts to others); unmerciful, harsh (as in not sparing any criticism)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/unsparing_final_video.mp4",
+        "title": "Today's Word! - UNSPARING",
+        "description": "UNSPARING - Generous, lavish (as in not sparing any help or gifts to others); unmerciful, harsh (as in not sparing any criticism)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:39:11.881433Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "39": {
         "word": "vicissitude",
         "meaning": "Changes or variations over time, esp. regular changes from one thing to another",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/vicissitude_final_video.mp4",
+        "title": "Today's Word! - VICISSITUDE",
+        "description": "VICISSITUDE - Changes or variations over time, esp. regular changes from one thing to another   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:40:54.411365Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "40": {
         "word": "aver",
         "meaning": "Declare or affirm with confidence",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/aver_final_video.mp4",
+        "title": "Today's Word! - AVER",
+        "description": "AVER - Declare or affirm with confidence   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:42:26.815969Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "41": {
         "word": "rustic",
         "meaning": "Relating to country life, unsophisticated; primitive; made of rough wood (adj); a rural or uncultured person (noun)",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/rustic_final_video.mp4",
+        "title": "Today's Word! - RUSTIC",
+        "description": "RUSTIC - Relating to country life, unsophisticated; primitive; made of rough wood (adj); a rural or uncultured person (noun)   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:43:59.693343Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "42": {
         "word": "activism",
         "meaning": "The practice of pursuing political or other goals through vigorous action, often including protests and demonstrations",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/activism_final_video.mp4",
+        "title": "Today's Word! - ACTIVISM",
+        "description": "ACTIVISM - The practice of pursuing political or other goals through vigorous action, often including protests and demonstrations   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:45:21.146725Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "43": {
         "word": "indefatigable",
         "meaning": "Untiring, not able to become fatigued",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/indefatigable_final_video.mp4",
+        "title": "Today's Word! - INDEFATIGABLE",
+        "description": "INDEFATIGABLE - Untiring, not able to become fatigued   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:47:18.741192Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "44": {
         "word": "opaque",
         "meaning": "Not translucent; not allowing light, heat, etc. to pass through; dark, dull, unclear or stupid",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/opaque_final_video.mp4",
+        "title": "Today's Word! - OPAQUE",
+        "description": "OPAQUE - Not translucent; not allowing light, heat, etc. to pass through; dark, dull, unclear or stupid   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:48:51.013074Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "45": {
         "word": "quiescent",
         "meaning": "Quiet, still",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/quiescent_final_video.mp4",
+        "title": "Today's Word! - QUIESCENT",
+        "description": "QUIESCENT - Quiet, still   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:50:31.139234Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "46": {
         "word": "trite",
-        "meaning": "Lacking freshness and originality, lacking effectiveness due to overuse, clich\u00e9",
-        "used": false
+        "meaning": "Lacking freshness and originality, lacking effectiveness due to overuse, cliché",
+        "used": true,
+        "filename": "data/video_output/trite_final_video.mp4",
+        "title": "Today's Word! - TRITE",
+        "description": "TRITE - Lacking freshness and originality, lacking effectiveness due to overuse, cliché   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:51:56.025594Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "47": {
         "word": "plausible",
         "meaning": "Believable; having the appearance of truth",
-        "used": false
+        "used": true,
+        "filename": "data/video_output/plausible_final_video.mp4",
+        "title": "Today's Word! - PLAUSIBLE",
+        "description": "PLAUSIBLE - Believable; having the appearance of truth   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+        "youtubeUploaded": false,
+        "instagramUploaded": false,
+        "uploadTimestamp": null,
+        "createdAt": "2025-06-15T22:53:12.427769Z",
+        "videoChecked": false,
+        "retryCount": 0
     },
     "48": {
         "word": "layperson",
@@ -1865,7 +2288,7 @@
         "used": false
     },
     "374": {
-        "word": "na\u00efve",
+        "word": "naïve",
         "meaning": "Simple and unsophisticated, unsuspecting, lacking worldly experience and critical judgment",
         "used": false
     },
@@ -2221,7 +2644,7 @@
     },
     "445": {
         "word": "banal",
-        "meaning": "Lacking freshness and originality; clich\u00e9",
+        "meaning": "Lacking freshness and originality; cliché",
         "used": false
     },
     "446": {
@@ -4650,7 +5073,7 @@
         "used": false
     },
     "931": {
-        "word": "pr\u00e9cis",
+        "word": "précis",
         "meaning": "Concise summary, abstract",
         "used": false
     },

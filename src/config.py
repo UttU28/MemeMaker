@@ -3,7 +3,6 @@
 import json
 import os
 from typing import Dict, Any, Optional
-from datetime import datetime
 
 
 class ConfigManager:
@@ -58,29 +57,9 @@ class ConfigManager:
         profiles = self.loadUserProfiles()
         return list(profiles.get("users", {}).keys())
     
-    def updateLastUsed(self, userId: str) -> bool:
-        try:
-            profiles = self.loadUserProfiles()
-            profiles["lastUsed"] = userId
-            profiles["updatedAt"] = datetime.now().isoformat()
-            
-            with open(self.userProfilesPath, 'w', encoding='utf-8') as file:
-                json.dump(profiles, file, indent=4, ensure_ascii=False)
-            
-            self._userProfiles = profiles
-            return True
-            
-        except Exception as e:
-            print(f"❌ Error updating last used user: {e}")
-            return False
-    
     def getDefaultUserId(self) -> str:
         profiles = self.loadUserProfiles()
         return profiles.get("defaultUser", "palki")
-    
-    def getLastUsedUserId(self) -> str:
-        profiles = self.loadUserProfiles()
-        return profiles.get("lastUsed", self.getDefaultUserId())
     
     def _getDefaultConfigFallback(self) -> Dict[str, Any]:
         return {
