@@ -14,20 +14,18 @@ def downloadYoutubeVideo(url, outputPath="downloads"):
     downloadedFile = None
     try:
         with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-            # Extract video info to get video ID and title
-            print(f"Downloading: {url}")
+            print(f"📥 Downloading: {url}")
             
             info = ydl.extract_info(url, download=False)
-            video_id = info.get('id', 'unknown')
+            videoId = info.get('id', 'unknown')
             title = info.get('title', 'Unknown')
             
-            print(f"Title: {title}")
-            print(f"Video ID: {video_id}")
+            print(f"🎬 Title: {title}")
+            print(f"🆔 Video ID: {videoId}")
         
-        # Use video ID as filename
         ydlOpts = {
             'format': 'bestvideo[height<=1080][ext=mp4]',
-            'outtmpl': f'{outputPath}/{video_id}.%(ext)s',
+            'outtmpl': f'{outputPath}/{videoId}.%(ext)s',
             'writeinfojson': False,
             'writesubtitles': False,
             'writeautomaticsub': False,
@@ -35,9 +33,9 @@ def downloadYoutubeVideo(url, outputPath="downloads"):
         
         with yt_dlp.YoutubeDL(ydlOpts) as ydl:
             ydl.download([url])
-            downloadedFile = f"{outputPath}/{video_id}.mp4"
+            downloadedFile = f"{outputPath}/{videoId}.mp4"
             
-            print(f"✅ Downloaded as: {video_id}.mp4")
+            print(f"✅ Downloaded as: {videoId}.mp4")
             
     except Exception as e:
         print(f"❌ Download error: {e}")
@@ -72,11 +70,9 @@ def cropVideoToMobile(inputFile, outputPath="downloads"):
         print("❌ Input file not found")
         return
         
-    # Generate output filename first to check if it already exists
     baseFilename = Path(inputFile).stem
     outputFile = f"{outputPath}/{baseFilename}_mobile.mp4"
     
-    # Check if mobile version already exists
     if os.path.exists(outputFile):
         print(f"✅ Mobile version already exists: {outputFile}")
         print("📁 Original file preserved")
@@ -85,28 +81,23 @@ def cropVideoToMobile(inputFile, outputPath="downloads"):
     try:
         print("🎬 Processing video for mobile...")
         
-        # Get original video dimensions
         originalWidth, originalHeight = getVideoInfo(inputFile)
         if not originalWidth or not originalHeight:
             print("❌ Could not get video dimensions")
             return
             
-        print(f"Original: {originalWidth}x{originalHeight}")
+        print(f"📐 Original: {originalWidth}x{originalHeight}")
         
-        # Target dimensions for mobile (16:9 vertical aspect ratio)
         targetWidth = 1080
         targetHeight = 1920
         aspectRatio = targetWidth / targetHeight
         
-        # Calculate crop parameters
         if originalWidth / originalHeight > aspectRatio:
-            # Video is wider, crop width
             newWidth = int(originalHeight * aspectRatio)
             newHeight = originalHeight
             cropX = (originalWidth - newWidth) // 2
             cropY = 0
         else:
-            # Video is taller, crop height
             newWidth = originalWidth
             newHeight = int(originalWidth / aspectRatio)
             cropX = 0
@@ -114,33 +105,31 @@ def cropVideoToMobile(inputFile, outputPath="downloads"):
         
         print("💾 Processing with ffmpeg...")
         
-        # Try GPU encoding first (NVIDIA), fallback to CPU
-        gpu_cmd = [
+        gpuCmd = [
             'ffmpeg', '-i', inputFile,
             '-vf', f'crop={newWidth}:{newHeight}:{cropX}:{cropY},scale={targetWidth}:{targetHeight}',
             '-c:v', 'h264_nvenc', '-preset', 'fast', '-cq', '23',
-            '-an',  # Remove audio
-            '-y',   # Overwrite output file
+            '-an',
+            '-y',
             outputFile
         ]
         
-        cpu_cmd = [
+        cpuCmd = [
             'ffmpeg', '-i', inputFile,
             '-vf', f'crop={newWidth}:{newHeight}:{cropX}:{cropY},scale={targetWidth}:{targetHeight}',
             '-c:v', 'libx264', '-crf', '23', '-preset', 'fast',
-            '-an',  # Remove audio
-            '-y',   # Overwrite output file
+            '-an',
+            '-y',
             outputFile
         ]
         
-        # Try GPU encoding first
         print("🚀 Attempting GPU acceleration (NVIDIA)...")
-        result = subprocess.run(gpu_cmd, capture_output=True, text=True)
+        result = subprocess.run(gpuCmd, capture_output=True, text=True)
         
         if result.returncode != 0:
             print("⚠️ GPU encoding failed, falling back to CPU...")
             print("💻 Processing with CPU...")
-            result = subprocess.run(cpu_cmd, capture_output=True, text=True)
+            result = subprocess.run(cpuCmd, capture_output=True, text=True)
         else:
             print("🎮 GPU acceleration successful!")
         
@@ -155,7 +144,6 @@ def cropVideoToMobile(inputFile, outputPath="downloads"):
 
 
 def getVideoLength(inputFile):
-    """Get video duration in seconds"""
     try:
         cmd = [
             'ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_entries',
@@ -173,40 +161,35 @@ def getVideoLength(inputFile):
 
 
 def getNextBackgroundNumber(backgroundDir):
-    """Get the next available background number"""
     if not os.path.exists(backgroundDir):
         os.makedirs(backgroundDir, exist_ok=True)
         return 1
     
-    existing_files = os.listdir(backgroundDir)
-    background_numbers = []
+    existingFiles = os.listdir(backgroundDir)
+    backgroundNumbers = []
     
-    for filename in existing_files:
+    for filename in existingFiles:
         if filename.startswith('background') and filename.endswith('.mp4'):
             try:
-                # Extract number from filename like background001.mp4
-                number_str = filename.replace('background', '').replace('.mp4', '')
-                number = int(number_str)
-                background_numbers.append(number)
+                numberStr = filename.replace('background', '').replace('.mp4', '')
+                number = int(numberStr)
+                backgroundNumbers.append(number)
             except ValueError:
                 continue
     
-    if not background_numbers:
+    if not backgroundNumbers:
         return 1
     
-    return max(background_numbers) + 1
+    return max(backgroundNumbers) + 1
 
 
 def splitVideoIntoSegments(inputFile, backgroundDir="data/background"):
-    """Split mobile video into 1.5-minute segments"""
     if not inputFile or not os.path.exists(inputFile):
         print("❌ Input file not found for splitting")
         return
     
-    # Create background directory if it doesn't exist
     Path(backgroundDir).mkdir(parents=True, exist_ok=True)
     
-    # Get video duration
     duration = getVideoLength(inputFile)
     if not duration:
         print("❌ Could not get video duration")
@@ -214,10 +197,8 @@ def splitVideoIntoSegments(inputFile, backgroundDir="data/background"):
     
     print(f"🎬 Video duration: {duration:.1f} seconds ({duration/60:.1f} minutes)")
     
-    # Segment duration (1.5 minutes = 90 seconds)
     segmentDuration = 90
     
-    # Get starting number for background files
     startNumber = getNextBackgroundNumber(backgroundDir)
     
     print(f"📂 Starting from background{startNumber:03d}")
@@ -227,7 +208,6 @@ def splitVideoIntoSegments(inputFile, backgroundDir="data/background"):
     currentTime = 0
     
     while currentTime < duration:
-        # Check if remaining time is at least 1.5 minutes
         remaining = duration - currentTime
         if remaining < segmentDuration:
             print(f"⏭️ Skipping last {remaining:.1f} seconds (less than 1.5 minutes)")
@@ -238,12 +218,11 @@ def splitVideoIntoSegments(inputFile, backgroundDir="data/background"):
         
         print(f"🎞️ Creating segment {segmentNumber:03d}: {currentTime/60:.1f}-{(currentTime+segmentDuration)/60:.1f} min")
         
-        # FFmpeg command to extract segment
         cmd = [
             'ffmpeg', '-i', inputFile,
             '-ss', str(currentTime),
             '-t', str(segmentDuration),
-            '-c', 'copy',  # Copy without re-encoding for speed
+            '-c', 'copy',
             '-avoid_negative_ts', 'make_zero',
             '-y',
             outputFile
@@ -271,9 +250,7 @@ def main():
     if len(sys.argv) > 1:
         videoUrl = sys.argv[1]
     else:
-        # videoUrl = input("YouTube URL: ").strip()
         videoUrl = "https://www.youtube.com/watch?v=dVFm8veHbqc"
-        # videoUrl = "https://www.youtube.com/watch?v=u7kdVe8q5zs"
     
     if not videoUrl:
         print("❌ No URL provided")
@@ -283,23 +260,18 @@ def main():
         print("❌ Invalid YouTube URL")
         return
     
-    # outputDir = input("Output directory (Enter for 'downloads'): ").strip()
     outputDir = "downloads"
     if not outputDir:
         outputDir = "downloads"
     
-    # Download video
     downloadedFile = downloadYoutubeVideo(videoUrl, outputDir)
     
     if downloadedFile:
-        # Crop to mobile format
         cropVideoToMobile(downloadedFile, outputDir)
         
-        # Generate mobile filename for splitting
         baseFilename = Path(downloadedFile).stem
         mobileFile = f"{outputDir}/{baseFilename}_mobile.mp4"
         
-        # Split mobile version into segments
         if os.path.exists(mobileFile):
             splitVideoIntoSegments(mobileFile)
 

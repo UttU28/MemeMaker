@@ -32,7 +32,7 @@ class LlmService:
             return response.choices[0].message.content.strip()
             
         except Exception as e:
-            print(f"OpenAI error: {e}")
+            print(f"❌ OpenAI error: {e}")
             return None
     
     def generateWithOllama(self, prompt: str, model: str = "llama3.2") -> Optional[str]:
@@ -50,11 +50,11 @@ class LlmService:
             if response.status_code == 200:
                 return response.json()["response"]
             else:
-                print(f"Ollama error: {response.status_code}")
+                print(f"❌ Ollama error: {response.status_code}")
                 return None
                 
         except Exception as e:
-            print(f"Ollama error: {e}")
+            print(f"❌ Ollama error: {e}")
             return None
     
     def isOllamaRunning(self) -> bool:

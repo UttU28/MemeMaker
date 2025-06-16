@@ -62,7 +62,7 @@ class AudioFileManager:
             if userPrefix:
                 audioFiles = [f for f in audioFiles if f.startswith(userPrefix)]
             
-            return sorted(audioFiles, reverse=True)  # Most recent first
+            return sorted(audioFiles, reverse=True)
             
         except Exception as e:
             return []
@@ -137,7 +137,7 @@ class LogManager:
         fileHandler.setFormatter(fileFormatter)
         
         consoleHandler = logging.StreamHandler()
-        consoleHandler.setLevel(logging.WARNING)  # Only warnings and errors to console
+        consoleHandler.setLevel(logging.WARNING)
         consoleHandler.setFormatter(consoleFormatter)
         
         self.logger.addHandler(fileHandler)

@@ -37,6 +37,22 @@ class UnifiedVideoPipeline:
         self.jsonPath = "data/wordData.json"
         self.videoOutputDir = "data/video_output"
         os.makedirs(self.videoOutputDir, exist_ok=True)
+        
+        # Initialize Whisper models once for better performance
+        self.whisperModel = None
+        self.alignModel = None
+        self.alignMetadata = None
+    
+    def _initializeWhisperModels(self):
+        """Initialize Whisper models once for better performance"""
+        if self.whisperModel is None:
+            device = "cpu"
+            self.whisperModel = whisperx.load_model("base", device, compute_type="float32")
+            self.alignModel, self.alignMetadata = whisperx.load_align_model(
+                language_code="en",
+                device=device,
+                model_name="WAV2VEC2_ASR_LARGE_LV60K_960H"
+            )
     
     def run(self, word: str, backgroundVideo: str = None):
         """Main pipeline execution"""
@@ -45,12 +61,15 @@ class UnifiedVideoPipeline:
         if not self._checkServices():
             return False
         
+        # Initialize Whisper models once
+        self._initializeWhisperModels()
+        
         # Step 1: Generate dialogue
         dialogues = self._generateAndSaveDialogue(word)
         if not dialogues:
             return False
         
-        # Step 2: Generate audio for each dialogue
+        # Step 2: Generate audio files for each dialogue
         audioFiles = self._generateAudioFiles(word, dialogues)
         
         # Step 3: Detect moods and assign images
@@ -333,7 +352,6 @@ class UnifiedVideoPipeline:
     
     def _generateSingleSubtitle(self, audioFile: str, dialogue: str) -> Optional[Dict]:
         """Generate subtitle information for a single audio clip"""
-        device = "cpu"
         tempAudioPath = "temp_single_audio.wav"
         
         try:
@@ -343,31 +361,25 @@ class UnifiedVideoPipeline:
             audio = AudioSegment.from_file(audioFile)
             audio.export(tempAudioPath, format="wav")
             
-            # Transcribe with Whisper (explicitly set to English)
-            whisperModel = whisperx.load_model("base", device, compute_type="float32")
-            transcription = whisperModel.transcribe(
+            # Transcribe with Whisper (using pre-loaded models)
+            transcription = self.whisperModel.transcribe(
                 tempAudioPath,
                 batch_size=1,
-                language="en",  # Explicitly set to English
-                task="transcribe"  # Force transcription task
+                language="en",
+                task="transcribe"
             )
             
             if not transcription.get("segments"):
                 return None
             
-            # Align words (explicitly set to English)
-            alignModel, metadata = whisperx.load_align_model(
-                language_code="en",
-                device=device,
-                model_name="WAV2VEC2_ASR_LARGE_LV60K_960H"  # More accurate English model
-            )
+            # Align words (using pre-loaded models)
             alignedData = whisperx.align(
                 transcription["segments"],
-                alignModel,
-                metadata,
+                self.alignModel,
+                self.alignMetadata,
                 tempAudioPath,
-                device,
-                return_char_alignments=False  # We don't need character-level alignment
+                "cpu",
+                return_char_alignments=False
             )
             
             if not alignedData.get("word_segments"):
@@ -509,16 +521,16 @@ class UnifiedVideoPipeline:
             
             # Add subtitles for this segment
             if "subtitleSegments" in item:
-                for segment in item["subtitleSegments"]:
+                for j, segment in enumerate(item["subtitleSegments"]):
                     start = item["startTime"] + segment["start"]
                     end = item["startTime"] + segment["end"]
                     text = segment["text"]
                     # Escape special characters in text
                     text = text.replace("'", "\\'").replace('"', '\\"')
                     filterParts.append(
-                        f"{currentBase}drawtext=text='{text}':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h-th-50:enable='between(t,{start},{end})'[sub{i}]"
+                        f"{currentBase}drawtext=text='{text}':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=64:borderw=3:bordercolor=black:fontcolor=white:x=(w-text_w)/2:y=h-th-150:enable='between(t,{start},{end})'[sub{i}_{j}]"
                     )
-                    currentBase = f"[sub{i}]"
+                    currentBase = f"[sub{i}_{j}]"
         
         # Add main title overlays (Today's Word and the word itself)
         mainWord = word.upper()
@@ -566,91 +578,6 @@ class UnifiedVideoPipeline:
             result = subprocess.run(cmd, capture_output=True, text=True)
             return result.returncode == 0
         except:
-            return False
-    
-    def _addSubtitles(self, dialogueText: str, videoPath: str, outputPath: str, word: str) -> bool:
-        """Add subtitles and word overlay to video"""
-        device = "cpu"
-        audioPath = "temp_audio.wav"
-        srtPath = "subtitles.srt"
-        
-        # Extract audio
-        if not self._extractAudio(videoPath, audioPath):
-            return False
-        
-        try:
-            # Transcribe with Whisper (only for timing information)
-            whisperModel = whisperx.load_model("base", device, compute_type="float32")
-            transcription = whisperModel.transcribe(audioPath, batch_size=1)
-            
-            if not transcription.get("segments"):
-                return False
-            
-            # Align words
-            alignModel, metadata = whisperx.load_align_model(language_code="en", device=device)
-            alignedData = whisperx.align(transcription["segments"], alignModel, metadata, audioPath, device)
-            
-            if not alignedData.get("word_segments"):
-                return False
-            
-            # Parse original dialogue text into words
-            originalWords = []
-            for line in dialogueText.split('\n'):
-                if line.strip():
-                    # Remove punctuation and split into words
-                    cleanLine = re.sub(r'[^\w\s]', '', line.strip())
-                    words = cleanLine.split()
-                    originalWords.extend(words)
-            
-            print(f"📝 Original words count: {len(originalWords)}")
-            print(f"🎤 Whisper words count: {len(alignedData['word_segments'])}")
-            
-            # Create SRT using original text with Whisper timing
-            with open(srtPath, 'w', encoding='utf-8') as srtFile:
-                wordSegments = alignedData["word_segments"]
-                groupSize = 4
-                
-                for i in range(0, len(wordSegments), groupSize):
-                    group = wordSegments[i:i+groupSize]
-                    start = self._formatTime(group[0]['start'])
-                    end = self._formatTime(group[-1]['end'])
-                    
-                    # Use original words instead of Whisper transcribed words
-                    groupWords = []
-                    for j, segment in enumerate(group):
-                        originalIndex = i + j
-                        if originalIndex < len(originalWords):
-                            groupWords.append(originalWords[originalIndex])
-                        else:
-                            # Fallback to Whisper word if original words are exhausted
-                            groupWords.append(segment['word'].strip())
-                    
-                    text = " ".join([w for w in groupWords if w])
-                    text = f"<font face='Impact' size='16' color='&HFFFFFF&'>{text}</font>"
-                    
-                    srtFile.write(f"{i//groupSize + 1}\n{start} --> {end}\n{text}\n\n")
-            
-            # Apply subtitles and overlays
-            subtitleStyle = "FontName=Impact,FontSize=16,PrimaryColour=&HFFFFFF&,BorderStyle=1,Outline=1,BackColour=&H80000000&,Bold=1,MarginV=25"
-            mainWord = word.upper()
-            
-            videoFilter = f"subtitles={srtPath}:force_style='{subtitleStyle}',drawtext=text='Todays Word!':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=60:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=80,drawtext=text='{mainWord}':fontfile='C\\:/Windows/Fonts/impact.ttf':fontsize=140:fontcolor=yellow:borderw=6:bordercolor=black:x=(w-text_w)/2:y=140"
-            
-            result = subprocess.run([
-                "ffmpeg", "-y", "-hwaccel", "cuda", "-i", videoPath, 
-                "-vf", videoFilter, 
-                "-c:v", "h264_nvenc", "-preset", "fast", 
-                outputPath
-            ], capture_output=True, text=True)
-            
-            # Cleanup
-            for file in [audioPath, srtPath]:
-                if os.path.exists(file):
-                    os.remove(file)
-            
-            return result.returncode == 0
-            
-        except Exception:
             return False
     
     # Helper methods
@@ -753,28 +680,6 @@ class UnifiedVideoPipeline:
         except:
             return None
     
-    def _getDialogueText(self, wordData: Dict) -> str:
-        """Get dialogue text for subtitles"""
-        dialogues = []
-        sortedChats = sorted(wordData['chats'].keys(), key=lambda x: int(x.replace('chat', '')))
-        
-        for chatKey in sortedChats:
-            chat = wordData['chats'][chatKey]
-            if 'dialogue' in chat:
-                dialogues.append(chat['dialogue'])
-        
-        return "\n".join(dialogues)
-    
-    def _getAudioDuration(self, audioFile: str) -> float:
-        """Get audio duration in seconds"""
-        try:
-            if not audioFile.startswith('data/'):
-                audioFile = 'data/' + audioFile
-            audio = AudioSegment.from_file(audioFile)
-            return len(audio) / 1000.0
-        except:
-            return 0
-    
     def _getVideoDuration(self, videoPath: str) -> float:
         """Get video duration using ffprobe"""
         try:
@@ -785,27 +690,9 @@ class UnifiedVideoPipeline:
             return float(result.stdout.strip()) if result.returncode == 0 else 3.0
         except:
             return 3.0
-    
-    def _extractAudio(self, videoPath: str, audioPath: str) -> bool:
-        """Extract audio from video"""
-        cmd = ["ffmpeg", "-y", "-i", videoPath, "-vn", "-acodec", "pcm_s16le", 
-               "-ar", "16000", "-ac", "1", audioPath]
-        try:
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
-    
-    def _formatTime(self, seconds: float) -> str:
-        """Format seconds to SRT time format"""
-        millis = int((seconds - int(seconds)) * 1000)
-        seconds = int(seconds)
-        mins, secs = divmod(seconds, 60)
-        hours, mins = divmod(mins, 60)
-        return f"{hours:02}:{mins:02}:{secs:02},{millis:03}"
 
 
-def get_random_background_video():
+def getRandomBackgroundVideo():
     """Get a random background video from the background directory"""
     backgroundDir = "data/background"
     if os.path.exists(backgroundDir):
@@ -824,7 +711,7 @@ def get_random_background_video():
         return None
 
 
-def bulk_process():
+def bulkProcess():
     """Process all unused words from greWords.json in sorted key order"""
     greWordsPath = "data/greWords.json"
     
@@ -838,7 +725,7 @@ def bulk_process():
         
         while True:
             # Get random background video for each word
-            backgroundVideo = get_random_background_video()
+            backgroundVideo = getRandomBackgroundVideo()
             
             # Load the entire GRE words file (reload each time to get updates)
             with open(greWordsPath, 'r', encoding='utf-8') as f:
@@ -880,20 +767,37 @@ def bulk_process():
             success = pipeline.run(firstUnusedWord, backgroundVideo)
             
             if success:
-                # Update the word data in memory
-                greWords[firstUnusedKey]["used"] = True
-                
-                # Try to get the final video path from wordData.json
+                # Get the final video path from wordData.json
+                finalVideoPath = None
                 try:
                     with open("data/wordData.json", 'r', encoding='utf-8') as f:
                         wordData = json.load(f)
                     
                     if firstUnusedWord.lower() in wordData.get("words", {}):
-                        finalVideo = wordData["words"][firstUnusedWord.lower()].get("finalVideoFile", "")
-                        if finalVideo:
-                            greWords[firstUnusedKey]["finalVideoFile"] = finalVideo
+                        finalVideoPath = wordData["words"][firstUnusedWord.lower()].get("finalVideoFile", "")
                 except:
                     pass
+                
+                # Update the word data with detailed structure
+                currentTime = datetime.now().isoformat() + 'Z'
+                
+                # Get the meaning from the original structure or use a default
+                originalMeaning = greWords[firstUnusedKey].get("meaning", f"Learn the meaning of {firstUnusedWord}")
+                
+                greWords[firstUnusedKey] = {
+                    "word": firstUnusedWord,
+                    "meaning": originalMeaning,
+                    "used": True,
+                    "filename": finalVideoPath if finalVideoPath else f"data/video_output/{firstUnusedWord}_final_video.mp4",
+                    "title": f"Today's Word! - {firstUnusedWord.upper()}",
+                    "description": f"{firstUnusedWord.upper()} - {originalMeaning}   #GRE #Vocabulary #English #WordOfTheDay #Trending #IndiaSpeaks",
+                    "youtubeUploaded": False,
+                    "instagramUploaded": False,
+                    "uploadTimestamp": None,
+                    "createdAt": currentTime,
+                    "videoChecked": False,
+                    "retryCount": 0
+                }
                 
                 # Save the entire updated file
                 with open(greWordsPath, 'w', encoding='utf-8') as f:
@@ -901,7 +805,7 @@ def bulk_process():
                 
                 processedCount += 1
                 print(f"✅ Successfully processed '{firstUnusedWord}' ({processedCount} completed)")
-                print(f"📝 Updated {greWordsPath}")
+                print(f"📝 Updated {greWordsPath} with detailed metadata")
                 
                 # Show progress
                 remaining = sum(1 for key in sortedKeys if not greWords[key].get("used", False))
@@ -910,13 +814,29 @@ def bulk_process():
             else:
                 print(f"❌ Failed to process '{firstUnusedWord}' - continuing to next word...")
                 # Mark as used even if failed to avoid getting stuck
-                greWords[firstUnusedKey]["used"] = True
+                currentTime = datetime.now().isoformat() + 'Z'
+                
+                originalMeaning = greWords[firstUnusedKey].get("meaning", f"Learn the meaning of {firstUnusedWord}")
+                
+                greWords[firstUnusedKey] = {
+                    "word": firstUnusedWord,
+                    "meaning": originalMeaning,
+                    "used": True,  # Mark as used even if failed to avoid infinite loop
+                    "filename": None,
+                    "title": f"Today's Word! - {firstUnusedWord}",
+                    "description": f"{firstUnusedWord} - {originalMeaning}",
+                    "youtubeUploaded": False,
+                    "instagramUploaded": False,
+                    "uploadTimestamp": None,
+                    "createdAt": currentTime,
+                    "videoChecked": False,
+                    "retryCount": 1  # Mark as failed attempt
+                }
+                
                 with open(greWordsPath, 'w', encoding='utf-8') as f:
                     json.dump(greWords, f, indent=4, ensure_ascii=False)
                 processedCount += 1
 
-            break
-        
     except KeyboardInterrupt:
         print(f"\n⚠️ Bulk processing interrupted by user")
         print(f"📊 Processed {processedCount} words before interruption")
@@ -932,7 +852,7 @@ def main():
     # Check for bulk processing (both --bulk and -b)
     if "--bulk" in sys.argv or "-b" in sys.argv:
         print("🚀 Starting bulk processing mode...")
-        success = bulk_process()
+        success = bulkProcess()
         
         if not success:
             sys.exit(1)
@@ -950,7 +870,7 @@ def main():
         sys.exit(1)
     
     # Get random background video for single word processing
-    backgroundVideo = get_random_background_video()
+    backgroundVideo = getRandomBackgroundVideo()
     
     print(f"🎬 Processing single word: {word.upper()}")
     if backgroundVideo:

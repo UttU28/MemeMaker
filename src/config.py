@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Configuration Manager for F5-TTS Gradio API Automation
-Handles loading and managing user profiles and default configurations
-"""
 
 import json
 import os
@@ -11,15 +7,8 @@ from datetime import datetime
 
 
 class ConfigManager:
-    """Manages configuration files and user profiles with camelCase naming"""
     
     def __init__(self, profilesDir: str = "data"):
-        """
-        Initialize the configuration manager
-        
-        Args:
-            profilesDir: Directory containing configuration files
-        """
         self.profilesDir = profilesDir
         self.userProfilesPath = os.path.join(profilesDir, "userProfiles.json")
         self._defaultConfig = None

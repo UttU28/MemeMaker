@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-F5-TTS Gradio API Client with camelCase naming conventions
-Enhanced version with user profile support using Gradio API calls
-"""
 
 import os
 import time
@@ -83,9 +79,8 @@ class F5TtsGradioClient:
                 print("❌ No API result to download")
                 return None
             
-            # Extract audio file path from API result tuple
             if isinstance(apiResult, tuple) and len(apiResult) > 0:
-                audioFilePath = apiResult[0]  # First element is the audio file path
+                audioFilePath = apiResult[0]
             else:
                 audioFilePath = apiResult
             
@@ -185,5 +180,4 @@ class F5TtsGradioClient:
             self.logManager.logInfo("Gradio API connection closed")
 
 
-# Backward compatibility alias
 F5TtsSeleniumClient = F5TtsGradioClient 
