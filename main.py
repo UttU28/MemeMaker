@@ -28,9 +28,8 @@ from prompts import CHAT_GENERATION_PROMPT, GET_THE_MOOD_PROMPT
 warnings.filterwarnings("ignore", category=UserWarning)
 load_dotenv()
 
-# Set up detailed logging
-def setup_logging():
-    """Set up detailed logging for error tracking"""
+def setupLogging():
+    os.makedirs('logs', exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -39,23 +38,18 @@ def setup_logging():
             logging.StreamHandler()
         ]
     )
-    # Create logs directory if it doesn't exist
-    os.makedirs('logs', exist_ok=True)
 
-setup_logging()
+setupLogging()
 logger = logging.getLogger(__name__)
 
 class PipelineError(Exception):
-    """Custom exception for pipeline errors"""
-    def __init__(self, stage: str, message: str, original_error: Exception = None):
+    def __init__(self, stage: str, message: str, originalError: Exception = None):
         self.stage = stage
         self.message = message
-        self.original_error = original_error
+        self.originalError = originalError
         super().__init__(f"[{stage}] {message}")
 
 class UnifiedVideoPipeline:
-    """Complete end-to-end pipeline for video generation from a single word"""
-    
     def __init__(self):
         self.llmService = LlmService()
         self.configManager = ConfigManager()
@@ -64,12 +58,11 @@ class UnifiedVideoPipeline:
         self.videoOutputDir = "data/video_output"
         os.makedirs(self.videoOutputDir, exist_ok=True)
         
-        # Initialize Whisper models once for better performance
         self.whisperModel = None
         self.alignModel = None
         self.alignMetadata = None
         
-        logger.info("UnifiedVideoPipeline initialized")
+        logger.info("🚀 Pipeline initialized and ready")
     
     def _initializeWhisperModels(self):
         """Initialize Whisper models once for better performance"""
@@ -92,6 +85,10 @@ class UnifiedVideoPipeline:
         try:
             logger.info(f"🎬 Starting pipeline for: {word.upper()}")
             print(f"🎬 Starting pipeline for: {word.upper()}")
+            
+            # Step 0: Remove existing word data for fresh start
+            logger.info("Step 0: Cleaning existing word data for fresh start...")
+            self._removeExistingWordData(word)
             
             # Step 1: Check services
             logger.info("Step 1: Checking services...")
@@ -132,8 +129,8 @@ class UnifiedVideoPipeline:
             
         except PipelineError as e:
             logger.error(f"❌ Pipeline failed at {e.stage}: {e.message}")
-            if e.original_error:
-                logger.error(f"Original error: {str(e.original_error)}")
+            if e.originalError:
+                logger.error(f"Original error: {str(e.originalError)}")
                 logger.error(f"Traceback: {traceback.format_exc()}")
             print(f"❌ Pipeline failed at {e.stage}: {e.message}")
             return False
@@ -1332,6 +1329,125 @@ class UnifiedVideoPipeline:
             return float(result.stdout.strip()) if result.returncode == 0 else 3.0
         except:
             return 3.0
+
+    def _removeExistingWordData(self, word: str):
+        """Remove existing word data for fresh start and cleanup associated files"""
+        try:
+            if os.path.exists(self.jsonPath):
+                with open(self.jsonPath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                if word.lower() in data.get("words", {}):
+                    wordData = data["words"][word.lower()]
+                    
+                    # Clean up associated audio files
+                    audioFiles = []
+                    if "chats" in wordData:
+                        for chatId, chatData in wordData["chats"].items():
+                            if "audioFile" in chatData:
+                                audioFile = chatData["audioFile"]
+                                if not audioFile.startswith("data/"):
+                                    audioFile = f"data/{audioFile}"
+                                audioFiles.append(audioFile)
+                    
+                    # Clean up final video file
+                    videoFile = None
+                    if "finalVideoFile" in wordData:
+                        videoFile = wordData["finalVideoFile"]
+                        if not videoFile.startswith("data/"):
+                            videoFile = f"data/{videoFile}"
+                    
+                    # Remove files
+                    cleanedFiles = []
+                    for audioFile in audioFiles:
+                        try:
+                            if os.path.exists(audioFile):
+                                os.remove(audioFile)
+                                cleanedFiles.append(audioFile)
+                        except Exception as e:
+                            logger.warning(f"⚠️ Failed to remove audio file {audioFile}: {str(e)}")
+                    
+                    if videoFile:
+                        try:
+                            if os.path.exists(videoFile):
+                                os.remove(videoFile)
+                                cleanedFiles.append(videoFile)
+                        except Exception as e:
+                            logger.warning(f"⚠️ Failed to remove video file {videoFile}: {str(e)}")
+                    
+                    # Remove word from JSON
+                    del data["words"][word.lower()]
+                    
+                    with open(self.jsonPath, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=4, ensure_ascii=False)
+                    
+                    logger.info(f"✅ Removed existing word data for '{word}' and cleaned {len(cleanedFiles)} associated files")
+                    print(f"🧹 Cleaned existing data for '{word}' - removed {len(cleanedFiles)} files")
+                else:
+                    logger.info(f"⚠️ No existing data found for word '{word}' to remove")
+                    print(f"⚠️ No existing data found for word '{word}' to remove")
+            else:
+                logger.info(f"⚠️ Word data file not found: {self.jsonPath}")
+                print(f"⚠️ Word data file not found, will create fresh")
+            
+            # Clean up orphaned files that might contain the word name
+            self._cleanupOrphanedFiles(word)
+                
+        except Exception as e:
+            logger.error(f"❌ Error removing word data: {str(e)}")
+            raise PipelineError("JSON_REMOVE", f"Failed to remove word data: {str(e)}", e)
+    
+    def _cleanupOrphanedFiles(self, word: str):
+        """Clean up orphaned audio and video files that might contain the word name"""
+        try:
+            orphanedFiles = []
+            
+            # Check generated audio files
+            generatedDir = "data/audio_files/generated"
+            if os.path.exists(generatedDir):
+                for file in os.listdir(generatedDir):
+                    if word.lower() in file.lower() and file.endswith('.wav'):
+                        filePath = os.path.join(generatedDir, file)
+                        try:
+                            os.remove(filePath)
+                            orphanedFiles.append(filePath)
+                        except Exception as e:
+                            logger.warning(f"⚠️ Failed to remove orphaned audio file {filePath}: {str(e)}")
+            
+            # Check video output files
+            videoDir = "data/video_output"
+            if os.path.exists(videoDir):
+                for file in os.listdir(videoDir):
+                    if word.lower() in file.lower() and (file.endswith('.mp4') or file.endswith('.wav')):
+                        filePath = os.path.join(videoDir, file)
+                        try:
+                            os.remove(filePath)
+                            orphanedFiles.append(filePath)
+                        except Exception as e:
+                            logger.warning(f"⚠️ Failed to remove orphaned video/audio file {filePath}: {str(e)}")
+            
+            # Check for temporary files in root directory
+            rootTempFiles = [
+                "temp_single_audio.wav",
+                f"{word.lower()}_combined_audio.wav",
+                f"data/video_output/{word.lower()}_combined_audio.wav"
+            ]
+            
+            for tempFile in rootTempFiles:
+                try:
+                    if os.path.exists(tempFile):
+                        os.remove(tempFile)
+                        orphanedFiles.append(tempFile)
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to remove temp file {tempFile}: {str(e)}")
+            
+            if orphanedFiles:
+                logger.info(f"✅ Cleaned {len(orphanedFiles)} orphaned files for '{word}'")
+                print(f"🧹 Also cleaned {len(orphanedFiles)} orphaned files")
+                
+        except Exception as e:
+            logger.warning(f"⚠️ Error cleaning orphaned files: {str(e)}")
+            # Don't raise error here as this is cleanup, not critical
 
 
 def getRandomBackgroundVideo():
