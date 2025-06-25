@@ -23,7 +23,7 @@ from src.client import F5TtsGradioClient
 from src.config import ConfigManager
 from src.utils import AudioFileManager
 from src.llm import LlmService
-from prompts import CHAT_GENERATION_PROMPT, GET_THE_MOOD_PROMPT
+from src.prompts import CHAT_GENERATION_PROMPT, GET_THE_MOOD_PROMPT
 
 warnings.filterwarnings("ignore", category=UserWarning)
 load_dotenv()

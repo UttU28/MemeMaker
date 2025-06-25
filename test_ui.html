@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Management API Test UI</title>
+</head>
+<body>
+    <h1>Character Management API Test UI</h1>
+    
+    <!-- System Status Section -->
+    <div>
+        <h2>System Status</h2>
+        <button onclick="getSystemStatus()">Get System Status</button>
+        <pre id="systemStatus"></pre>
+    </div>
+    
+    <hr>
+    
+    <!-- List Characters Section -->
+    <div>
+        <h2>Characters List</h2>
+        <button onclick="listCharacters()">Refresh Characters List</button>
+        <div id="charactersList"></div>
+    </div>
+    
+    <hr>
+    
+    <!-- Create Complete Character Section -->
+    <div>
+        <h2>Create New Character (Complete)</h2>
+        <p><strong>All-in-One:</strong> Create character with name, config, audio file, and images in one step!</p>
+        
+        <form id="createCompleteCharacterForm">
+            <h4>Basic Information</h4>
+            <label>Display Name: <input type="text" id="completeDisplayName" required placeholder="e.g., John Doe"></label><br><br>
+            
+            <h4>Audio File (Required)</h4>
+            <label>Audio File: <input type="file" id="completeAudioFile" accept=".wav,.mp3,.m4a,.flac,.ogg" required></label><br>
+            <small>Supported formats: WAV, MP3, M4A, FLAC, OGG (Max 50MB)</small><br><br>
+            
+            <h4>Images (Required - Max 10)</h4>
+            <label>Image Files: <input type="file" id="completeImageFiles" accept=".png,.jpg,.jpeg,.webp" multiple required></label><br>
+            <small>Supported formats: PNG, JPG, JPEG, WEBP (Max 10MB each)</small><br><br>
+            
+            <h4>Configuration (Optional - Leave empty for defaults)</h4>
+            <label>Speed: <input type="number" id="completeSpeed" step="0.1" min="0.5" max="2.0" placeholder="Default: 1.0"></label><br>
+            <label>NFE Steps: <input type="number" id="completeNfeSteps" min="20" max="50" placeholder="Default: 34"></label><br>
+            <label>Cross Fade Duration: <input type="number" id="completeCrossFadeDuration" step="0.01" min="0" max="1" placeholder="Default: 0.15"></label><br>
+            <label>Remove Silences: <input type="checkbox" id="completeRemoveSilences" checked></label><br><br>
+            
+            <button type="submit" style="background-color: green; color: white; padding: 10px 20px; font-size: 16px;">Create Complete Character</button>
+        </form>
+        <pre id="createCompleteCharacterResult"></pre>
+    </div>
+    
+
+    
+    <hr>
+    
+    <!-- Update Character Section -->
+    <div>
+        <h2>Update Character</h2>
+        <form id="updateCharacterForm">
+            <label>Character ID: <input type="text" id="updateCharacterId" required placeholder="e.g., palki"></label><br>
+            <label>New Display Name: <input type="text" id="updateDisplayName" placeholder="Leave empty to keep current"></label><br><br>
+            
+            <h4>Update Configuration (Optional)</h4>
+            <label>Speed: <input type="number" id="updateSpeed" step="0.1" min="0.5" max="2.0" placeholder="Leave empty to keep current"></label><br>
+            <label>NFE Steps: <input type="number" id="updateNfeSteps" min="20" max="50" placeholder="Leave empty to keep current"></label><br>
+            <label>Cross Fade Duration: <input type="number" id="updateCrossFadeDuration" step="0.01" min="0" max="1" placeholder="Leave empty to keep current"></label><br>
+            <label>Remove Silences: 
+                <select id="updateRemoveSilences">
+                    <option value="">Keep current</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </label><br><br>
+            
+            <button type="submit">Update Character</button>
+        </form>
+        <pre id="updateCharacterResult"></pre>
+    </div>
+    
+    <hr>
+    
+    <!-- Get Character Details Section -->
+    <div>
+        <h2>Get Character Details</h2>
+        <form id="getCharacterForm">
+            <label>Character ID: <input type="text" id="getCharacterId" required placeholder="e.g., palki"></label>
+            <button type="submit">Get Character</button>
+        </form>
+        <pre id="getCharacterResult"></pre>
+    </div>
+    
+    <hr>
+    
+    <!-- Delete Character Section -->
+    <div>
+        <h2>Delete Character</h2>
+        <form id="deleteCharacterForm">
+            <label>Character ID: <input type="text" id="deleteCharacterId" required placeholder="e.g., testuser"></label>
+            <button type="submit" style="background-color: red; color: white;">Delete Character</button>
+        </form>
+        <pre id="deleteCharacterResult"></pre>
+    </div>
+    
+        <hr>
+    
+    <!-- F5-TTS Status Section -->
+    <div>
+        <h2>F5-TTS Service Status</h2>
+        <button onclick="checkF5TTSStatus()">Check F5-TTS Status</button>
+        <pre id="f5ttsStatus"></pre>
+    </div>
+    
+    <hr>
+    
+    <!-- Script Creation Section -->
+    <div>
+        <h2>Script Creation & Audio Generation</h2>
+        
+        <!-- Generate Script Form -->
+        <div>
+            <h3>Generate New Script</h3>
+            <form id="generateScriptForm">
+                <div>
+                    <h4>Select Characters (2-5 characters):</h4>
+                    <div id="characterSelection"></div>
+                </div>
+                <br>
+                
+                <label>Situation/Prompt: 
+                    <textarea id="scriptPrompt" rows="3" cols="50" required placeholder="Describe the situation or topic for the dialogue..."></textarea>
+                </label><br><br>
+                
+                <label>Word (Optional): 
+                    <input type="text" id="scriptWord" placeholder="e.g., Democracy, Innovation, etc.">
+                </label><br><br>
+                
+                <button type="submit">Generate Script</button>
+            </form>
+            <pre id="generateScriptResult"></pre>
+        </div>
+        
+        <hr>
+        
+        <!-- Script List -->
+        <div>
+            <h3>Generated Scripts</h3>
+            <button onclick="listScripts()">Refresh Scripts</button>
+            <div id="scriptsList"></div>
+        </div>
+        
+        <hr>
+        
+        <!-- Edit Script Section -->
+        <div>
+            <h3>Edit Script</h3>
+            <form id="editScriptForm">
+                <label>Script ID: <input type="text" id="editScriptId" required placeholder="script_20231201_12345678"></label><br><br>
+                <button type="button" onclick="loadScriptForEdit()">Load Script</button><br><br>
+                
+                <div id="scriptEditor" style="display: none;">
+                    <h4>Edit Dialogue:</h4>
+                    <div id="dialogueEditor"></div>
+                    <br>
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+            <pre id="editScriptResult"></pre>
+        </div>
+        
+        <hr>
+        
+        <!-- Delete Script Section -->
+        <div>
+            <h3>Delete Script</h3>
+            <form id="deleteScriptForm">
+                <label>Script ID: <input type="text" id="deleteScriptId" required placeholder="script_20231201_12345678"></label><br><br>
+                <button type="submit">Delete Script</button>
+            </form>
+            <pre id="deleteScriptResult"></pre>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        function displayResult(elementId, data) {
+            document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function getSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/system/status`);
+                const data = await response.json();
+                displayResult('systemStatus', data);
+            } catch (error) {
+                displayResult('systemStatus', { error: error.message });
+            }
+        }
+        async function listCharacters() {
+            try {
+                const response = await fetch(`${API_BASE}/characters`);
+                const data = await response.json();
+                
+                let html = '<h3>Characters:</h3>';
+                data.forEach(char => {
+                    html += `
+                        <div style="border: 1px solid black; margin: 10px; padding: 10px;">
+                            <strong>ID:</strong> ${char.id}<br>
+                            <strong>Name:</strong> ${char.displayName}<br>
+                            <strong>Has Audio:</strong> ${char.hasAudio}<br>
+                            <strong>Image Count:</strong> ${char.imageCount}<br>
+                            <strong>Config:</strong> Speed=${char.config.speed}, NFE=${char.config.nfeSteps}<br>
+                            <strong>Created:</strong> ${char.createdAt}<br>
+                        </div>
+                    `;
+                });
+                document.getElementById('charactersList').innerHTML = html;
+            } catch (error) {
+                document.getElementById('charactersList').innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+        document.getElementById('createCompleteCharacterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('completeDisplayName').value;
+            const speed = document.getElementById('completeSpeed').value;
+            const nfeSteps = document.getElementById('completeNfeSteps').value;
+            const crossFadeDuration = document.getElementById('completeCrossFadeDuration').value;
+            const removeSilences = document.getElementById('completeRemoveSilences').checked;
+            const audioFile = document.getElementById('completeAudioFile').files[0];
+            const imageFiles = document.getElementById('completeImageFiles').files;
+            
+            if (!displayName.trim()) {
+                displayResult('createCompleteCharacterResult', { error: 'Display name is required' });
+                return;
+            }
+            
+            if (!audioFile) {
+                displayResult('createCompleteCharacterResult', { error: 'Audio file is required' });
+                return;
+            }
+            
+            if (imageFiles.length === 0) {
+                displayResult('createCompleteCharacterResult', { error: 'At least one image file is required' });
+                return;
+            }
+            
+            if (imageFiles.length > 10) {
+                displayResult('createCompleteCharacterResult', { error: 'Maximum 10 images allowed' });
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('displayName', displayName.trim());
+            formData.append('removeSilences', removeSilences.toString());
+            
+            if (speed) formData.append('speed', speed);
+            if (nfeSteps) formData.append('nfeSteps', nfeSteps);
+            if (crossFadeDuration) formData.append('crossFadeDuration', crossFadeDuration);
+            
+            formData.append('audioFile', audioFile);
+            
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append('imageFiles', imageFiles[i]);
+            }
+            
+            displayResult('createCompleteCharacterResult', { status: 'Creating character... Please wait.' });
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/complete`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResult('createCompleteCharacterResult', data);
+                
+                if (response.ok) {
+                    document.getElementById('createCompleteCharacterForm').reset();
+                    listCharacters();
+                    alert(`Successfully created character: ${data.displayName} (ID: ${data.id})`);
+                } else {
+                    alert(`Failed to create character: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                const errorData = { error: error.message };
+                displayResult('createCompleteCharacterResult', errorData);
+                alert(`Error creating character: ${error.message}`);
+            }
+        });
+        document.getElementById('updateCharacterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const characterId = document.getElementById('updateCharacterId').value;
+            const displayName = document.getElementById('updateDisplayName').value;
+            const speed = document.getElementById('updateSpeed').value;
+            const nfeSteps = document.getElementById('updateNfeSteps').value;
+            const crossFadeDuration = document.getElementById('updateCrossFadeDuration').value;
+            const removeSilences = document.getElementById('updateRemoveSilences').value;
+            
+            const payload = {};
+            
+            if (displayName) payload.displayName = displayName;
+            
+            if (speed || nfeSteps || crossFadeDuration || removeSilences) {
+                payload.config = {};
+                if (speed) payload.config.speed = parseFloat(speed);
+                if (nfeSteps) payload.config.nfeSteps = parseInt(nfeSteps);
+                if (crossFadeDuration) payload.config.crossFadeDuration = parseFloat(crossFadeDuration);
+                if (removeSilences) payload.config.removeSilences = removeSilences === 'true';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                displayResult('updateCharacterResult', data);
+                
+                if (response.ok) {
+                    listCharacters();
+                }
+            } catch (error) {
+                displayResult('updateCharacterResult', { error: error.message });
+            }
+        });
+        document.getElementById('getCharacterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const characterId = document.getElementById('getCharacterId').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/${characterId}`);
+                const data = await response.json();
+                displayResult('getCharacterResult', data);
+            } catch (error) {
+                displayResult('getCharacterResult', { error: error.message });
+            }
+        });
+        document.getElementById('deleteCharacterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const characterId = document.getElementById('deleteCharacterId').value;
+            
+            if (!confirm(`Are you sure you want to delete character '${characterId}'? This will also delete all associated files.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                displayResult('deleteCharacterResult', data);
+                
+                if (response.ok) {
+                    document.getElementById('deleteCharacterForm').reset();
+                    listCharacters();
+                }
+            } catch (error) {
+                displayResult('deleteCharacterResult', { error: error.message });
+            }
+        });
+
+        // Script Management Functions
+        let availableCharacters = [];
+        let currentScript = null;
+
+        async function loadCharactersForSelection() {
+            try {
+                const response = await fetch(`${API_BASE}/characters`);
+                const characters = await response.json();
+                availableCharacters = characters;
+                
+                const selectionDiv = document.getElementById('characterSelection');
+                selectionDiv.innerHTML = '';
+                
+                characters.forEach(char => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `char_${char.id}`;
+                    checkbox.value = char.id;
+                    checkbox.name = 'selectedCharacters';
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `char_${char.id}`;
+                    label.textContent = ` ${char.displayName} (${char.id})`;
+                    
+                    const div = document.createElement('div');
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    
+                    selectionDiv.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading characters:', error);
+            }
+        }
+
+        function getSelectedCharacters() {
+            const checkboxes = document.querySelectorAll('input[name="selectedCharacters"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        document.getElementById('generateScriptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const selectedCharacters = getSelectedCharacters();
+            const prompt = document.getElementById('scriptPrompt').value.trim();
+            const word = document.getElementById('scriptWord').value.trim();
+            
+            if (selectedCharacters.length < 2 || selectedCharacters.length > 5) {
+                displayResult('generateScriptResult', { error: 'Please select 2-5 characters' });
+                return;
+            }
+            
+            if (!prompt) {
+                displayResult('generateScriptResult', { error: 'Please enter a situation/prompt' });
+                return;
+            }
+            
+            const payload = {
+                selectedCharacters: selectedCharacters,
+                prompt: prompt,
+                word: word || null
+            };
+            
+            displayResult('generateScriptResult', { status: 'Generating script... Please wait.' });
+            
+            try {
+                const response = await fetch(`${API_BASE}/scripts/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                displayResult('generateScriptResult', data);
+                
+                if (response.ok) {
+                    document.getElementById('generateScriptForm').reset();
+                    listScripts();
+                    alert(`Successfully generated script: ${data.id}`);
+                } else {
+                    alert(`Failed to generate script: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                const errorData = { error: error.message };
+                displayResult('generateScriptResult', errorData);
+                alert(`Error generating script: ${error.message}`);
+            }
+        });
+
+        async function listScripts() {
+            try {
+                const response = await fetch(`${API_BASE}/scripts`);
+                const scripts = await response.json();
+                
+                let html = '<h4>Generated Scripts:</h4>';
+                if (scripts.length === 0) {
+                    html += '<p>No scripts generated yet.</p>';
+                } else {
+                    scripts.forEach(script => {
+                        const audioStatus = script.hasAudio ? 
+                            `✅ ${script.audioCount}/${script.dialogue.length} audio files` : 
+                            `❌ No audio files`;
+                        
+                        html += `
+                            <div style="border: 1px solid black; margin: 10px; padding: 10px;">
+                                <strong>ID:</strong> ${script.id}<br>
+                                <strong>Characters:</strong> ${script.selectedCharacters.join(', ')}<br>
+                                <strong>Prompt:</strong> ${script.originalPrompt}<br>
+                                ${script.word ? `<strong>Word:</strong> ${script.word}<br>` : ''}
+                                <strong>Dialogue Lines:</strong> ${script.dialogue.length}<br>
+                                <strong>Audio Status:</strong> ${audioStatus}<br>
+                                <strong>Created:</strong> ${script.createdAt}<br>
+                                
+                                <div style="margin: 10px 0;">
+                                    <button onclick="generateAudioForScript('${script.id}')" 
+                                            style="background-color: blue; color: white; margin-right: 5px;">
+                                        Generate Audio
+                                    </button>
+                                    <button onclick="checkAudioStatus('${script.id}')" 
+                                            style="background-color: orange; color: white;">
+                                        Check Audio Status
+                                    </button>
+                                </div>
+                                
+                                <details>
+                                    <summary>View Dialogue</summary>
+                                    <div style="background: #f5f5f5; padding: 10px; margin: 5px 0;">
+                                        ${script.dialogue.map((line, idx) => {
+                                            const hasAudio = line.audioFile && line.audioFile.trim() !== '';
+                                            const audioIcon = hasAudio ? '🔊' : '🔇';
+                                            return `${audioIcon} <strong>${line.speaker}:</strong> ${line.text}`;
+                                        }).join('<br>')}
+                                    </div>
+                                </details>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('scriptsList').innerHTML = html;
+            } catch (error) {
+                document.getElementById('scriptsList').innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function loadScriptForEdit() {
+            const scriptId = document.getElementById('editScriptId').value.trim();
+            if (!scriptId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}`);
+                const script = await response.json();
+                
+                if (response.ok) {
+                    currentScript = script;
+                    displayScriptEditor(script);
+                } else {
+                    displayResult('editScriptResult', script);
+                }
+            } catch (error) {
+                displayResult('editScriptResult', { error: error.message });
+            }
+        }
+
+        function displayScriptEditor(script) {
+            const editorDiv = document.getElementById('dialogueEditor');
+            editorDiv.innerHTML = '';
+            
+            script.dialogue.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.style.marginBottom = '10px';
+                lineDiv.style.padding = '10px';
+                lineDiv.style.border = '1px solid #ccc';
+                
+                // Check if this line has audio
+                const hasAudio = line.audioFile && line.audioFile.trim() !== '';
+                const audioIcon = hasAudio ? '🔊' : '🔇';
+                const audioStatus = hasAudio ? 'Has Audio' : 'No Audio';
+                const borderColor = hasAudio ? '#4CAF50' : '#ccc';
+                
+                lineDiv.style.borderColor = borderColor;
+                lineDiv.style.borderWidth = hasAudio ? '2px' : '1px';
+                
+                lineDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <strong>Line ${index + 1}</strong>
+                        <span style="color: ${hasAudio ? 'green' : 'gray'};">${audioIcon} ${audioStatus}</span>
+                    </div>
+                    <label><strong>Speaker:</strong> 
+                        <input type="text" id="speaker_${index}" value="${line.speaker}" style="width: 100px;">
+                    </label><br>
+                    <label><strong>Text:</strong> 
+                        <textarea id="text_${index}" rows="2" style="width: 100%;">${line.text}</textarea>
+                    </label><br>
+                    ${hasAudio ? '<small style="color: orange;">⚠️ Editing this line will remove its audio file</small><br>' : ''}
+                    <button type="button" onclick="removeDialogueLine(${index})">Remove Line</button>
+                `;
+                
+                editorDiv.appendChild(lineDiv);
+            });
+            
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.textContent = 'Add New Line';
+            addButton.onclick = addDialogueLine;
+            editorDiv.appendChild(addButton);
+            
+            document.getElementById('scriptEditor').style.display = 'block';
+        }
+
+        function addDialogueLine() {
+            if (!currentScript) return;
+            
+            const newIndex = currentScript.dialogue.length;
+            currentScript.dialogue.push({ speaker: '', text: '' });
+            
+            const editorDiv = document.getElementById('dialogueEditor');
+            const addButton = editorDiv.lastElementChild;
+            
+            const lineDiv = document.createElement('div');
+            lineDiv.style.marginBottom = '10px';
+            lineDiv.style.padding = '10px';
+            lineDiv.style.border = '1px solid #ccc';
+            
+            lineDiv.innerHTML = `
+                <label><strong>Speaker:</strong> 
+                    <input type="text" id="speaker_${newIndex}" value="" style="width: 100px;">
+                </label><br>
+                <label><strong>Text:</strong> 
+                    <textarea id="text_${newIndex}" rows="2" style="width: 100%;"></textarea>
+                </label><br>
+                <button type="button" onclick="removeDialogueLine(${newIndex})">Remove Line</button>
+            `;
+            
+            editorDiv.insertBefore(lineDiv, addButton);
+        }
+
+        function removeDialogueLine(index) {
+            if (!currentScript) return;
+            
+            currentScript.dialogue.splice(index, 1);
+            displayScriptEditor(currentScript);
+        }
+
+        document.getElementById('editScriptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentScript) {
+                displayResult('editScriptResult', { error: 'No script loaded for editing' });
+                return;
+            }
+            
+            const dialogue = [];
+            const editorDiv = document.getElementById('dialogueEditor');
+            const lineDivs = editorDiv.querySelectorAll('div[style*="border"]');
+            
+            lineDivs.forEach((lineDiv, index) => {
+                const speakerInput = lineDiv.querySelector(`input[id^="speaker_"]`);
+                const textInput = lineDiv.querySelector(`textarea[id^="text_"]`);
+                
+                if (speakerInput && textInput) {
+                    const speaker = speakerInput.value.trim();
+                    const text = textInput.value.trim();
+                    
+                    if (speaker && text) {
+                        dialogue.push({ speaker, text });
+                    }
+                }
+            });
+            
+            if (dialogue.length === 0) {
+                displayResult('editScriptResult', { error: 'Please add at least one dialogue line' });
+                return;
+            }
+            
+            // Check for changes that might affect audio
+            let hasChanges = false;
+            let audioAffected = false;
+            
+            if (dialogue.length !== currentScript.dialogue.length) {
+                hasChanges = true;
+                audioAffected = true;
+            } else {
+                for (let i = 0; i < dialogue.length; i++) {
+                    const oldLine = currentScript.dialogue[i];
+                    const newLine = dialogue[i];
+                    
+                    if (oldLine.speaker !== newLine.speaker || oldLine.text !== newLine.text) {
+                        hasChanges = true;
+                        if (oldLine.audioFile && oldLine.audioFile.trim() !== '') {
+                            audioAffected = true;
+                        }
+                    }
+                }
+            }
+            
+            // Warn user if audio will be affected
+            if (audioAffected) {
+                const confirmMessage = 'Some dialogue lines with audio will be changed. The associated audio files will be deleted and you\'ll need to regenerate them. Continue?';
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+            }
+            
+            try {
+                displayResult('editScriptResult', { status: 'Updating script... Please wait.' });
+                
+                const response = await fetch(`${API_BASE}/scripts/${currentScript.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dialogue })
+                });
+                
+                const data = await response.json();
+                displayResult('editScriptResult', data);
+                
+                if (response.ok) {
+                    listScripts();
+                    
+                    let successMessage = `Successfully updated script: ${currentScript.id}`;
+                    if (audioAffected) {
+                        const audioCount = data.audioCount || 0;
+                        successMessage += `\n\nAudio Status: ${audioCount}/${data.dialogue.length} lines have audio`;
+                        if (audioCount < data.dialogue.length) {
+                            successMessage += '\nSome audio files were removed due to changes. You can regenerate audio for the updated lines.';
+                        }
+                    }
+                    
+                    alert(successMessage);
+                } else {
+                    alert(`Failed to update script: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                displayResult('editScriptResult', { error: error.message });
+                alert(`Error updating script: ${error.message}`);
+            }
+        });
+
+        document.getElementById('deleteScriptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const scriptId = document.getElementById('deleteScriptId').value.trim();
+            
+            if (!confirm(`Are you sure you want to delete script '${scriptId}'?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                displayResult('deleteScriptResult', data);
+                
+                if (response.ok) {
+                    document.getElementById('deleteScriptForm').reset();
+                    listScripts();
+                    alert(`Successfully deleted script: ${scriptId}`);
+                } else {
+                    alert(`Failed to delete script: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                displayResult('deleteScriptResult', { error: error.message });
+                alert(`Error deleting script: ${error.message}`);
+            }
+        });
+
+        // F5-TTS Status Functions
+        async function checkF5TTSStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/f5tts/status`);
+                const data = await response.json();
+                displayResult('f5ttsStatus', data);
+            } catch (error) {
+                displayResult('f5ttsStatus', { error: error.message });
+            }
+        }
+
+        // Audio Generation Functions
+        async function generateAudioForScript(scriptId) {
+            if (!confirm(`Generate audio for script '${scriptId}'? This may take several minutes.`)) {
+                return;
+            }
+            
+            try {
+                displayResult('generateScriptResult', { status: 'Generating audio... Please wait.' });
+                
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-audio`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                displayResult('generateScriptResult', data);
+                
+                if (response.ok) {
+                    listScripts(); // Refresh the scripts list
+                    alert(`Audio generation completed: ${data.message}`);
+                } else {
+                    alert(`Audio generation failed: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                const errorData = { error: error.message };
+                displayResult('generateScriptResult', errorData);
+                alert(`Error generating audio: ${error.message}`);
+            }
+        }
+
+        async function checkAudioStatus(scriptId) {
+            try {
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}/audio-status`);
+                const data = await response.json();
+                
+                let statusMessage = `Script: ${scriptId}\n`;
+                statusMessage += `Status: ${data.status}\n`;
+                statusMessage += `Total Lines: ${data.totalLines}\n`;
+                statusMessage += `Completed: ${data.completedLines}\n`;
+                statusMessage += `Failed: ${data.failedLines}\n`;
+                
+                // Get the script details to show audio file info
+                const scriptResponse = await fetch(`${API_BASE}/scripts/${scriptId}`);
+                if (scriptResponse.ok) {
+                    const scriptData = await scriptResponse.json();
+                    const dialogueWithAudio = scriptData.dialogue.filter(line => line.audioFile && line.audioFile.trim() !== '');
+                    
+                    if (dialogueWithAudio.length > 0) {
+                        statusMessage += '\nAudio Files:\n';
+                        dialogueWithAudio.forEach((line, idx) => {
+                            const fileName = line.audioFile.split(/[/\\]/).pop();
+                            statusMessage += `  ${line.speaker}: ${fileName}\n`;
+                        });
+                    }
+                }
+                
+                alert(statusMessage);
+                displayResult('generateScriptResult', data);
+            } catch (error) {
+                alert(`Error checking audio status: ${error.message}`);
+                displayResult('generateScriptResult', { error: error.message });
+            }
+        }
+
+        window.addEventListener('load', () => {
+            getSystemStatus();
+            listCharacters();
+            loadCharactersForSelection();
+            listScripts();
+            checkF5TTSStatus();
+        });
+    </script>
+</body>
+</html> 

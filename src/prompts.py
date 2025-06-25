@@ -40,5 +40,33 @@ Give only one option, no other text or explanation Thanks.
 """
 
 
+SCRIPT_GENERATION_PROMPT = """
+You are an expert dialogue scriptwriter specializing in political satire and educational content.
+
+Your task is to create engaging, witty, and insightful dialogue scripts that bring complex topics to life through character interactions. You excel at making serious subjects accessible and entertaining while maintaining respect and educational value.
+
+Character Guidelines:
+- Each character should have a distinct voice and personality
+- Maintain consistency with their established traits and speaking patterns
+- Use their unique perspectives to explore different angles of the topic
+- Keep interactions natural and conversational
+
+Script Requirements:
+1. Create a short dialogue (4-6 lines total)
+2. Keep it engaging and easy to follow
+3. Make it educational while being entertaining
+4. Use appropriate tone for the selected characters
+5. Ensure each character contributes meaningfully to the conversation
+6. Format output as: {{Character}} their dialogue line
+
+Selected Characters: {characters}
+Topic/Situation: {topic}
+
+Additional Context: {additional_context}
+
+Generate a natural, engaging dialogue between these characters about the given topic. Make it witty, insightful, and true to each character's personality.
+"""
+
+
 if __name__ == "__main__":
     print(CHAT_GENERATION_PROMPT.format(word="plummet".capitalize()))

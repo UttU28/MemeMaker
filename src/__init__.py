@@ -12,11 +12,14 @@ from src.client import F5TtsGradioClient
 from src.config import ConfigManager
 from src.utils import AudioFileManager, LogManager
 from src.llm import LlmService
+from src.prompts import CHAT_GENERATION_PROMPT, GET_THE_MOOD_PROMPT
 
 __all__ = [
     "F5TtsGradioClient",
     "ConfigManager",
     "AudioFileManager", 
     "LogManager",
-    "LlmService"
+    "LlmService",
+    "CHAT_GENERATION_PROMPT",
+    "GET_THE_MOOD_PROMPT"
 ] 
