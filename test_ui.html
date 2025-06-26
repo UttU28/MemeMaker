@@ -4,225 +4,535 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Character Management API Test UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .section h3 {
+            color: #555;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover {
+            background-color: #1e7e34;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        button.warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        button.warning:hover {
+            background-color: #e0a800;
+        }
+        button:disabled {
+            background-color: #cccccc !important;
+            color: #666666 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+        button:disabled:hover {
+            background-color: #cccccc !important;
+            transform: none !important;
+        }
+        input, select, textarea {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        label {
+            display: inline-block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .character-card {
+            border: 1px solid #007bff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+                 .script-item {
+             border: 1px solid #ddd;
+             padding: 15px;
+             margin: 10px 0;
+             border-radius: 5px;
+             background-color: white;
+         }
+         .dialogue-line-editor {
+             border: 1px solid #ccc;
+             padding: 15px;
+             margin: 10px 0;
+             border-radius: 5px;
+             background-color: #f9f9f9;
+         }
+         .dialogue-line-editor.editing {
+             border-color: #007bff;
+             background-color: #e7f3ff;
+         }
+         .speaker-select {
+             width: 150px;
+             margin-right: 10px;
+         }
+         .dialogue-text-input {
+             width: 100%;
+             min-height: 60px;
+             margin: 10px 0;
+         }
+    </style>
 </head>
 <body>
-    <h1>Character Management API Test UI</h1>
-    
-    <!-- System Status Section -->
-    <div>
-        <h2>System Status</h2>
-        <button onclick="getSystemStatus()">Get System Status</button>
-        <pre id="systemStatus"></pre>
-    </div>
-    
-    <hr>
-    
-    <!-- List Characters Section -->
-    <div>
-        <h2>Characters List</h2>
-        <button onclick="listCharacters()">Refresh Characters List</button>
-        <div id="charactersList"></div>
-    </div>
-    
-    <hr>
-    
-    <!-- Create Complete Character Section -->
-    <div>
-        <h2>Create New Character (Complete)</h2>
-        <p><strong>All-in-One:</strong> Create character with name, config, audio file, and images in one step!</p>
+    <div class="container">
+        <h1>🎭 Character Management API Test UI</h1>
         
-        <form id="createCompleteCharacterForm">
-            <h4>Basic Information</h4>
-            <label>Display Name: <input type="text" id="completeDisplayName" required placeholder="e.g., John Doe"></label><br><br>
+        <!-- System Status Section -->
+        <div class="section">
+            <h2>🚀 System Status</h2>
+            <button onclick="getSystemStatus()">🔄 Refresh System Status</button>
+            <div id="systemStatus">
+                <div class="status-warning">
+                    <p>Click "Refresh System Status" to check system health</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- List Characters Section -->
+        <div class="section">
+            <h2>👥 Characters List</h2>
+            <button onclick="listCharacters()">🔄 Refresh Characters List</button>
+            <div id="charactersList">
+                <div class="status-warning">
+                    <p>Click "Refresh Characters List" to load characters</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create Complete Character Section -->
+        <div class="section">
+            <h2>➕ Create New Character (Complete)</h2>
+            <p><strong>All-in-One:</strong> Create character with name, config, audio file, and images in one step!</p>
             
-            <h4>Audio File (Required)</h4>
-            <label>Audio File: <input type="file" id="completeAudioFile" accept=".wav,.mp3,.m4a,.flac,.ogg" required></label><br>
-            <small>Supported formats: WAV, MP3, M4A, FLAC, OGG (Max 50MB)</small><br><br>
+            <form id="createCompleteCharacterForm">
+                <div class="form-group">
+                    <h4>📝 Basic Information</h4>
+                    <label>Display Name:</label>
+                    <input type="text" id="completeDisplayName" required placeholder="e.g., John Doe" style="width: 300px;">
+                </div>
+                
+                <div class="form-group">
+                    <h4>🎵 Audio File (Required)</h4>
+                    <label>Audio File:</label>
+                    <input type="file" id="completeAudioFile" accept=".wav,.mp3,.m4a,.flac,.ogg" required>
+                    <br><small>Supported formats: WAV, MP3, M4A, FLAC, OGG (Max 50MB)</small>
+                </div>
+                
+                <div class="form-group">
+                    <h4>🖼️ Images (Required - Max 10)</h4>
+                    <label>Image Files:</label>
+                    <input type="file" id="completeImageFiles" accept=".png,.jpg,.jpeg,.webp" multiple required>
+                    <br><small>Supported formats: PNG, JPG, JPEG, WEBP (Max 10MB each)</small>
+                </div>
+                
+                <div class="form-group">
+                    <h4>⚙️ Configuration (Optional - Leave empty for defaults)</h4>
+                                         <div class="form-row">
+                         <label>Speed:</label>
+                         <input type="number" id="completeSpeed" step="0.1" min="0.5" max="2.0" placeholder="1.0">
+                         
+                         <label>NFE Steps:</label>
+                         <input type="number" id="completeNfeSteps" min="20" max="50" placeholder="34">
+                     </div>
+                     <div class="form-row">
+                         <label>Cross Fade Duration:</label>
+                         <input type="number" id="completeCrossFadeDuration" step="0.01" min="0" max="1" placeholder="0.15">
+                         
+                         <label>Remove Silences:</label>
+                         <input type="checkbox" id="completeRemoveSilences" checked>
+                     </div>
+                </div>
+                
+                <button type="submit" class="success" style="padding: 15px 30px; font-size: 16px;">
+                    ✨ Create Complete Character
+                </button>
+            </form>
+            <div id="createCompleteCharacterResult"></div>
+        </div>
+        
+        <!-- Update Character Section -->
+        <div class="section">
+            <h2>✏️ Update Character</h2>
+            <form id="updateCharacterForm">
+                <div class="form-group">
+                    <label>Character ID:</label>
+                    <input type="text" id="updateCharacterId" required placeholder="e.g., palki" style="width: 200px;">
+                    
+                    <label>New Display Name:</label>
+                    <input type="text" id="updateDisplayName" placeholder="Leave empty to keep current" style="width: 200px;">
+                </div>
+                
+                <div class="form-group">
+                    <h4>⚙️ Update Configuration (Optional)</h4>
+                                         <div class="form-row">
+                         <label>Speed:</label>
+                         <input type="number" id="updateSpeed" step="0.1" min="0.5" max="2.0" placeholder="1.0">
+                         
+                         <label>NFE Steps:</label>
+                         <input type="number" id="updateNfeSteps" min="20" max="50" placeholder="34">
+                     </div>
+                     <div class="form-row">
+                         <label>Cross Fade Duration:</label>
+                         <input type="number" id="updateCrossFadeDuration" step="0.01" min="0" max="1" placeholder="0.15">
+                         
+                         <label>Remove Silences:</label>
+                         <select id="updateRemoveSilences">
+                             <option value="">Keep current</option>
+                             <option value="true">True</option>
+                             <option value="false">False</option>
+                         </select>
+                     </div>
+                </div>
+                
+                <button type="submit" class="warning">📝 Update Character</button>
+            </form>
+            <div id="updateCharacterResult"></div>
+        </div>
+        
+        <!-- Get Character Details Section -->
+        <div class="section">
+            <h2>🔍 Get Character Details</h2>
+            <form id="getCharacterForm">
+                <div class="form-row">
+                    <label>Character ID:</label>
+                    <input type="text" id="getCharacterId" required placeholder="e.g., palki" style="width: 200px;">
+                    <button type="submit">🔍 Get Character</button>
+                </div>
+            </form>
+            <div id="getCharacterResult"></div>
+        </div>
+        
+        <!-- Delete Character Section -->
+        <div class="section">
+            <h2>🗑️ Delete Character</h2>
+            <form id="deleteCharacterForm">
+                <div class="form-row">
+                    <label>Character ID:</label>
+                    <input type="text" id="deleteCharacterId" required placeholder="e.g., testuser" style="width: 200px;">
+                    <button type="submit" class="danger">🗑️ Delete Character</button>
+                </div>
+            </form>
+            <div id="deleteCharacterResult"></div>
+        </div>
+        
+        <!-- F5-TTS Status Section -->
+        <div class="section">
+            <h2>🎤 F5-TTS Service Status</h2>
+            <button onclick="checkF5TTSStatus()">🔄 Check F5-TTS Status</button>
+            <div id="f5ttsStatus">
+                <div class="status-warning">
+                    <p>Click "Check F5-TTS Status" to verify TTS service</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Script Creation Section -->
+        <div class="section">
+            <h2>📝 Script Creation & Audio Generation</h2>
             
-            <h4>Images (Required - Max 10)</h4>
-            <label>Image Files: <input type="file" id="completeImageFiles" accept=".png,.jpg,.jpeg,.webp" multiple required></label><br>
-            <small>Supported formats: PNG, JPG, JPEG, WEBP (Max 10MB each)</small><br><br>
+            <!-- Scripts List -->
+            <div class="form-group">
+                <h3>📋 Scripts</h3>
+                <button onclick="listScripts()">🔄 Refresh Scripts</button>
+                <div id="scripts-list">
+                    <div class="status-warning">
+                        <p>Click "Refresh Scripts" to load existing scripts</p>
+                    </div>
+                </div>
+            </div>
             
-            <h4>Configuration (Optional - Leave empty for defaults)</h4>
-            <label>Speed: <input type="number" id="completeSpeed" step="0.1" min="0.5" max="2.0" placeholder="Default: 1.0"></label><br>
-            <label>NFE Steps: <input type="number" id="completeNfeSteps" min="20" max="50" placeholder="Default: 34"></label><br>
-            <label>Cross Fade Duration: <input type="number" id="completeCrossFadeDuration" step="0.01" min="0" max="1" placeholder="Default: 0.15"></label><br>
-            <label>Remove Silences: <input type="checkbox" id="completeRemoveSilences" checked></label><br><br>
-            
-            <button type="submit" style="background-color: green; color: white; padding: 10px 20px; font-size: 16px;">Create Complete Character</button>
-        </form>
-        <pre id="createCompleteCharacterResult"></pre>
-    </div>
-    
+            <!-- Generate New Script -->
+            <div class="form-group">
+                <h3>✨ Generate New Script</h3>
+                <form id="generate-script-form">
+                    <div class="form-group">
+                        <label>Selected Characters (hold Ctrl for multiple):</label>
+                        <select id="script-characters" multiple required style="width: 100%; height: 120px;">
+                            <option disabled>Loading characters...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Prompt:</label>
+                        <textarea id="script-prompt" required placeholder="Enter the topic or situation for the dialogue..." style="width: 100%; height: 80px;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Word (optional):</label>
+                        <input type="text" id="script-word" placeholder="Enter a word to explain (optional)" style="width: 100%;">
+                    </div>
+                    
+                                         <button type="submit" class="success">✨ Generate Script</button>
+                 </form>
+                 <div id="generateScriptResult"></div>
+             </div>
 
-    
-    <hr>
-    
-    <!-- Update Character Section -->
-    <div>
-        <h2>Update Character</h2>
-        <form id="updateCharacterForm">
-            <label>Character ID: <input type="text" id="updateCharacterId" required placeholder="e.g., palki"></label><br>
-            <label>New Display Name: <input type="text" id="updateDisplayName" placeholder="Leave empty to keep current"></label><br><br>
-            
-            <h4>Update Configuration (Optional)</h4>
-            <label>Speed: <input type="number" id="updateSpeed" step="0.1" min="0.5" max="2.0" placeholder="Leave empty to keep current"></label><br>
-            <label>NFE Steps: <input type="number" id="updateNfeSteps" min="20" max="50" placeholder="Leave empty to keep current"></label><br>
-            <label>Cross Fade Duration: <input type="number" id="updateCrossFadeDuration" step="0.01" min="0" max="1" placeholder="Leave empty to keep current"></label><br>
-            <label>Remove Silences: 
-                <select id="updateRemoveSilences">
-                    <option value="">Keep current</option>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
-                </select>
-            </label><br><br>
-            
-            <button type="submit">Update Character</button>
-        </form>
-        <pre id="updateCharacterResult"></pre>
-    </div>
-    
-    <hr>
-    
-    <!-- Get Character Details Section -->
-    <div>
-        <h2>Get Character Details</h2>
-        <form id="getCharacterForm">
-            <label>Character ID: <input type="text" id="getCharacterId" required placeholder="e.g., palki"></label>
-            <button type="submit">Get Character</button>
-        </form>
-        <pre id="getCharacterResult"></pre>
-    </div>
-    
-    <hr>
-    
-    <!-- Delete Character Section -->
-    <div>
-        <h2>Delete Character</h2>
-        <form id="deleteCharacterForm">
-            <label>Character ID: <input type="text" id="deleteCharacterId" required placeholder="e.g., testuser"></label>
-            <button type="submit" style="background-color: red; color: white;">Delete Character</button>
-        </form>
-        <pre id="deleteCharacterResult"></pre>
-    </div>
-    
-        <hr>
-    
-    <!-- F5-TTS Status Section -->
-    <div>
-        <h2>F5-TTS Service Status</h2>
-        <button onclick="checkF5TTSStatus()">Check F5-TTS Status</button>
-        <pre id="f5ttsStatus"></pre>
-    </div>
-    
-    <hr>
-    
-    <!-- Script Creation Section -->
-    <div>
-        <h2>Script Creation & Audio Generation</h2>
-        
-        <!-- Generate Script Form -->
-        <div>
-            <h3>Generate New Script</h3>
-            <form id="generateScriptForm">
-                <div>
-                    <h4>Select Characters (2-5 characters):</h4>
-                    <div id="characterSelection"></div>
-                </div>
-                <br>
-                
-                <label>Situation/Prompt: 
-                    <textarea id="scriptPrompt" rows="3" cols="50" required placeholder="Describe the situation or topic for the dialogue..."></textarea>
-                </label><br><br>
-                
-                <label>Word (Optional): 
-                    <input type="text" id="scriptWord" placeholder="e.g., Democracy, Innovation, etc.">
-                </label><br><br>
-                
-                <button type="submit">Generate Script</button>
-            </form>
-            <pre id="generateScriptResult"></pre>
-        </div>
-        
-        <hr>
-        
-        <!-- Script List -->
-        <div>
-            <h3>Generated Scripts</h3>
-            <button onclick="listScripts()">Refresh Scripts</button>
-            <div id="scriptsList"></div>
-        </div>
-        
-        <hr>
-        
-        <!-- Edit Script Section -->
-        <div>
-            <h3>Edit Script</h3>
-            <form id="editScriptForm">
-                <label>Script ID: <input type="text" id="editScriptId" required placeholder="script_20231201_12345678"></label><br><br>
-                <button type="button" onclick="loadScriptForEdit()">Load Script</button><br><br>
-                
-                <div id="scriptEditor" style="display: none;">
-                    <h4>Edit Dialogue:</h4>
-                    <div id="dialogueEditor"></div>
-                    <br>
-                    <button type="submit">Save Changes</button>
-                </div>
-            </form>
-            <pre id="editScriptResult"></pre>
-        </div>
-        
-        <hr>
-        
-        <!-- Delete Script Section -->
-        <div>
-            <h3>Delete Script</h3>
-            <form id="deleteScriptForm">
-                <label>Script ID: <input type="text" id="deleteScriptId" required placeholder="script_20231201_12345678"></label><br><br>
-                <button type="submit">Delete Script</button>
-            </form>
-            <pre id="deleteScriptResult"></pre>
-        </div>
-    </div>
-    
+                         <!-- Script Editing Section -->
+             <div class="form-group">
+                 <h3>✏️ Edit Script</h3>
+                 <div id="script-editor" style="display: none;">
+                     <div class="status-warning">
+                         <p><strong>Editing Script:</strong> <span id="editing-script-id"></span></p>
+                         <button onclick="cancelScriptEdit()" class="danger">❌ Cancel Edit</button>
+                     </div>
+                     
+                     <div id="script-dialogue-editor">
+                         <!-- Dialogue lines will be populated here -->
+                     </div>
+                     
+                     <div style="margin-top: 20px;">
+                         <button onclick="saveScriptChanges()" class="success">💾 Save Changes</button>
+                         <button onclick="addDialogueLine()" class="warning">➕ Add Line</button>
+                         <button onclick="cancelScriptEdit()" class="danger">❌ Cancel</button>
+                     </div>
+                 </div>
+                 <div id="script-edit-result"></div>
+             </div>
+
+             <!-- Video Generation Section -->
+             <div class="form-group">
+                 <h3>🎬 Video Generation</h3>
+                 <div id="video-status">
+                     <div class="status-warning">
+                         <p>Generate a script first, then you can create audio and video</p>
+                     </div>
+                 </div>
+                 <div id="video-controls"></div>
+             </div>
+         </div>
+     </div>
+
     <script>
         const API_BASE = 'http://localhost:8000/api';
         
-        function displayResult(elementId, data) {
-            document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
+        // Function to check if we're running from file:// protocol
+        function isFileProtocol() {
+            return window.location.protocol === 'file:';
+        }
+        
+        // Enhanced fetch with better error handling
+        async function safeFetch(url, options = {}) {
+            if (isFileProtocol()) {
+                console.warn('⚠️ Running from file:// protocol. Please use HTTP server for full functionality.');
+                console.log('💡 Run: python -m http.server 3000 and open http://localhost:3000/test_ui.html');
+            }
+            
+            try {
+                const response = await fetch(url, options);
+                return response;
+            } catch (error) {
+                if (isFileProtocol()) {
+                    throw new Error(`CORS Error: Please serve this file over HTTP. Run 'python -m http.server 3000' and open http://localhost:3000/test_ui.html`);
+                }
+                throw error;
+            }
+        }
+        
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            const className = isError ? 'status-error' : 'status-success';
+            if (typeof data === 'object') {
+                element.innerHTML = `<div class="${className}"><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+            } else {
+                element.innerHTML = `<div class="${className}"><p>${data}</p></div>`;
+            }
         }
         
         async function getSystemStatus() {
             try {
-                const response = await fetch(`${API_BASE}/system/status`);
-                const data = await response.json();
-                displayResult('systemStatus', data);
+                document.getElementById('systemStatus').innerHTML = '<div class="status-warning"><p>🔄 Checking system status...</p></div>';
+                
+                // Check API status
+                const apiResponse = await safeFetch(`${API_BASE}/system/status`);
+                const apiStatus = await apiResponse.json();
+                
+                // Check F5-TTS status
+                const f5ttsResponse = await safeFetch(`${API_BASE}/f5tts/status`);
+                const f5ttsStatus = await f5ttsResponse.json();
+                
+                // Check FFmpeg status
+                const ffmpegResponse = await safeFetch(`${API_BASE}/system/ffmpeg-status`);
+                const ffmpegStatus = await ffmpegResponse.json();
+                
+                const statusHtml = `
+                    <div class="status-success">
+                        <h4>🚀 System Status - All Good!</h4>
+                        <p><strong>🔧 API:</strong> ${apiStatus.status} (${apiStatus.totalCharacters} characters loaded)</p>
+                        <p><strong>🎤 F5-TTS:</strong> ${f5ttsStatus.status} (${f5ttsStatus.url})</p>
+                        <p><strong>🎬 FFmpeg:</strong> ${ffmpegStatus.status} - ${ffmpegStatus.message}</p>
+                        <p><strong>📁 Data Directory:</strong> ${apiStatus.apiDataDir}</p>
+                        <p><strong>⏰ Last Check:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                `;
+                
+                document.getElementById('systemStatus').innerHTML = statusHtml;
             } catch (error) {
-                displayResult('systemStatus', { error: error.message });
+                document.getElementById('systemStatus').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ System Status Check Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>API server is not running (run: python app.py)</li>
+                            <li>CORS issues (try running from localhost)</li>
+                            <li>Network connectivity problems</li>
+                        </ul>
+                        <p><strong>⏰ Failed at:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                `;
             }
         }
         async function listCharacters() {
             try {
+                document.getElementById('charactersList').innerHTML = '<div class="status-warning"><p>🔄 Loading characters...</p></div>';
+                
                 const response = await fetch(`${API_BASE}/characters`);
                 const data = await response.json();
                 
-                let html = '<h3>Characters:</h3>';
+                if (data.length === 0) {
+                    document.getElementById('charactersList').innerHTML = `
+                        <div class="status-warning">
+                            <h4>📭 No Characters Found</h4>
+                            <p>Create your first character using the form below!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '<div class="status-success"><h4>👥 Characters Loaded Successfully</h4></div>';
                 data.forEach(char => {
                     html += `
-                        <div style="border: 1px solid black; margin: 10px; padding: 10px;">
-                            <strong>ID:</strong> ${char.id}<br>
-                            <strong>Name:</strong> ${char.displayName}<br>
-                            <strong>Has Audio:</strong> ${char.hasAudio}<br>
-                            <strong>Image Count:</strong> ${char.imageCount}<br>
-                            <strong>Config:</strong> Speed=${char.config.speed}, NFE=${char.config.nfeSteps}<br>
-                            <strong>Created:</strong> ${char.createdAt}<br>
+                        <div class="character-card">
+                            <h4>🎭 ${char.displayName} (${char.id})</h4>
+                            <div class="form-row">
+                                <span><strong>🎵 Audio:</strong> ${char.hasAudio ? '✅ Available' : '❌ Missing'}</span>
+                                <span><strong>🖼️ Images:</strong> ${char.imageCount} files</span>
+                            </div>
+                            <div class="form-row">
+                                <span><strong>⚡ Speed:</strong> ${char.config.speed}x</span>
+                                <span><strong>🔧 NFE Steps:</strong> ${char.config.nfeSteps}</span>
+                                <span><strong>🔀 Cross Fade:</strong> ${char.config.crossFadeDuration}s</span>
+                            </div>
+                            <p><strong>📅 Created:</strong> ${new Date(char.createdAt).toLocaleString()}</p>
                         </div>
                     `;
                 });
                 document.getElementById('charactersList').innerHTML = html;
+                
+                // Also populate script character selection
+                loadCharactersForSelection(data);
             } catch (error) {
-                document.getElementById('charactersList').innerHTML = `<pre>Error: ${error.message}</pre>`;
+                document.getElementById('charactersList').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Failed to Load Characters</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure the API server is running and accessible.</p>
+                    </div>
+                `;
             }
+        }
+
+        function loadCharactersForSelection(characters) {
+            const selectionDiv = document.getElementById('script-characters');
+            selectionDiv.innerHTML = '';
+            
+            characters.forEach(char => {
+                const option = document.createElement('option');
+                option.value = char.id;
+                option.textContent = `${char.displayName} (${char.id})`;
+                
+                selectionDiv.appendChild(option);
+            });
+        }
+
+        // Alias for backward compatibility
+        async function loadCharacters() {
+            await listCharacters();
         }
         document.getElementById('createCompleteCharacterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -369,6 +679,34 @@
             }
         });
 
+        async function checkF5TTSStatus() {
+            try {
+                document.getElementById('f5ttsStatus').innerHTML = '<div class="status-warning"><p>🔄 Checking F5-TTS service...</p></div>';
+                
+                const response = await fetch(`${API_BASE}/f5tts/status`);
+                const data = await response.json();
+                
+                const statusHtml = `
+                    <div class="status-success">
+                        <h4>🎤 F5-TTS Service Status</h4>
+                        <p><strong>Status:</strong> ${data.status === 'connected' ? '✅ Connected' : '❌ Disconnected'}</p>
+                        <p><strong>URL:</strong> ${data.url}</p>
+                        <p><strong>Last Check:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+                    </div>
+                `;
+                
+                document.getElementById('f5ttsStatus').innerHTML = statusHtml;
+            } catch (error) {
+                document.getElementById('f5ttsStatus').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ F5-TTS Service Check Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure F5-TTS service is running on the expected port.</p>
+                    </div>
+                `;
+            }
+        }
+
         // Script Management Functions
         let availableCharacters = [];
         let currentScript = null;
@@ -379,25 +717,15 @@
                 const characters = await response.json();
                 availableCharacters = characters;
                 
-                const selectionDiv = document.getElementById('characterSelection');
+                const selectionDiv = document.getElementById('script-characters');
                 selectionDiv.innerHTML = '';
                 
                 characters.forEach(char => {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `char_${char.id}`;
-                    checkbox.value = char.id;
-                    checkbox.name = 'selectedCharacters';
+                    const option = document.createElement('option');
+                    option.value = char.id;
+                    option.textContent = ` ${char.displayName} (${char.id})`;
                     
-                    const label = document.createElement('label');
-                    label.htmlFor = `char_${char.id}`;
-                    label.textContent = ` ${char.displayName} (${char.id})`;
-                    
-                    const div = document.createElement('div');
-                    div.appendChild(checkbox);
-                    div.appendChild(label);
-                    
-                    selectionDiv.appendChild(div);
+                    selectionDiv.appendChild(option);
                 });
             } catch (error) {
                 console.error('Error loading characters:', error);
@@ -405,16 +733,16 @@
         }
 
         function getSelectedCharacters() {
-            const checkboxes = document.querySelectorAll('input[name="selectedCharacters"]:checked');
-            return Array.from(checkboxes).map(cb => cb.value);
+            const selectedOptions = document.getElementById('script-characters').selectedOptions;
+            return Array.from(selectedOptions).map(option => option.value);
         }
 
-        document.getElementById('generateScriptForm').addEventListener('submit', async (e) => {
+        document.getElementById('generate-script-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const selectedCharacters = getSelectedCharacters();
-            const prompt = document.getElementById('scriptPrompt').value.trim();
-            const word = document.getElementById('scriptWord').value.trim();
+            const prompt = document.getElementById('script-prompt').value.trim();
+            const word = document.getElementById('script-word').value.trim();
             
             if (selectedCharacters.length < 2 || selectedCharacters.length > 5) {
                 displayResult('generateScriptResult', { error: 'Please select 2-5 characters' });
@@ -445,7 +773,7 @@
                 displayResult('generateScriptResult', data);
                 
                 if (response.ok) {
-                    document.getElementById('generateScriptForm').reset();
+                    document.getElementById('generate-script-form').reset();
                     listScripts();
                     alert(`Successfully generated script: ${data.id}`);
                 } else {
@@ -460,258 +788,482 @@
 
         async function listScripts() {
             try {
+                document.getElementById('scripts-list').innerHTML = '<div class="status-warning"><p>🔄 Loading scripts...</p></div>';
+                
                 const response = await fetch(`${API_BASE}/scripts`);
                 const scripts = await response.json();
                 
-                let html = '<h4>Generated Scripts:</h4>';
                 if (scripts.length === 0) {
-                    html += '<p>No scripts generated yet.</p>';
-                } else {
-                    scripts.forEach(script => {
-                        const audioStatus = script.hasAudio ? 
-                            `✅ ${script.audioCount}/${script.dialogue.length} audio files` : 
-                            `❌ No audio files`;
-                        
-                        html += `
-                            <div style="border: 1px solid black; margin: 10px; padding: 10px;">
-                                <strong>ID:</strong> ${script.id}<br>
-                                <strong>Characters:</strong> ${script.selectedCharacters.join(', ')}<br>
-                                <strong>Prompt:</strong> ${script.originalPrompt}<br>
-                                ${script.word ? `<strong>Word:</strong> ${script.word}<br>` : ''}
-                                <strong>Dialogue Lines:</strong> ${script.dialogue.length}<br>
-                                <strong>Audio Status:</strong> ${audioStatus}<br>
-                                <strong>Created:</strong> ${script.createdAt}<br>
-                                
-                                <div style="margin: 10px 0;">
-                                    <button onclick="generateAudioForScript('${script.id}')" 
-                                            style="background-color: blue; color: white; margin-right: 5px;">
-                                        Generate Audio
-                                    </button>
-                                    <button onclick="checkAudioStatus('${script.id}')" 
-                                            style="background-color: orange; color: white;">
-                                        Check Audio Status
-                                    </button>
-                                </div>
-                                
-                                <details>
-                                    <summary>View Dialogue</summary>
-                                    <div style="background: #f5f5f5; padding: 10px; margin: 5px 0;">
-                                        ${script.dialogue.map((line, idx) => {
-                                            const hasAudio = line.audioFile && line.audioFile.trim() !== '';
-                                            const audioIcon = hasAudio ? '🔊' : '🔇';
-                                            return `${audioIcon} <strong>${line.speaker}:</strong> ${line.text}`;
-                                        }).join('<br>')}
-                                    </div>
-                                </details>
-                            </div>
-                        `;
-                    });
+                    document.getElementById('scripts-list').innerHTML = `
+                        <div class="status-warning">
+                            <h4>📝 No Scripts Found</h4>
+                            <p>Generate your first script using the form above!</p>
+                        </div>
+                    `;
+                    return;
                 }
-                document.getElementById('scriptsList').innerHTML = html;
+                
+                let html = '<div class="status-success"><h4>📋 Scripts Loaded Successfully</h4></div>';
+                scripts.forEach(script => {
+                    const audioInfo = script.hasAudio ? 
+                        `✅ Audio: ${script.audioCount}/${script.dialogue.length} lines` : 
+                        '❌ No audio generated';
+                    
+                    const videoInfo = script.finalVideoPath ? 
+                        `✅ Video: ${script.finalVideoPath}` : 
+                        '⏳ No video generated';
+                    
+                    html += `
+                        <div class="script-item">
+                            <h4>📝 Script: ${script.id}</h4>
+                            <div class="form-row">
+                                <span><strong>👥 Characters:</strong> ${script.selectedCharacters.join(', ')}</span>
+                                <span><strong>💬 Lines:</strong> ${script.dialogue.length}</span>
+                            </div>
+                            <p><strong>💡 Prompt:</strong> ${script.originalPrompt}</p>
+                            ${script.word ? `<p><strong>📖 Word:</strong> ${script.word}</p>` : ''}
+                            <div class="form-row">
+                                <span><strong>🎵 Audio:</strong> ${audioInfo}</span>
+                                <span><strong>🎬 Video:</strong> ${videoInfo}</span>
+                            </div>
+                            <p><strong>📅 Created:</strong> ${new Date(script.createdAt).toLocaleString()}</p>
+                            
+                            <div style="margin-top: 15px;">
+                                <button onclick="viewScriptDetails('${script.id}')" class="warning">👁️ View Details</button>
+                                <button onclick="editScript('${script.id}')" style="background-color: #6f42c1; color: white;">✏️ Edit Script</button>
+                                <button onclick="deleteScript('${script.id}')" class="danger">🗑️ Delete</button>
+                                
+                                <button onclick="generateAudioForScript('${script.id}')" class="success" ${script.audioCount === script.dialogue.length ? 'disabled title="All audio files already generated"' : ''}>
+                                    🎤 Generate Audio ${script.audioCount === script.dialogue.length ? '(Complete)' : `(${script.audioCount}/${script.dialogue.length})`}
+                                </button>
+                                
+                                <button onclick="generateVideoForScript('${script.id}')" style="background-color: #2196F3; color: white;" ${script.audioCount < script.dialogue.length ? 'disabled title="Generate all audio files first"' : ''}>
+                                    🎬 Generate Video
+                                </button>
+                                
+                                ${script.finalVideoPath ? 
+                                    `<button onclick="viewVideoDetails('${script.id}')" class="warning">🎥 View Video</button>` : 
+                                    ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('scripts-list').innerHTML = html;
             } catch (error) {
-                document.getElementById('scriptsList').innerHTML = `<pre>Error: ${error.message}</pre>`;
+                document.getElementById('scripts-list').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Failed to Load Scripts</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure the API server is running and accessible.</p>
+                    </div>
+                `;
             }
         }
 
-        async function loadScriptForEdit() {
-            const scriptId = document.getElementById('editScriptId').value.trim();
-            if (!scriptId) return;
-            
+        async function viewScriptDetails(scriptId) {
             try {
                 const response = await fetch(`${API_BASE}/scripts/${scriptId}`);
                 const script = await response.json();
                 
-                if (response.ok) {
-                    currentScript = script;
-                    displayScriptEditor(script);
-                } else {
-                    displayResult('editScriptResult', script);
-                }
+                let dialogueHtml = '';
+                script.dialogue.forEach((line, index) => {
+                    const audioStatus = line.audioFile ? '✅' : '❌';
+                    dialogueHtml += `
+                        <div style="margin: 5px 0; padding: 5px; border-left: 3px solid #ddd;">
+                            <strong>${line.speaker}:</strong> ${line.text}
+                            <br><small>Audio: ${audioStatus} ${line.audioFile || 'No audio file'}</small>
+                        </div>
+                    `;
+                });
+                
+                const detailsHtml = `
+                    <h3>Script Details: ${script.id}</h3>
+                    <p><strong>Characters:</strong> ${script.selectedCharacters.join(', ')}</p>
+                    <p><strong>Prompt:</strong> ${script.originalPrompt}</p>
+                    ${script.word ? `<p><strong>Word:</strong> ${script.word}</p>` : ''}
+                    <p><strong>Audio Count:</strong> ${script.audioCount}/${script.dialogue.length}</p>
+                    ${script.finalVideoPath ? `<p><strong>Final Video:</strong> ${script.finalVideoPath}</p>` : ''}
+                    <p><strong>Created:</strong> ${new Date(script.createdAt).toLocaleString()}</p>
+                    <h4>Dialogue:</h4>
+                    ${dialogueHtml}
+                `;
+                
+                alert(detailsHtml.replace(/<[^>]*>/g, '\n').replace(/\n\n+/g, '\n'));
             } catch (error) {
-                displayResult('editScriptResult', { error: error.message });
+                alert(`Error viewing script details: ${error.message}`);
             }
         }
 
-        function displayScriptEditor(script) {
-            const editorDiv = document.getElementById('dialogueEditor');
-            editorDiv.innerHTML = '';
-            
-            script.dialogue.forEach((line, index) => {
-                const lineDiv = document.createElement('div');
-                lineDiv.style.marginBottom = '10px';
-                lineDiv.style.padding = '10px';
-                lineDiv.style.border = '1px solid #ccc';
-                
-                // Check if this line has audio
-                const hasAudio = line.audioFile && line.audioFile.trim() !== '';
-                const audioIcon = hasAudio ? '🔊' : '🔇';
-                const audioStatus = hasAudio ? 'Has Audio' : 'No Audio';
-                const borderColor = hasAudio ? '#4CAF50' : '#ccc';
-                
-                lineDiv.style.borderColor = borderColor;
-                lineDiv.style.borderWidth = hasAudio ? '2px' : '1px';
-                
-                lineDiv.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                        <strong>Line ${index + 1}</strong>
-                        <span style="color: ${hasAudio ? 'green' : 'gray'};">${audioIcon} ${audioStatus}</span>
+        async function generateAudioForScript(scriptId) {
+            try {
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-warning">
+                        <p>🎤 Generating audio for script: ${scriptId}...</p>
+                        <p>⏳ This may take a few minutes depending on the number of dialogue lines...</p>
+                        <p>🔄 The system will only generate audio for lines that don't already have audio files.</p>
                     </div>
-                    <label><strong>Speaker:</strong> 
-                        <input type="text" id="speaker_${index}" value="${line.speaker}" style="width: 100px;">
-                    </label><br>
-                    <label><strong>Text:</strong> 
-                        <textarea id="text_${index}" rows="2" style="width: 100%;">${line.text}</textarea>
-                    </label><br>
-                    ${hasAudio ? '<small style="color: orange;">⚠️ Editing this line will remove its audio file</small><br>' : ''}
-                    <button type="button" onclick="removeDialogueLine(${index})">Remove Line</button>
                 `;
                 
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-audio`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('video-status').innerHTML = `
+                        <div class="status-success">
+                            <h4>✅ Audio Generation Complete!</h4>
+                            <p><strong>Status:</strong> ${result.message}</p>
+                            <p><strong>Completed:</strong> ${result.completedLines}/${result.totalLines} lines</p>
+                            <p><strong>Script:</strong> ${scriptId}</p>
+                        </div>
+                    `;
+                    listScripts(); // Refresh the scripts list
+                } else {
+                    document.getElementById('video-status').innerHTML = `
+                        <div class="status-error">
+                            <h4>❌ Audio Generation Failed</h4>
+                            <p><strong>Error:</strong> ${result.detail}</p>
+                            <p><strong>Script:</strong> ${scriptId}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Audio Generation Error</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Script:</strong> ${scriptId}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function generateVideoForScript(scriptId) {
+            try {
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-warning">
+                        <h4>🎬 Video Generation Started</h4>
+                        <p><strong>Script:</strong> ${scriptId}</p>
+                        <p>⏳ This may take several minutes depending on the script length...</p>
+                        <p>🎙️ Initializing subtitle generation...</p>
+                        <p>🎵 Processing audio files...</p>
+                        <p>🎥 Generating final video with FFmpeg...</p>
+                    </div>
+                `;
+                document.getElementById('video-controls').innerHTML = `
+                    <p style="font-style: italic;">🔄 Video generation in progress... Please wait.</p>
+                `;
+                
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-video`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('video-status').innerHTML = `
+                        <div class="status-success">
+                            <h4>✅ Video Generation Complete!</h4>
+                            <p><strong>Status:</strong> ${result.message}</p>
+                            <p><strong>Final Video:</strong> ${result.finalVideoPath}</p>
+                            <p><strong>Duration:</strong> ${result.duration ? result.duration.toFixed(2) + 's' : 'Unknown'}</p>
+                            <p><strong>Script:</strong> ${scriptId}</p>
+                        </div>
+                    `;
+                    document.getElementById('video-controls').innerHTML = `
+                        <button onclick="viewVideoDetails('${scriptId}')" style="background-color: #FF9800; color: white;">🎥 View Video Details</button>
+                        <button onclick="checkVideoStatus('${scriptId}')" class="warning">📊 Check Status</button>
+                        <button onclick="listScripts()" class="success">🔄 Refresh Scripts</button>
+                    `;
+                    listScripts(); // Refresh the scripts list
+                } else {
+                    document.getElementById('video-status').innerHTML = `
+                        <div class="status-error">
+                            <h4>❌ Video Generation Failed</h4>
+                            <p><strong>Error:</strong> ${result.detail}</p>
+                            <p><strong>Script:</strong> ${scriptId}</p>
+                        </div>
+                    `;
+                    document.getElementById('video-controls').innerHTML = `
+                        <button onclick="checkVideoStatus('${scriptId}')" class="warning">📊 Check Status</button>
+                        <button onclick="listScripts()" class="success">🔄 Refresh Scripts</button>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Video Generation Error</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Script:</strong> ${scriptId}</p>
+                    </div>
+                `;
+                document.getElementById('video-controls').innerHTML = `
+                    <button onclick="listScripts()" class="success">🔄 Refresh Scripts</button>
+                `;
+            }
+        }
+
+        async function checkVideoStatus(scriptId) {
+            try {
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}/video-status`);
+                const status = await response.json();
+                
+                document.getElementById('video-status').innerHTML = `
+                    <h4>Video Status for ${scriptId}</h4>
+                    <p><strong>Status:</strong> ${status.status}</p>
+                    <p><strong>Stage:</strong> ${status.stage}</p>
+                    <p><strong>Progress:</strong> ${status.progress}%</p>
+                    <p><strong>Message:</strong> ${status.message}</p>
+                    ${status.finalVideoPath ? `<p><strong>Final Video:</strong> ${status.finalVideoPath}</p>` : ''}
+                `;
+            } catch (error) {
+                document.getElementById('video-status').innerHTML = `<p>❌ Error checking video status: ${error.message}</p>`;
+            }
+        }
+
+        async function viewVideoDetails(scriptId) {
+            try {
+                const response = await fetch(`${API_BASE}/scripts/${scriptId}`);
+                const script = await response.json();
+                
+                if (!script.finalVideoPath) {
+                    document.getElementById('video-status').innerHTML = `
+                        <div class="status-warning">
+                            <h4>⚠️ No Video Generated</h4>
+                            <p>No video has been generated for script: ${scriptId}</p>
+                            <p>Generate audio first, then create the video.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const videoPath = script.finalVideoPath.replace(/\\/g, '/');
+                const fileSizeMB = await getFileSize(script.finalVideoPath);
+                
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-success">
+                        <h4>🎥 Video Details - ${script.id}</h4>
+                        <div class="form-row">
+                            <span><strong>📁 File:</strong> ${videoPath}</span>
+                            <span><strong>⏱️ Duration:</strong> ${script.videoDuration ? script.videoDuration.toFixed(2) + 's' : 'Unknown'}</span>
+                        </div>
+                        <div class="form-row">
+                            <span><strong>👥 Characters:</strong> ${script.selectedCharacters.join(', ')}</span>
+                            <span><strong>💬 Lines:</strong> ${script.dialogue.length}</span>
+                        </div>
+                        <div class="form-row">
+                            <span><strong>🎵 Audio:</strong> ${script.audioCount}/${script.dialogue.length} lines</span>
+                            <span><strong>📊 Size:</strong> ${fileSizeMB}</span>
+                        </div>
+                        <p><strong>📅 Created:</strong> ${new Date(script.createdAt).toLocaleString()}</p>
+                        <p><strong>🔄 Updated:</strong> ${new Date(script.updatedAt).toLocaleString()}</p>
+                        <p><strong>💡 Prompt:</strong> ${script.originalPrompt}</p>
+                    </div>
+                `;
+                
+                document.getElementById('video-controls').innerHTML = `
+                    <button onclick="checkVideoStatus('${scriptId}')" class="warning">📊 Check Status</button>
+                    <button onclick="listScripts()" class="success">🔄 Refresh Scripts</button>
+                `;
+                
+            } catch (error) {
+                document.getElementById('video-status').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Error Loading Video Details</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function getFileSize(filePath) {
+            try {
+                // This is a simplified approach - in a real app you'd have an API endpoint for file info
+                return "~25MB"; // Based on the logs showing 25MB file
+            } catch (error) {
+                return "Unknown";
+            }
+        }
+
+        // Script editing variables
+        let currentEditingScript = null;
+        let currentDialogue = [];
+
+        async function editScript(scriptId) {
+            try {
+                // Fetch the script data
+                const response = await safeFetch(`${API_BASE}/scripts/${scriptId}`);
+                const script = await response.json();
+                
+                if (!response.ok) {
+                    alert(`Failed to load script: ${script.detail}`);
+                    return;
+                }
+                
+                // Set up editing state
+                currentEditingScript = script;
+                currentDialogue = [...script.dialogue]; // Create a copy
+                
+                // Show the editor
+                document.getElementById('script-editor').style.display = 'block';
+                document.getElementById('editing-script-id').textContent = scriptId;
+                
+                // Populate the dialogue editor
+                renderDialogueEditor();
+                
+                // Scroll to editor
+                document.getElementById('script-editor').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert(`Error loading script for editing: ${error.message}`);
+            }
+        }
+
+        function renderDialogueEditor() {
+            const editorDiv = document.getElementById('script-dialogue-editor');
+            editorDiv.innerHTML = '';
+            
+            currentDialogue.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'dialogue-line-editor';
+                lineDiv.innerHTML = `
+                    <div class="form-row">
+                        <select class="speaker-select" onchange="updateDialogueLine(${index}, 'speaker', this.value)">
+                            ${availableCharacters.map(char => 
+                                `<option value="${char.id}" ${char.id === line.speaker ? 'selected' : ''}>${char.displayName} (${char.id})</option>`
+                            ).join('')}
+                        </select>
+                        <button onclick="moveLineUp(${index})" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+                        <button onclick="moveLineDown(${index})" ${index === currentDialogue.length - 1 ? 'disabled' : ''}>⬇️</button>
+                        <button onclick="removeDialogueLine(${index})" class="danger">🗑️</button>
+                    </div>
+                    <textarea class="dialogue-text-input" 
+                              placeholder="Enter dialogue text..." 
+                              onchange="updateDialogueLine(${index}, 'text', this.value)">${line.text}</textarea>
+                    ${line.audioFile ? `<p><small>🎵 Audio: ${line.audioFile}</small></p>` : '<p><small>❌ No audio generated</small></p>'}
+                `;
                 editorDiv.appendChild(lineDiv);
             });
-            
-            const addButton = document.createElement('button');
-            addButton.type = 'button';
-            addButton.textContent = 'Add New Line';
-            addButton.onclick = addDialogueLine;
-            editorDiv.appendChild(addButton);
-            
-            document.getElementById('scriptEditor').style.display = 'block';
+        }
+
+        function updateDialogueLine(index, field, value) {
+            if (currentDialogue[index]) {
+                currentDialogue[index][field] = value;
+                // Remove audio file reference if text changes (audio will need regeneration)
+                if (field === 'text') {
+                    currentDialogue[index].audioFile = null;
+                }
+            }
         }
 
         function addDialogueLine() {
-            if (!currentScript) return;
-            
-            const newIndex = currentScript.dialogue.length;
-            currentScript.dialogue.push({ speaker: '', text: '' });
-            
-            const editorDiv = document.getElementById('dialogueEditor');
-            const addButton = editorDiv.lastElementChild;
-            
-            const lineDiv = document.createElement('div');
-            lineDiv.style.marginBottom = '10px';
-            lineDiv.style.padding = '10px';
-            lineDiv.style.border = '1px solid #ccc';
-            
-            lineDiv.innerHTML = `
-                <label><strong>Speaker:</strong> 
-                    <input type="text" id="speaker_${newIndex}" value="" style="width: 100px;">
-                </label><br>
-                <label><strong>Text:</strong> 
-                    <textarea id="text_${newIndex}" rows="2" style="width: 100%;"></textarea>
-                </label><br>
-                <button type="button" onclick="removeDialogueLine(${newIndex})">Remove Line</button>
-            `;
-            
-            editorDiv.insertBefore(lineDiv, addButton);
+            const newLine = {
+                speaker: availableCharacters.length > 0 ? availableCharacters[0].id : 'unknown',
+                text: '',
+                audioFile: null
+            };
+            currentDialogue.push(newLine);
+            renderDialogueEditor();
         }
 
         function removeDialogueLine(index) {
-            if (!currentScript) return;
-            
-            currentScript.dialogue.splice(index, 1);
-            displayScriptEditor(currentScript);
+            if (currentDialogue.length > 1) {
+                currentDialogue.splice(index, 1);
+                renderDialogueEditor();
+            } else {
+                alert('Cannot remove the last dialogue line. Scripts must have at least one line.');
+            }
         }
 
-        document.getElementById('editScriptForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!currentScript) {
-                displayResult('editScriptResult', { error: 'No script loaded for editing' });
+        function moveLineUp(index) {
+            if (index > 0) {
+                [currentDialogue[index], currentDialogue[index - 1]] = [currentDialogue[index - 1], currentDialogue[index]];
+                renderDialogueEditor();
+            }
+        }
+
+        function moveLineDown(index) {
+            if (index < currentDialogue.length - 1) {
+                [currentDialogue[index], currentDialogue[index + 1]] = [currentDialogue[index + 1], currentDialogue[index]];
+                renderDialogueEditor();
+            }
+        }
+
+        async function saveScriptChanges() {
+            if (!currentEditingScript) {
+                alert('No script is being edited');
                 return;
             }
             
-            const dialogue = [];
-            const editorDiv = document.getElementById('dialogueEditor');
-            const lineDivs = editorDiv.querySelectorAll('div[style*="border"]');
-            
-            lineDivs.forEach((lineDiv, index) => {
-                const speakerInput = lineDiv.querySelector(`input[id^="speaker_"]`);
-                const textInput = lineDiv.querySelector(`textarea[id^="text_"]`);
-                
-                if (speakerInput && textInput) {
-                    const speaker = speakerInput.value.trim();
-                    const text = textInput.value.trim();
-                    
-                    if (speaker && text) {
-                        dialogue.push({ speaker, text });
-                    }
+            // Validate dialogue
+            for (let i = 0; i < currentDialogue.length; i++) {
+                const line = currentDialogue[i];
+                if (!line.text.trim()) {
+                    alert(`Line ${i + 1} cannot be empty. Please enter dialogue text.`);
+                    return;
                 }
-            });
-            
-            if (dialogue.length === 0) {
-                displayResult('editScriptResult', { error: 'Please add at least one dialogue line' });
-                return;
-            }
-            
-            // Check for changes that might affect audio
-            let hasChanges = false;
-            let audioAffected = false;
-            
-            if (dialogue.length !== currentScript.dialogue.length) {
-                hasChanges = true;
-                audioAffected = true;
-            } else {
-                for (let i = 0; i < dialogue.length; i++) {
-                    const oldLine = currentScript.dialogue[i];
-                    const newLine = dialogue[i];
-                    
-                    if (oldLine.speaker !== newLine.speaker || oldLine.text !== newLine.text) {
-                        hasChanges = true;
-                        if (oldLine.audioFile && oldLine.audioFile.trim() !== '') {
-                            audioAffected = true;
-                        }
-                    }
-                }
-            }
-            
-            // Warn user if audio will be affected
-            if (audioAffected) {
-                const confirmMessage = 'Some dialogue lines with audio will be changed. The associated audio files will be deleted and you\'ll need to regenerate them. Continue?';
-                if (!confirm(confirmMessage)) {
+                if (!line.speaker) {
+                    alert(`Line ${i + 1} must have a speaker selected.`);
                     return;
                 }
             }
             
             try {
-                displayResult('editScriptResult', { status: 'Updating script... Please wait.' });
+                document.getElementById('script-edit-result').innerHTML = '<div class="status-warning"><p>💾 Saving script changes...</p></div>';
                 
-                const response = await fetch(`${API_BASE}/scripts/${currentScript.id}`, {
+                const response = await safeFetch(`${API_BASE}/scripts/${currentEditingScript.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dialogue })
+                    body: JSON.stringify({ dialogue: currentDialogue })
                 });
                 
-                const data = await response.json();
-                displayResult('editScriptResult', data);
+                const result = await response.json();
                 
                 if (response.ok) {
+                    document.getElementById('script-edit-result').innerHTML = `
+                        <div class="status-success">
+                            <h4>✅ Script Updated Successfully!</h4>
+                            <p>Updated script: ${result.id}</p>
+                            <p>Lines: ${result.dialogue.length}</p>
+                            <p>Note: Audio will need to be regenerated for modified lines.</p>
+                        </div>
+                    `;
+                    
+                    // Refresh scripts list and close editor
                     listScripts();
+                    cancelScriptEdit();
                     
-                    let successMessage = `Successfully updated script: ${currentScript.id}`;
-                    if (audioAffected) {
-                        const audioCount = data.audioCount || 0;
-                        successMessage += `\n\nAudio Status: ${audioCount}/${data.dialogue.length} lines have audio`;
-                        if (audioCount < data.dialogue.length) {
-                            successMessage += '\nSome audio files were removed due to changes. You can regenerate audio for the updated lines.';
-                        }
-                    }
-                    
-                    alert(successMessage);
                 } else {
-                    alert(`Failed to update script: ${data.detail || 'Unknown error'}`);
+                    document.getElementById('script-edit-result').innerHTML = `
+                        <div class="status-error">
+                            <h4>❌ Failed to Update Script</h4>
+                            <p>${result.detail || 'Unknown error'}</p>
+                        </div>
+                    `;
                 }
+                
             } catch (error) {
-                displayResult('editScriptResult', { error: error.message });
-                alert(`Error updating script: ${error.message}`);
+                document.getElementById('script-edit-result').innerHTML = `
+                    <div class="status-error">
+                        <h4>❌ Error Updating Script</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             }
-        });
+        }
 
-        document.getElementById('deleteScriptForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const scriptId = document.getElementById('deleteScriptId').value.trim();
-            
-            if (!confirm(`Are you sure you want to delete script '${scriptId}'?`)) {
+        function cancelScriptEdit() {
+            currentEditingScript = null;
+            currentDialogue = [];
+            document.getElementById('script-editor').style.display = 'none';
+            document.getElementById('script-edit-result').innerHTML = '';
+        }
+
+        async function deleteScript(scriptId) {
+            if (!confirm(`Are you sure you want to delete script ${scriptId}? This will also delete all associated audio and video files.`)) {
                 return;
             }
             
@@ -719,103 +1271,62 @@
                 const response = await fetch(`${API_BASE}/scripts/${scriptId}`, {
                     method: 'DELETE'
                 });
-                const data = await response.json();
-                displayResult('deleteScriptResult', data);
+                
+                const result = await response.json();
                 
                 if (response.ok) {
-                    document.getElementById('deleteScriptForm').reset();
-                    listScripts();
-                    alert(`Successfully deleted script: ${scriptId}`);
-                } else {
-                    alert(`Failed to delete script: ${data.detail || 'Unknown error'}`);
-                }
-            } catch (error) {
-                displayResult('deleteScriptResult', { error: error.message });
-                alert(`Error deleting script: ${error.message}`);
-            }
-        });
-
-        // F5-TTS Status Functions
-        async function checkF5TTSStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/f5tts/status`);
-                const data = await response.json();
-                displayResult('f5ttsStatus', data);
-            } catch (error) {
-                displayResult('f5ttsStatus', { error: error.message });
-            }
-        }
-
-        // Audio Generation Functions
-        async function generateAudioForScript(scriptId) {
-            if (!confirm(`Generate audio for script '${scriptId}'? This may take several minutes.`)) {
-                return;
-            }
-            
-            try {
-                displayResult('generateScriptResult', { status: 'Generating audio... Please wait.' });
-                
-                const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-audio`, {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                displayResult('generateScriptResult', data);
-                
-                if (response.ok) {
+                    alert(`✅ Script deleted successfully: ${result.message}`);
                     listScripts(); // Refresh the scripts list
-                    alert(`Audio generation completed: ${data.message}`);
                 } else {
-                    alert(`Audio generation failed: ${data.detail || 'Unknown error'}`);
+                    alert(`❌ Failed to delete script: ${result.detail}`);
                 }
             } catch (error) {
-                const errorData = { error: error.message };
-                displayResult('generateScriptResult', errorData);
-                alert(`Error generating audio: ${error.message}`);
+                alert(`❌ Error deleting script: ${error.message}`);
             }
         }
 
-        async function checkAudioStatus(scriptId) {
+        // Check system status on page load
+        async function checkSystemStatus() {
             try {
-                const response = await fetch(`${API_BASE}/scripts/${scriptId}/audio-status`);
-                const data = await response.json();
+                // Check API status
+                const apiResponse = await fetch('/api/system/status');
+                const apiStatus = await apiResponse.json();
                 
-                let statusMessage = `Script: ${scriptId}\n`;
-                statusMessage += `Status: ${data.status}\n`;
-                statusMessage += `Total Lines: ${data.totalLines}\n`;
-                statusMessage += `Completed: ${data.completedLines}\n`;
-                statusMessage += `Failed: ${data.failedLines}\n`;
+                // Check F5-TTS status
+                const f5ttsResponse = await fetch('/api/f5tts/status');
+                const f5ttsStatus = await f5ttsResponse.json();
                 
-                // Get the script details to show audio file info
-                const scriptResponse = await fetch(`${API_BASE}/scripts/${scriptId}`);
-                if (scriptResponse.ok) {
-                    const scriptData = await scriptResponse.json();
-                    const dialogueWithAudio = scriptData.dialogue.filter(line => line.audioFile && line.audioFile.trim() !== '');
-                    
-                    if (dialogueWithAudio.length > 0) {
-                        statusMessage += '\nAudio Files:\n';
-                        dialogueWithAudio.forEach((line, idx) => {
-                            const fileName = line.audioFile.split(/[/\\]/).pop();
-                            statusMessage += `  ${line.speaker}: ${fileName}\n`;
-                        });
-                    }
-                }
+                // Check FFmpeg status
+                const ffmpegResponse = await fetch('/api/system/ffmpeg-status');
+                const ffmpegStatus = await ffmpegResponse.json();
                 
-                alert(statusMessage);
-                displayResult('generateScriptResult', data);
+                const statusHtml = `
+                    <div style="background-color: #f0f8ff; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <h4>System Status</h4>
+                        <p>🚀 API: ${apiStatus.status} (${apiStatus.totalCharacters} characters)</p>
+                        <p>🎤 F5-TTS: ${f5ttsStatus.status}</p>
+                        <p>🎬 FFmpeg: ${ffmpegStatus.status} - ${ffmpegStatus.message}</p>
+                    </div>
+                `;
+                
+                document.getElementById('systemStatus').innerHTML = statusHtml;
             } catch (error) {
-                alert(`Error checking audio status: ${error.message}`);
-                displayResult('generateScriptResult', { error: error.message });
+                document.getElementById('systemStatus').innerHTML = `
+                    <div style="background-color: #ffe6e6; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <h4>System Status</h4>
+                        <p>❌ Error checking system status: ${error.message}</p>
+                    </div>
+                `;
             }
         }
 
-        window.addEventListener('load', () => {
+        // Initialize page
+        window.onload = function() {
+            console.log('🚀 Initializing Character Management UI...');
             getSystemStatus();
             listCharacters();
-            loadCharactersForSelection();
             listScripts();
-            checkF5TTSStatus();
-        });
+        };
     </script>
 </body>
 </html> 

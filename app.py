@@ -6,13 +6,22 @@ import shutil
 import uuid
 import time
 import requests
+import subprocess
+import random
+import glob
+import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 import logging
 from openai import OpenAI
 from dotenv import load_dotenv
 from gradio_client import Client, handle_file
+
+# Add video generation imports
+import whisperx
+from pydub import AudioSegment, silence
+import warnings
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -62,11 +71,20 @@ BACKGROUND_DIR = os.path.join(API_DATA_DIR, "background")
 F5TTS_URL = "http://localhost:7860"
 F5TTS_TIMEOUT = 300  # 5 minutes
 
+# Video Generation Configuration
+VIDEO_OUTPUT_DIR = os.path.join(API_DATA_DIR, "video_output")
+DEFAULT_BACKGROUND_VIDEO = "downloads/Minecraft Parkour Gameplay No Copyright_mobile.mp4"
+FONT_PATH = 'C:/Windows/Fonts/impact.ttf'
+
 # Ensure directories exist
 os.makedirs(AUDIO_FILES_DIR, exist_ok=True)
 os.makedirs(GENERATED_AUDIO_DIR, exist_ok=True)
 os.makedirs(IMAGES_DIR, exist_ok=True)
 os.makedirs(BACKGROUND_DIR, exist_ok=True)
+os.makedirs(VIDEO_OUTPUT_DIR, exist_ok=True)
+
+# Suppress warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 # Pydantic Models
 class CharacterConfig(BaseModel):
@@ -117,6 +135,8 @@ class ScriptResponse(BaseModel):
     updatedAt: str
     hasAudio: bool = False
     audioCount: int = 0
+    finalVideoPath: Optional[str] = None
+    videoDuration: Optional[float] = None
 
 class ScriptUpdate(BaseModel):
     dialogue: List[DialogueLine]
@@ -141,6 +161,29 @@ class AudioGenerationResponse(BaseModel):
     message: str
     completedLines: int
     totalLines: int
+
+# Video Generation Models
+class VideoGenerationRequest(BaseModel):
+    scriptId: str = Field(..., description="ID of the script to generate video for")
+    backgroundVideo: Optional[str] = Field(None, description="Path to background video (optional)")
+
+class VideoGenerationStatus(BaseModel):
+    scriptId: str
+    status: str  # "pending", "processing", "completed", "failed"
+    stage: str  # Current processing stage
+    progress: float  # Progress percentage (0-100)
+    message: str
+    startedAt: Optional[str] = None
+    completedAt: Optional[str] = None
+    errorMessage: Optional[str] = None
+    finalVideoPath: Optional[str] = None
+
+class VideoGenerationResponse(BaseModel):
+    scriptId: str
+    status: str
+    message: str
+    finalVideoPath: Optional[str] = None
+    duration: Optional[float] = None
 
 # Utility Functions
 def load_user_profiles() -> Dict[str, Any]:
@@ -395,6 +438,709 @@ class F5TTSClient:
         if self.client:
             self.client = None
             logger.info("F5-TTS API connection closed")
+
+class VideoGenerator:
+    """Video generation pipeline for scripts with audio"""
+    
+    def __init__(self):
+        self.whisper_model = None
+        self.align_model = None
+        self.align_metadata = None
+        
+    def _initialize_whisper_models(self):
+        """Initialize Whisper models for subtitle generation"""
+        try:
+            if self.whisper_model is None:
+                logger.info("🎙️ Initializing Whisper models for subtitle generation...")
+                device = "cpu"
+                
+                # Try to initialize WhisperX models
+                try:
+                    self.whisper_model = whisperx.load_model("base", device, compute_type="float32")
+                    self.align_model, self.align_metadata = whisperx.load_align_model(
+                        language_code="en",
+                        device=device,
+                        model_name="WAV2VEC2_ASR_LARGE_LV60K_960H"
+                    )
+                    logger.info("✅ Whisper models initialized successfully")
+                except Exception as whisper_error:
+                    logger.warning(f"⚠️ WhisperX initialization failed: {str(whisper_error)}")
+                    logger.info("🔄 Falling back to simple subtitle generation...")
+                    # Set models to None to indicate fallback mode
+                    self.whisper_model = "fallback"
+                    self.align_model = None
+                    self.align_metadata = None
+                    
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize subtitle generation: {str(e)}")
+            # Use fallback mode instead of raising exception
+            logger.info("🔄 Using fallback subtitle generation mode...")
+            self.whisper_model = "fallback"
+            self.align_model = None
+            self.align_metadata = None
+    
+    def _get_random_background_video(self) -> str:
+        """Get a random background video from the background directory or default"""
+        try:
+            if os.path.exists(BACKGROUND_DIR):
+                background_files = [f for f in os.listdir(BACKGROUND_DIR) 
+                                  if f.startswith('background') and f.endswith('.mp4')]
+                if background_files:
+                    random_background = random.choice(background_files)
+                    background_video = os.path.join(BACKGROUND_DIR, random_background)
+                    logger.info(f"🎲 Randomly selected background: {random_background}")
+                    return background_video
+            
+            # Fallback to default
+            if os.path.exists(DEFAULT_BACKGROUND_VIDEO):
+                logger.info(f"📺 Using default background video: {DEFAULT_BACKGROUND_VIDEO}")
+                return DEFAULT_BACKGROUND_VIDEO
+            else:
+                raise Exception(f"No background video found. Default path: {DEFAULT_BACKGROUND_VIDEO}")
+                
+        except Exception as e:
+            logger.error(f"❌ Error getting background video: {str(e)}")
+            raise Exception(f"Background video error: {str(e)}")
+    
+    def _generate_subtitle_for_audio(self, audio_file: str, dialogue_text: str) -> Optional[Dict]:
+        """Generate subtitle information for a single audio clip"""
+        temp_audio_path = "temp_single_audio.wav"
+        
+        try:
+            # Validate inputs
+            if not audio_file or not dialogue_text:
+                logger.error("❌ Missing audio file or dialogue text for subtitle generation")
+                return None
+            
+            # Check if audio file exists
+            if not os.path.exists(audio_file):
+                logger.error(f"❌ Audio file not found: {audio_file}")
+                return None
+            
+            logger.info(f"🎬 Generating subtitles for: {os.path.basename(audio_file)}")
+            
+            # Load audio to get duration
+            try:
+                audio = AudioSegment.from_file(audio_file)
+                audio_duration = len(audio) / 1000.0  # Convert to seconds
+            except Exception as e:
+                logger.error(f"❌ Failed to process audio file {audio_file}: {str(e)}")
+                return None
+            
+            # Check if we're in fallback mode or have proper WhisperX models
+            if self.whisper_model == "fallback" or not self.align_model:
+                logger.info("🔄 Using fallback subtitle generation (simple timing)")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+            # Copy audio file to temp location for WhisperX processing
+            try:
+                audio.export(temp_audio_path, format="wav")
+            except Exception as e:
+                logger.error(f"❌ Failed to export audio for WhisperX: {str(e)}")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+            # Transcribe with Whisper
+            try:
+                transcription = self.whisper_model.transcribe(
+                    temp_audio_path,
+                    batch_size=1,
+                    language="en",
+                    task="transcribe"
+                )
+                
+                if not transcription.get("segments"):
+                    logger.warning("❌ No segments found in transcription, using fallback")
+                    return self._generate_simple_subtitles(dialogue_text, audio_duration)
+                
+            except Exception as e:
+                logger.error(f"❌ Whisper transcription failed: {str(e)}, using fallback")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+            # Align words
+            try:
+                aligned_data = whisperx.align(
+                    transcription["segments"],
+                    self.align_model,
+                    self.align_metadata,
+                    temp_audio_path,
+                    "cpu",
+                    return_char_alignments=False
+                )
+                
+                if not aligned_data.get("word_segments"):
+                    logger.warning("❌ No word segments found in alignment, using fallback")
+                    return self._generate_simple_subtitles(dialogue_text, audio_duration)
+                
+            except Exception as e:
+                logger.error(f"❌ Word alignment failed: {str(e)}, using fallback")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+            # Parse original dialogue text into words
+            try:
+                import re
+                original_words = []
+                clean_line = re.sub(r'[^\w\s]', '', dialogue_text.strip())
+                words = clean_line.split()
+                original_words.extend(words)
+                
+                if not original_words:
+                    logger.warning("❌ No words found in original dialogue, using fallback")
+                    return self._generate_simple_subtitles(dialogue_text, audio_duration)
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to parse original dialogue: {str(e)}, using fallback")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+            # Create subtitle segments
+            try:
+                word_segments = aligned_data["word_segments"]
+                subtitle_segments = []
+                group_size = 4
+                
+                for i in range(0, len(word_segments), group_size):
+                    group = word_segments[i:i+group_size]
+                    start = group[0]['start']
+                    end = group[-1]['end']
+                    
+                    # Use original words instead of Whisper transcribed words
+                    group_words = []
+                    for j, segment in enumerate(group):
+                        original_index = i + j
+                        if original_index < len(original_words):
+                            group_words.append(original_words[original_index])
+                        else:
+                            group_words.append(segment['word'].strip())
+                    
+                    text = " ".join([w for w in group_words if w])
+                    if text:  # Only add non-empty segments
+                        subtitle_segments.append({
+                            "start": start,
+                            "end": end,
+                            "text": text
+                        })
+                
+                if not subtitle_segments:
+                    logger.warning("❌ No subtitle segments created, using fallback")
+                    return self._generate_simple_subtitles(dialogue_text, audio_duration)
+                
+                return {
+                    "segments": subtitle_segments,
+                    "duration": audio_duration
+                }
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to create subtitle segments: {str(e)}, using fallback")
+                return self._generate_simple_subtitles(dialogue_text, audio_duration)
+            
+        except Exception as e:
+            logger.error(f"❌ Unexpected error generating subtitle: {str(e)}, using fallback")
+            # Try to get audio duration if not already available
+            try:
+                if 'audio_duration' not in locals():
+                    audio = AudioSegment.from_file(audio_file)
+                    audio_duration = len(audio) / 1000.0
+            except:
+                audio_duration = 3.0  # Default fallback duration
+            return self._generate_simple_subtitles(dialogue_text, audio_duration)
+        finally:
+            # Cleanup temp file
+            try:
+                if os.path.exists(temp_audio_path):
+                    os.remove(temp_audio_path)
+            except Exception as e:
+                logger.warning(f"Warning: Failed to cleanup temp file {temp_audio_path}: {str(e)}")
+    
+    def _generate_simple_subtitles(self, dialogue_text: str, audio_duration: float) -> Dict:
+        """Generate simple subtitles with basic timing when WhisperX is not available"""
+        try:
+            import re
+            
+            # Clean and split the dialogue text into words
+            clean_text = re.sub(r'[^\w\s]', '', dialogue_text.strip())
+            words = clean_text.split()
+            
+            if not words:
+                # If no words, create a single subtitle for the entire duration
+                return {
+                    "segments": [{
+                        "start": 0.0,
+                        "end": audio_duration,
+                        "text": dialogue_text.strip()
+                    }],
+                    "duration": audio_duration
+                }
+            
+            # Create subtitle segments with simple timing
+            subtitle_segments = []
+            words_per_segment = 4  # Group words into segments of 4
+            segment_duration = audio_duration / max(1, len(words) / words_per_segment)
+            
+            for i in range(0, len(words), words_per_segment):
+                segment_words = words[i:i + words_per_segment]
+                start_time = i / words_per_segment * segment_duration
+                end_time = min(start_time + segment_duration, audio_duration)
+                
+                subtitle_segments.append({
+                    "start": start_time,
+                    "end": end_time,
+                    "text": " ".join(segment_words)
+                })
+            
+            logger.info(f"✅ Generated {len(subtitle_segments)} simple subtitle segments")
+            return {
+                "segments": subtitle_segments,
+                "duration": audio_duration
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to generate simple subtitles: {str(e)}")
+            # Return a single subtitle for the entire duration as last resort
+            return {
+                "segments": [{
+                    "start": 0.0,
+                    "end": audio_duration,
+                    "text": dialogue_text.strip()
+                }],
+                "duration": audio_duration
+            }
+    
+    def _create_timeline(self, script_data: Dict, user_profiles: Dict) -> Tuple[List[Dict], float]:
+        """Create timeline for video generation"""
+        try:
+            dialogue_lines = script_data.get("dialogue", [])
+            if not dialogue_lines:
+                logger.error("❌ No dialogue lines found in script")
+                return [], 0
+            
+            timeline = []
+            current_time = 0
+            skipped_count = 0
+            
+            logger.info(f"🎬 Creating timeline from {len(dialogue_lines)} dialogue lines...")
+            
+            for i, dialogue_line in enumerate(dialogue_lines):
+                try:
+                    speaker = dialogue_line.get("speaker", "").lower()
+                    text = dialogue_line.get("text", "")
+                    audio_file = dialogue_line.get("audioFile", "")
+                    
+                    # Validate dialogue line data
+                    if not audio_file or not text or not speaker:
+                        logger.warning(f"⚠️ Missing data for dialogue line {i}, skipping...")
+                        skipped_count += 1
+                        continue
+                    
+                    # Check if audio file exists
+                    if not os.path.exists(audio_file):
+                        logger.error(f"❌ Audio file not found for line {i}: {audio_file}")
+                        skipped_count += 1
+                        continue
+                    
+                    logger.info(f"Processing dialogue line {i}: {speaker} - {text[:30]}...")
+                    
+                    # Generate subtitle information for this clip
+                    subtitle_info = self._generate_subtitle_for_audio(audio_file, text)
+                    if not subtitle_info:
+                        logger.error(f"❌ Failed to generate subtitle info for line {i}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Get character image
+                    character_image = self._get_character_image(speaker, user_profiles)
+                    
+                    timeline_item = {
+                        "lineIndex": i,
+                        "speaker": speaker,
+                        "text": text,
+                        "audioFile": audio_file,
+                        "imageFile": character_image,
+                        "startTime": current_time,
+                        "endTime": current_time + subtitle_info["duration"],
+                        "duration": subtitle_info["duration"],
+                        "subtitleSegments": subtitle_info["segments"]
+                    }
+                    
+                    timeline.append(timeline_item)
+                    current_time += subtitle_info["duration"]
+                    
+                    logger.info(f"✅ Added line {i} to timeline (duration: {subtitle_info['duration']:.2f}s)")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Error processing dialogue line {i}: {str(e)}")
+                    skipped_count += 1
+                    continue
+            
+            if not timeline:
+                logger.error("❌ No valid timeline items created")
+                return [], 0
+            
+            logger.info(f"✅ Timeline created with {len(timeline)} items (skipped {skipped_count}), total duration: {current_time:.2f}s")
+            return timeline, current_time
+            
+        except Exception as e:
+            logger.error(f"❌ Unexpected error creating timeline: {str(e)}")
+            return [], 0
+    
+    def _get_character_image(self, speaker: str, user_profiles: Dict) -> str:
+        """Get a random image for the character speaker"""
+        try:
+            users = user_profiles.get("users", {})
+            if speaker not in users:
+                logger.warning(f"⚠️ Speaker '{speaker}' not found in user profiles")
+                return ""
+            
+            character_data = users[speaker]
+            images = character_data.get("images", {})
+            
+            if not images:
+                logger.warning(f"⚠️ No images found for speaker '{speaker}'")
+                return ""
+            
+            # Get a random image
+            image_paths = list(images.values())
+            random_image = random.choice(image_paths)
+            
+            # Verify image exists
+            if os.path.exists(random_image):
+                logger.info(f"🖼️ Selected image for {speaker}: {os.path.basename(random_image)}")
+                return random_image
+            else:
+                logger.warning(f"⚠️ Selected image file not found: {random_image}")
+                return ""
+                
+        except Exception as e:
+            logger.error(f"❌ Error getting character image for {speaker}: {str(e)}")
+            return ""
+    
+    def _concatenate_audio_files(self, timeline: List[Dict], output_path: str) -> bool:
+        """Concatenate audio files from timeline"""
+        try:
+            if not timeline:
+                logger.error("❌ No timeline provided for audio concatenation")
+                return False
+            
+            logger.info(f"🎵 Concatenating {len(timeline)} audio files...")
+            
+            combined_audio = AudioSegment.empty()
+            processed_count = 0
+            
+            for i, item in enumerate(timeline):
+                try:
+                    audio_file = item.get("audioFile", "")
+                    if not audio_file or not os.path.exists(audio_file):
+                        logger.warning(f"⚠️ Audio file not found in timeline item {i}, skipping...")
+                        continue
+                    
+                    logger.info(f"Loading audio file {i+1}/{len(timeline)}: {os.path.basename(audio_file)}")
+                    
+                    # Load and add audio
+                    audio = AudioSegment.from_file(audio_file)
+                    
+                    if len(audio) == 0:
+                        logger.warning(f"⚠️ Audio file has zero duration: {audio_file}")
+                        continue
+                    
+                    combined_audio += audio
+                    processed_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"❌ Error processing audio file {i}: {str(e)}")
+                    continue
+            
+            if processed_count == 0:
+                logger.error("❌ No audio files were successfully processed")
+                return False
+            
+            # Export combined audio
+            try:
+                logger.info(f"💾 Exporting combined audio to: {output_path}")
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                combined_audio.export(output_path, format="wav")
+                
+                if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+                    logger.error(f"❌ Combined audio file was not created properly: {output_path}")
+                    return False
+                
+                logger.info(f"✅ Audio concatenation successful: {processed_count} files, duration: {len(combined_audio)/1000:.2f}s")
+                return True
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to export combined audio: {str(e)}")
+                return False
+            
+        except Exception as e:
+            logger.error(f"❌ Unexpected error in audio concatenation: {str(e)}")
+            return False
+    
+    def _get_video_duration(self, video_path: str) -> float:
+        """Get video duration using ffprobe"""
+        try:
+            result = subprocess.run([
+                'ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
+                '-of', 'default=noprint_wrappers=1:nokey=1', video_path
+            ], capture_output=True, text=True, timeout=10)
+            return float(result.stdout.strip()) if result.returncode == 0 else 3.0
+        except Exception:
+            return 3.0
+    
+    def _generate_video_with_ffmpeg(self, background_video: str, timeline: List[Dict], 
+                                   total_duration: float, combined_audio: str, 
+                                   output_video: str, script_id: str) -> bool:
+        """Generate final video using FFmpeg"""
+        try:
+            logger.info(f"🎬 Generating video with FFmpeg...")
+            logger.info(f"Background: {background_video}")
+            logger.info(f"Audio: {combined_audio}")
+            logger.info(f"Duration: {total_duration:.2f}s")
+            logger.info(f"Output: {output_video}")
+            
+            # Ensure output directory exists
+            os.makedirs(os.path.dirname(output_video), exist_ok=True)
+            
+            # Check font file
+            font_path = FONT_PATH
+            if not os.path.exists(font_path):
+                logger.warning(f"⚠️ Font file not found: {font_path}, using default font")
+                font_path = 'arial'  # Fallback to system default
+            else:
+                # Escape colons in Windows paths for FFmpeg
+                font_path = font_path.replace(':', '\\:')
+            
+            # Build FFmpeg command
+            filter_parts = []
+            input_parts = ['-hwaccel', 'cuda', '-stream_loop', '-1', '-i', background_video, '-i', combined_audio]
+            
+            # Add image inputs and validate them
+            image_inputs = {}
+            valid_images = 0
+            input_index = 2
+            
+            for item in timeline:
+                image_file = item.get("imageFile", "")
+                if image_file and os.path.exists(image_file):
+                    input_parts.extend(['-i', image_file])
+                    image_inputs[item["lineIndex"]] = input_index
+                    input_index += 1
+                    valid_images += 1
+                    logger.info(f"✅ Added image for line {item['lineIndex']}: {os.path.basename(image_file)}")
+                else:
+                    logger.warning(f"⚠️ No valid image for line {item['lineIndex']}: {image_file}")
+            
+            logger.info(f"Added {valid_images} valid images out of {len(timeline)} timeline items")
+            
+            # Build filter complex
+            try:
+                # Background video processing
+                filter_parts.append(f"[0:v]scale=1080:1920:force_original_aspect_ratio=disable,setsar=1,trim=duration={total_duration},setpts=PTS-STARTPTS[bg]")
+                current_base = "[bg]"
+                
+                # Add overlays and subtitles
+                overlay_count = 0
+                subtitle_count = 0
+                
+                for item in timeline:
+                    line_index = item.get("lineIndex", 0)
+                    
+                    # Add image overlay if available
+                    if line_index in image_inputs:
+                        img_input = image_inputs[line_index]
+                        filter_parts.append(
+                            f"{current_base}[{img_input}:v]overlay=0:0:enable='between(t,{item['startTime']},{item['endTime']})'[overlay{overlay_count}]"
+                        )
+                        current_base = f"[overlay{overlay_count}]"
+                        overlay_count += 1
+                    
+                    # Add subtitles for this segment
+                    if "subtitleSegments" in item and item["subtitleSegments"]:
+                        for segment in item["subtitleSegments"]:
+                            start = item["startTime"] + segment["start"]
+                            end = item["startTime"] + segment["end"]
+                            text = segment.get("text", "").strip()
+                            
+                            if not text:
+                                continue
+                                
+                            # Escape special characters in text for FFmpeg
+                            text = text.replace("'", "\\'").replace('"', '\\"').replace(':', '\\:')
+                            
+                            filter_parts.append(
+                                f"{current_base}drawtext=text='{text}':fontfile='{font_path}':fontsize=64:borderw=3:bordercolor=black:fontcolor=white:x=(w-text_w)/2:y=h-th-150:enable='between(t,{start:.3f},{end:.3f})'[sub{subtitle_count}]"
+                            )
+                            current_base = f"[sub{subtitle_count}]"
+                            subtitle_count += 1
+                
+                logger.info(f"Added {overlay_count} overlays and {subtitle_count} subtitle segments")
+                
+                # Final output (simplified - no main title for now)
+                filter_parts.append(f"{current_base}setpts=PTS-STARTPTS[final_video]")
+                output_mapping = ['-map', '[final_video]', '-map', '1:a']
+                
+            except Exception as e:
+                logger.error(f"❌ Error building FFmpeg filters: {str(e)}")
+                return False
+            
+            # Build final FFmpeg command
+            try:
+                filter_complex = ";".join(filter_parts)
+                
+                # Debug: Log the filter complex (truncated for readability)
+                if len(filter_complex) > 500:
+                    logger.info(f"Filter complex (first 500 chars): {filter_complex[:500]}...")
+                else:
+                    logger.info(f"Filter complex: {filter_complex}")
+                
+                cmd = [
+                    'ffmpeg', '-y',
+                    *input_parts,
+                    '-filter_complex', filter_complex,
+                    *output_mapping,
+                    '-c:v', 'h264_nvenc',
+                    '-preset', 'fast',
+                    '-c:a', 'aac',
+                    '-shortest',
+                    output_video
+                ]
+                
+                logger.info("Executing FFmpeg command...")
+                logger.info(f"FFmpeg inputs: {len([x for x in input_parts if not x.startswith('-')])} files")
+                
+            except Exception as e:
+                logger.error(f"❌ Error building FFmpeg command: {str(e)}")
+                return False
+            
+            # Execute FFmpeg
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)  # 10 minute timeout
+                
+                if result.returncode != 0:
+                    logger.error(f"❌ FFmpeg failed with return code: {result.returncode}")
+                    logger.error(f"FFmpeg stderr: {result.stderr}")
+                    return False
+                
+                # Verify output file was created
+                if not os.path.exists(output_video) or os.path.getsize(output_video) == 0:
+                    logger.error(f"❌ Output video file was not created properly: {output_video}")
+                    return False
+                
+                file_size = os.path.getsize(output_video)
+                logger.info(f"✅ FFmpeg video generation successful!")
+                logger.info(f"Output file: {output_video}")
+                logger.info(f"File size: {file_size} bytes")
+                
+                return True
+                
+            except subprocess.TimeoutExpired:
+                logger.error("❌ FFmpeg process timed out (10 minutes)")
+                return False
+            except Exception as e:
+                logger.error(f"❌ Error executing FFmpeg: {str(e)}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Unexpected error in video generation: {str(e)}")
+            return False
+    
+    async def generate_video(self, script_id: str, background_video: Optional[str] = None) -> VideoGenerationResponse:
+        """Main video generation pipeline"""
+        try:
+            logger.info(f"🎬 Starting video generation for script: {script_id}")
+            
+            # Load script data
+            scripts_data = load_scripts()
+            scripts = scripts_data.get("scripts", {})
+            
+            if script_id not in scripts:
+                raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+            
+            script_data = scripts[script_id]
+            dialogue_lines = script_data.get("dialogue", [])
+            
+            if not dialogue_lines:
+                raise HTTPException(status_code=400, detail="Script has no dialogue lines")
+            
+            # Check if all dialogue lines have audio
+            missing_audio = []
+            for i, line in enumerate(dialogue_lines):
+                audio_file = line.get("audioFile", "")
+                if not audio_file or not os.path.exists(audio_file):
+                    missing_audio.append(i)
+            
+            if missing_audio:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Audio files missing for dialogue lines: {missing_audio}. Generate audio first."
+                )
+            
+            # Initialize Whisper models
+            logger.info("🎙️ Initializing Whisper models...")
+            self._initialize_whisper_models()
+            
+            # Get background video
+            if not background_video:
+                background_video = self._get_random_background_video()
+            
+            if not os.path.exists(background_video):
+                raise HTTPException(status_code=400, detail=f"Background video not found: {background_video}")
+            
+            # Load user profiles for character images
+            user_profiles = load_user_profiles()
+            
+            # Create timeline
+            logger.info("🎬 Creating timeline...")
+            timeline, total_duration = self._create_timeline(script_data, user_profiles)
+            
+            if not timeline:
+                raise HTTPException(status_code=500, detail="Failed to create timeline - no valid segments")
+            
+            logger.info(f"Created timeline with {len(timeline)} segments, total duration: {total_duration:.2f}s")
+            
+            # Concatenate audio
+            logger.info("🎵 Concatenating audio files...")
+            combined_audio_path = os.path.join(VIDEO_OUTPUT_DIR, f"{script_id}_combined_audio.wav")
+            
+            if not self._concatenate_audio_files(timeline, combined_audio_path):
+                raise HTTPException(status_code=500, detail="Failed to concatenate audio files")
+            
+            # Generate final video
+            logger.info("🎬 Generating final video...")
+            final_video_path = os.path.join(VIDEO_OUTPUT_DIR, f"{script_id}_final_video.mp4")
+            
+            if not self._generate_video_with_ffmpeg(
+                background_video, timeline, total_duration, combined_audio_path, final_video_path, script_id
+            ):
+                raise HTTPException(status_code=500, detail="FFmpeg video generation failed")
+            
+            # Update script with final video path
+            script_data["finalVideoPath"] = final_video_path
+            script_data["videoDuration"] = total_duration
+            script_data["updatedAt"] = datetime.now().isoformat()
+            scripts[script_id] = script_data
+            save_scripts(scripts_data)
+            
+            # Cleanup temp files
+            try:
+                if os.path.exists(combined_audio_path):
+                    os.remove(combined_audio_path)
+                    logger.info(f"Cleaned up temp file: {combined_audio_path}")
+            except Exception as e:
+                logger.warning(f"Warning: Failed to cleanup temp file: {str(e)}")
+            
+            logger.info(f"✅ Video generation completed successfully for script: {script_id}")
+            
+            return VideoGenerationResponse(
+                scriptId=script_id,
+                status="completed",
+                message=f"✅ Video generated successfully with {len(timeline)} segments",
+                finalVideoPath=final_video_path,
+                duration=total_duration
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"❌ Video generation failed for script {script_id}: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
 
 def get_openai_client():
     """Get OpenAI client - you'll need to set OPENAI_API_KEY environment variable"""
@@ -837,8 +1583,6 @@ async def get_character(character_id: str):
         logger.error(f"Error getting character {character_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
 @app.put("/api/characters/{character_id}", response_model=CharacterResponse)
 async def update_character(character_id: str, updates: CharacterUpdate):
     """Update an existing character"""
@@ -939,12 +1683,6 @@ async def delete_character(character_id: str):
     except Exception as e:
         logger.error(f"Error deleting character {character_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-
-
 
 @app.post("/api/characters/complete", response_model=CharacterResponse)
 async def create_complete_character(
@@ -1139,7 +1877,9 @@ async def generate_script(request: ScriptRequest):
             createdAt=script_data["createdAt"],
             updatedAt=script_data["updatedAt"],
             hasAudio=False,
-            audioCount=0
+            audioCount=0,
+            finalVideoPath=None,
+            videoDuration=None
         )
         
     except HTTPException:
@@ -1175,7 +1915,9 @@ async def list_scripts():
                 createdAt=script_data["createdAt"],
                 updatedAt=script_data["updatedAt"],
                 hasAudio=audio_count > 0,
-                audioCount=audio_count
+                audioCount=audio_count,
+                finalVideoPath=script_data.get("finalVideoPath"),
+                videoDuration=script_data.get("videoDuration")
             )
             script_responses.append(script_response)
         
@@ -1214,7 +1956,9 @@ async def get_script(script_id: str):
             createdAt=script_data["createdAt"],
             updatedAt=script_data["updatedAt"],
             hasAudio=audio_count > 0,
-            audioCount=audio_count
+            audioCount=audio_count,
+            finalVideoPath=script_data.get("finalVideoPath"),
+            videoDuration=script_data.get("videoDuration")
         )
         
     except HTTPException:
@@ -1242,6 +1986,7 @@ async def update_script(script_id: str, updates: ScriptUpdate):
         # Process each dialogue line and handle audio cleanup
         updated_dialogue = []
         deleted_audio_files = []
+        dialogue_changed = False
         
         for i, new_line in enumerate(new_dialogue_updates):
             # Get the old line if it exists
@@ -1268,6 +2013,7 @@ async def update_script(script_id: str, updates: ScriptUpdate):
                 speaker_changed = old_speaker != new_speaker
                 
                 if text_changed or speaker_changed:
+                    dialogue_changed = True
                     # Content changed - remove old audio file if it exists
                     if old_audio and old_audio.strip() and os.path.exists(old_audio):
                         try:
@@ -1287,12 +2033,14 @@ async def update_script(script_id: str, updates: ScriptUpdate):
                         logger.info(f"📝 Line {i} unchanged - no existing audio")
             else:
                 # This is a new line
+                dialogue_changed = True
                 logger.info(f"➕ New line {i} added: {new_line.speaker} - {new_line.text[:30]}...")
             
             updated_dialogue.append(new_dialogue_line)
         
         # Handle case where new dialogue has fewer lines than old dialogue
         if len(old_dialogue) > len(new_dialogue_updates):
+            dialogue_changed = True
             # Delete audio files for removed lines
             for i in range(len(new_dialogue_updates), len(old_dialogue)):
                 old_line = old_dialogue[i]
@@ -1308,6 +2056,12 @@ async def update_script(script_id: str, updates: ScriptUpdate):
         # Update the script with new dialogue
         script_data["dialogue"] = updated_dialogue
         script_data["updatedAt"] = datetime.now().isoformat()
+        
+        # Clear video data if any dialogue was changed (since video will be outdated)
+        if dialogue_changed:
+            logger.info("🎬 Clearing video data since dialogue was modified")
+            script_data["finalVideoPath"] = None
+            script_data["videoDuration"] = None
         
         # Save updated scripts
         save_scripts(scripts_data)
@@ -1330,7 +2084,9 @@ async def update_script(script_id: str, updates: ScriptUpdate):
             createdAt=script_data["createdAt"],
             updatedAt=script_data["updatedAt"],
             hasAudio=audio_count > 0,
-            audioCount=audio_count
+            audioCount=audio_count,
+            finalVideoPath=script_data.get("finalVideoPath"),
+            videoDuration=script_data.get("videoDuration")
         )
         
     except HTTPException:
@@ -1452,6 +2208,145 @@ async def get_f5tts_status():
             "timestamp": datetime.now().isoformat()
         }
 
+# Video Generation Endpoints
+
+@app.post("/api/scripts/{script_id}/generate-video", response_model=VideoGenerationResponse)
+async def generate_script_video(script_id: str, background_video: Optional[str] = None):
+    """Generate video for a script with audio"""
+    try:
+        logger.info(f"🎬 Video generation requested for script: {script_id}")
+        
+        # Check if script exists
+        scripts_data = load_scripts()
+        scripts = scripts_data.get("scripts", {})
+        
+        if script_id not in scripts:
+            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        
+        # Validate that all dialogue lines have audio files
+        script = scripts[script_id]
+        dialogue_lines = script.get("dialogue", [])
+        
+        if not dialogue_lines:
+            raise HTTPException(status_code=400, detail="Script has no dialogue lines")
+        
+        missing_audio = []
+        for i, line in enumerate(dialogue_lines):
+            audio_file = line.get("audioFile", "")
+            if not audio_file or not os.path.exists(audio_file):
+                missing_audio.append(f"Line {i+1} ({line.get('speaker', 'unknown')})")
+        
+        if missing_audio:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Cannot generate video: Missing audio files for {len(missing_audio)} lines. Generate all audio files first. Missing: {', '.join(missing_audio[:3])}{'...' if len(missing_audio) > 3 else ''}"
+            )
+        
+        logger.info(f"✅ Audio validation passed: {len(dialogue_lines)} audio files ready")
+        
+        # Initialize video generator
+        video_generator = VideoGenerator()
+        
+        # Generate video
+        result = await video_generator.generate_video(script_id, background_video)
+        
+        logger.info(f"✅ Video generation completed for script: {script_id}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Video generation API error for script {script_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+
+@app.get("/api/scripts/{script_id}/video-status", response_model=VideoGenerationStatus)
+async def get_video_generation_status(script_id: str):
+    """Get video generation status for a script"""
+    try:
+        scripts_data = load_scripts()
+        scripts = scripts_data.get("scripts", {})
+        
+        if script_id not in scripts:
+            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        
+        script = scripts[script_id]
+        final_video_path = script.get("finalVideoPath", "")
+        
+        # Check if video exists and is valid
+        if final_video_path and os.path.exists(final_video_path) and os.path.getsize(final_video_path) > 0:
+            status = "completed"
+            message = f"Video generated successfully: {os.path.basename(final_video_path)}"
+            progress = 100.0
+        else:
+            # Check if all dialogue lines have audio (prerequisite for video generation)
+            dialogue_lines = script.get("dialogue", [])
+            total_lines = len(dialogue_lines)
+            audio_lines = 0
+            
+            for line in dialogue_lines:
+                audio_file = line.get("audioFile", "")
+                if audio_file and os.path.exists(audio_file):
+                    audio_lines += 1
+            
+            if audio_lines == total_lines and total_lines > 0:
+                status = "pending"
+                message = f"Ready for video generation ({audio_lines}/{total_lines} audio files ready)"
+                progress = 0.0
+            else:
+                status = "pending"
+                message = f"Waiting for audio generation ({audio_lines}/{total_lines} audio files ready)"
+                progress = 0.0
+        
+        return VideoGenerationStatus(
+            scriptId=script_id,
+            status=status,
+            stage="ready" if status == "pending" else "completed",
+            progress=progress,
+            message=message,
+            finalVideoPath=final_video_path if final_video_path else None
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error getting video status for script {script_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/system/ffmpeg-status")
+async def check_ffmpeg_status():
+    """Check if FFmpeg is available"""
+    try:
+        result = subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            return {
+                "status": "available",
+                "message": "FFmpeg is available and working",
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "FFmpeg check failed",
+                "timestamp": datetime.now().isoformat()
+            }
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "timeout",
+            "message": "FFmpeg check timed out",
+            "timestamp": datetime.now().isoformat()
+        }
+    except FileNotFoundError:
+        return {
+            "status": "not_found",
+            "message": "FFmpeg not found in PATH",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"FFmpeg check error: {str(e)}",
+            "timestamp": datetime.now().isoformat()
+        }
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")
