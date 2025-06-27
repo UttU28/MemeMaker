@@ -42,7 +42,7 @@ This sophisticated system combines multiple AI technologies to automatically cre
 ### Core AI Services
 - **🧠 Large Language Models**: OpenAI GPT-3.5/4 or Local Ollama (Llama 3.2)
 - **🎤 Text-to-Speech**: F5-TTS (High-quality voice cloning)
-- **👂 Speech Recognition**: WhisperX (For subtitle alignment)
+- **📝 Subtitle Generation**: Simple timing-based subtitle generation
 - **😊 Emotion AI**: Custom mood detection system
 
 ### Media Processing
@@ -188,9 +188,9 @@ python downloadCrop.py
 - CUDA-accelerated video encoding
 
 ### 6. **Subtitle Generation**
-- WhisperX word-level transcription
-- SRT format with precise timing
-- Styled subtitles with word highlighting
+- Simple timing-based subtitle generation
+- Word-level timing based on audio duration
+- Styled subtitles with automatic word grouping
 - Main word overlay with emphasis
 
 ### 7. **Final Output**
@@ -387,7 +387,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **F5-TTS**: High-quality voice cloning technology
 - **OpenAI**: GPT language models for dialogue generation
 - **Ollama**: Local LLM inference capability
-- **WhisperX**: Precise speech recognition and alignment
+- **Simple Subtitles**: Timing-based subtitle generation
 - **FFmpeg**: Powerful multimedia processing framework
 
 ---
