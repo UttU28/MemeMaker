@@ -156,6 +156,133 @@
              min-height: 60px;
              margin: 10px 0;
          }
+         .character-card.editing {
+             border-color: #007bff;
+             background-color: #f8f9ff;
+             box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+         }
+         .slider-container {
+             display: flex;
+             align-items: center;
+             gap: 10px;
+             margin: 5px 0;
+         }
+         .slider {
+             flex: 1;
+             height: 6px;
+             border-radius: 3px;
+             background: #ddd;
+             outline: none;
+             -webkit-appearance: none;
+         }
+         .slider::-webkit-slider-thumb {
+             -webkit-appearance: none;
+             appearance: none;
+             width: 20px;
+             height: 20px;
+             border-radius: 50%;
+             background: #007bff;
+             cursor: pointer;
+         }
+         .slider::-moz-range-thumb {
+             width: 20px;
+             height: 20px;
+             border-radius: 50%;
+             background: #007bff;
+             cursor: pointer;
+             border: none;
+         }
+         .slider-value {
+             min-width: 60px;
+             text-align: center;
+             font-weight: bold;
+             color: #007bff;
+         }
+         .image-gallery {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 8px;
+             margin: 10px 0;
+             max-height: 120px;
+             overflow-y: auto;
+             padding: 5px;
+             border: 1px solid #e0e0e0;
+             border-radius: 4px;
+             background-color: #fafafa;
+         }
+         .image-tile {
+             width: 60px;
+             height: 60px;
+             border-radius: 6px;
+             object-fit: cover;
+             border: 2px solid #ddd;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             background-color: #f0f0f0;
+             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>');
+             background-size: 30px 30px;
+             background-repeat: no-repeat;
+             background-position: center;
+         }
+         .image-tile:hover {
+             border-color: #007bff;
+             transform: scale(1.05);
+             box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+         }
+         .image-modal {
+             display: none;
+             position: fixed;
+             z-index: 1000;
+             left: 0;
+             top: 0;
+             width: 100%;
+             height: 100%;
+             background-color: rgba(0,0,0,0.8);
+             cursor: pointer;
+         }
+         .image-modal img {
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             max-width: 90%;
+             max-height: 90%;
+             border-radius: 8px;
+         }
+         .image-modal .close {
+             position: absolute;
+             top: 20px;
+             right: 30px;
+             color: white;
+             font-size: 40px;
+             font-weight: bold;
+             cursor: pointer;
+         }
+         .image-container {
+             position: relative;
+             display: inline-block;
+             margin: 4px;
+         }
+         .remove-indicator {
+             position: absolute;
+             top: 2px;
+             right: 2px;
+             background: #dc3545;
+             color: white;
+             border-radius: 50%;
+             width: 20px;
+             height: 20px;
+             text-align: center;
+             line-height: 20px;
+             font-size: 12px;
+             font-weight: bold;
+             cursor: pointer;
+             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+         }
+         .image-tile.marked-for-removal {
+             border: 2px solid #dc3545 !important;
+             opacity: 0.5;
+         }
     </style>
 </head>
 <body>
@@ -212,17 +339,34 @@
                 
                 <div class="form-group">
                     <h4>⚙️ Configuration (Optional - Leave empty for defaults)</h4>
-                                         <div class="form-row">
-                         <label>Speed:</label>
-                         <input type="number" id="completeSpeed" step="0.1" min="0.5" max="2.0" placeholder="1.0">
-                         
-                         <label>NFE Steps:</label>
-                         <input type="number" id="completeNfeSteps" min="20" max="50" placeholder="34">
+                                         <div class="form-group">
+                         <label>Speed: <span id="completeSpeedValue">1.0x</span></label>
+                         <div class="slider-container">
+                             <span>0.3</span>
+                             <input type="range" id="completeSpeed" class="slider" min="0.3" max="2.0" step="0.1" value="1.0" oninput="updateSliderValue('completeSpeed', 'completeSpeedValue', 'x')">
+                             <span>2.0</span>
+                         </div>
                      </div>
-                     <div class="form-row">
-                         <label>Cross Fade Duration:</label>
-                         <input type="number" id="completeCrossFadeDuration" step="0.01" min="0" max="1" placeholder="0.15">
-                         
+                     
+                     <div class="form-group">
+                         <label>NFE Steps: <span id="completeNfeValue">34</span></label>
+                         <div class="slider-container">
+                             <span>4</span>
+                             <input type="range" id="completeNfeSteps" class="slider" min="4" max="64" step="1" value="34" oninput="updateSliderValue('completeNfeSteps', 'completeNfeValue', '')">
+                             <span>64</span>
+                     </div>
+                     </div>
+                     
+                     <div class="form-group">
+                         <label>Cross Fade Duration: <span id="completeCrossFadeValue">0.15s</span></label>
+                         <div class="slider-container">
+                             <span>0</span>
+                             <input type="range" id="completeCrossFadeDuration" class="slider" min="0" max="1" step="0.01" value="0.15" oninput="updateSliderValue('completeCrossFadeDuration', 'completeCrossFadeValue', 's')">
+                             <span>1</span>
+                         </div>
+                     </div>
+                     
+                     <div class="form-group">
                          <label>Remove Silences:</label>
                          <input type="checkbox" id="completeRemoveSilences" checked>
                      </div>
@@ -235,79 +379,9 @@
             <div id="createCompleteCharacterResult"></div>
         </div>
         
-        <!-- Update Character Section -->
-        <div class="section">
-            <h2>✏️ Update Character</h2>
-            <form id="updateCharacterForm">
-                <div class="form-group">
-                    <label>Select Character:</label>
-                    <select id="updateCharacterId" required style="width: 300px;">
-                        <option value="">-- Select a character to update --</option>
-                    </select>
-                    <button type="button" onclick="loadCharactersForUpdate()" class="warning" style="margin-left: 10px;">🔄 Refresh</button>
-                    
-                    <label>New Display Name:</label>
-                    <input type="text" id="updateDisplayName" placeholder="Leave empty to keep current" style="width: 200px;">
-                </div>
-                
-                <div class="form-group">
-                    <h4>⚙️ Update Configuration (Optional)</h4>
-                                         <div class="form-row">
-                         <label>Speed:</label>
-                         <input type="number" id="updateSpeed" step="0.1" min="0.5" max="2.0" placeholder="1.0">
-                         
-                         <label>NFE Steps:</label>
-                         <input type="number" id="updateNfeSteps" min="20" max="50" placeholder="34">
-                     </div>
-                     <div class="form-row">
-                         <label>Cross Fade Duration:</label>
-                         <input type="number" id="updateCrossFadeDuration" step="0.01" min="0" max="1" placeholder="0.15">
-                         
-                         <label>Remove Silences:</label>
-                         <select id="updateRemoveSilences">
-                             <option value="">Keep current</option>
-                             <option value="true">True</option>
-                             <option value="false">False</option>
-                         </select>
-                     </div>
-                </div>
-                
-                <button type="submit" class="warning">📝 Update Character</button>
-            </form>
-            <div id="updateCharacterResult"></div>
-        </div>
+
         
-        <!-- Get Character Details Section -->
-        <div class="section">
-            <h2>🔍 Get Character Details</h2>
-            <form id="getCharacterForm">
-                <div class="form-row">
-                    <label>Select Character:</label>
-                    <select id="getCharacterId" required style="width: 300px;">
-                        <option value="">-- Select a character to view --</option>
-                    </select>
-                    <button type="button" onclick="loadCharactersForGet()" class="warning" style="margin-left: 10px;">🔄 Refresh</button>
-                    <button type="submit">🔍 Get Character</button>
-                </div>
-            </form>
-            <div id="getCharacterResult"></div>
-        </div>
-        
-        <!-- Delete Character Section -->
-        <div class="section">
-            <h2>🗑️ Delete Character</h2>
-            <form id="deleteCharacterForm">
-                <div class="form-row">
-                    <label>Select Character:</label>
-                    <select id="deleteCharacterId" required style="width: 300px;">
-                        <option value="">-- Select a character to delete --</option>
-                    </select>
-                    <button type="button" onclick="loadCharactersForDelete()" class="warning" style="margin-left: 10px;">🔄 Refresh</button>
-                    <button type="submit" class="danger">🗑️ Delete Character</button>
-                </div>
-            </form>
-            <div id="deleteCharacterResult"></div>
-        </div>
+
         
         <!-- F5-TTS Status Section -->
         <div class="section">
@@ -396,9 +470,16 @@
          </div>
      </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="close">&times;</span>
+        <img id="modalImage" src="" alt="Character Image">
+     </div>
+
     <script>
         const API_BASE = 'http://localhost:8000/api';
-        const BASE_PATH = 'C:\\Users\\utsav\\OneDrive\\Desktop\\VoiceClonning_F5-TTS\\';
+        // const API_BASE = 'https://lucky-adjusted-possum.ngrok-free.app/api';
+        const BASE_PATH = 'C:\\Users\\utsav\\OneDrive\\Desktop\\VoiceClonning_F5-TTS\\backend\\';
         
         // Helper function to convert relative paths to absolute paths for user display
         function getAbsolutePath(relativePath) {
@@ -445,6 +526,46 @@
                 element.innerHTML = `<div class="${className}"><p>${data}</p></div>`;
             }
         }
+
+        // Update slider value display in real-time
+        function updateSliderValue(sliderId, valueId, suffix) {
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+            valueDisplay.textContent = slider.value + suffix;
+        }
+
+        // Convert image path to URL for display
+        function getImageUrl(imagePath) {
+            if (!imagePath) return '';
+            // Convert Windows backslashes to forward slashes for URL
+            const cleanPath = imagePath.replace(/\\/g, '/');
+            // Remove the apiData prefix if present and prepend with API base
+            const relativePath = cleanPath.replace(/^apiData\//, '');
+            return `${API_BASE}/static/${relativePath}`;
+        }
+
+        // Open image in modal
+        function openImageModal(imageUrl, altText) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modalImg.src = imageUrl;
+            modalImg.alt = altText;
+            modal.style.display = 'block';
+        }
+
+        // Close image modal
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside the image
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeImageModal();
+            }
+        });
         
         async function getSystemStatus() {
             try {
@@ -510,18 +631,128 @@
                 let html = '<div class="status-success"><h4>👥 Characters Loaded Successfully</h4></div>';
                 data.forEach(char => {
                     html += `
-                        <div class="character-card">
+                        <div class="character-card" id="char-${char.id}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h4>🎭 ${char.displayName} (${char.id})</h4>
+                                <div>
+                                    <button class="warning" onclick="editCharacter('${char.id}')" style="padding: 5px 10px; margin-right: 5px;">✏️ Edit</button>
+                                    <button class="danger" onclick="deleteCharacter('${char.id}', '${char.displayName}')" style="padding: 5px 10px;">🗑️ Delete</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Display Mode -->
+                            <div id="display-${char.id}">
                             <div class="form-row">
                                 <span><strong>🎵 Audio:</strong> ${char.hasAudio ? '✅ Available' : '❌ Missing'}</span>
                                 <span><strong>🖼️ Images:</strong> ${char.imageCount} files</span>
                             </div>
+                                
+                                <!-- Image Gallery -->
+                                <div class="form-group">
+                                    <label><strong>🖼️ Character Images:</strong></label>
+                                    ${char.imageCount > 0 ? `
+                                    <div class="image-gallery">
+                                        ${Object.values(char.images).map((imagePath, index) => `
+                                            <img src="${getImageUrl(imagePath)}" 
+                                                 alt="${char.displayName} - Image ${index + 1}" 
+                                                 class="image-tile" 
+                                                 onclick="openImageModal('${getImageUrl(imagePath)}', '${char.displayName} - Image ${index + 1}')"
+                                                 title="Click to view full size"
+                                                 onerror="this.style.display='none'">
+                                        `).join('')}
+                                    </div>
+                                    ` : `
+                                    <div style="padding: 20px; text-align: center; color: #999; background-color: #f8f9fa; border-radius: 4px; border: 1px dashed #ddd;">
+                                        📷 No images available for this character
+                                    </div>
+                                    `}
+                                </div>
+                                
                             <div class="form-row">
                                 <span><strong>⚡ Speed:</strong> ${char.config.speed}x</span>
                                 <span><strong>🔧 NFE Steps:</strong> ${char.config.nfeSteps}</span>
                                 <span><strong>🔀 Cross Fade:</strong> ${char.config.crossFadeDuration}s</span>
+                                    <span><strong>🔇 Remove Silences:</strong> ${char.config.removeSilences ? '✅ Yes' : '❌ No'}</span>
                             </div>
                             <p><strong>📅 Created:</strong> ${new Date(char.createdAt).toLocaleString()}</p>
+                            </div>
+                            
+                            <!-- Edit Mode (Initially Hidden) -->
+                            <div id="edit-${char.id}" style="display: none;">
+                                <div class="form-group">
+                                    <label><strong>Display Name:</strong></label>
+                                    <input type="text" id="edit-name-${char.id}" value="${char.displayName}" style="width: 300px; margin-left: 10px;">
+                                </div>
+                                
+                                <!-- Image Management -->
+                                <div class="form-group">
+                                    <h4>🖼️ Image Management</h4>
+                                    <div class="form-group">
+                                        <label><strong>Current Images (click to remove):</strong></label>
+                                        <div id="edit-images-${char.id}" class="image-gallery" style="max-height: 150px;">
+                                            ${Object.entries(char.images).map(([key, imagePath]) => `
+                                                <div class="image-container" style="position: relative; display: inline-block;">
+                                                    <img src="${getImageUrl(imagePath)}" 
+                                                         alt="${char.displayName} - Image ${key}" 
+                                                         class="image-tile" 
+                                                         style="border: 2px solid #ddd; cursor: pointer;"
+                                                         onclick="toggleImageForRemoval('${char.id}', '${key}', this)"
+                                                         title="Click to mark for removal"
+                                                         onerror="this.style.display='none'">
+                                                    <span class="remove-indicator" id="remove-${char.id}-${key}" 
+                                                          style="display: none; position: absolute; top: 2px; right: 2px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 12px;">✗</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label><strong>Add New Images:</strong></label>
+                                        <input type="file" id="edit-new-images-${char.id}" accept=".png,.jpg,.jpeg,.webp" multiple onchange="showSelectedFiles('${char.id}')">
+                                        <div id="selected-files-${char.id}" style="margin-top: 5px; font-size: 12px; color: #666;"></div>
+                                        <br><small>Supported formats: PNG, JPG, JPEG, WEBP (Max 10MB each, Max 10 total images)</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <h4>⚙️ Configuration</h4>
+                                                                         <div class="form-group">
+                                         <label>Speed: <span id="edit-speed-value-${char.id}">${char.config.speed}</span>x</label>
+                                         <div class="slider-container">
+                                             <span>0.3</span>
+                                             <input type="range" id="edit-speed-${char.id}" class="slider" min="0.3" max="2.0" step="0.1" value="${char.config.speed}" oninput="updateSliderValue('edit-speed-${char.id}', 'edit-speed-value-${char.id}', 'x')">
+                                             <span>2.0</span>
+                                         </div>
+                                     </div>
+                                     
+                                     <div class="form-group">
+                                         <label>NFE Steps: <span id="edit-nfe-value-${char.id}">${char.config.nfeSteps}</span></label>
+                                         <div class="slider-container">
+                                             <span>4</span>
+                                             <input type="range" id="edit-nfe-${char.id}" class="slider" min="4" max="64" step="1" value="${char.config.nfeSteps}" oninput="updateSliderValue('edit-nfe-${char.id}', 'edit-nfe-value-${char.id}', '')">
+                                             <span>64</span>
+                                         </div>
+                                     </div>
+                                     
+                                     <div class="form-group">
+                                         <label>Cross Fade Duration: <span id="edit-crossfade-value-${char.id}">${char.config.crossFadeDuration}</span>s</label>
+                                         <div class="slider-container">
+                                             <span>0</span>
+                                             <input type="range" id="edit-crossfade-${char.id}" class="slider" min="0" max="1" step="0.01" value="${char.config.crossFadeDuration}" oninput="updateSliderValue('edit-crossfade-${char.id}', 'edit-crossfade-value-${char.id}', 's')">
+                                             <span>1</span>
+                                         </div>
+                                     </div>
+                                     
+                                     <div class="form-group">
+                                         <label>Remove Silences:</label>
+                                         <input type="checkbox" id="edit-silences-${char.id}" ${char.config.removeSilences ? 'checked' : ''}>
+                                     </div>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <button onclick="saveCharacterChanges('${char.id}')" class="success" style="padding: 8px 15px;">💾 Save Changes</button>
+                                    <button onclick="cancelCharacterEdit('${char.id}')" class="danger" style="padding: 8px 15px; margin-left: 10px;">❌ Cancel</button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
@@ -541,6 +772,184 @@
             }
         }
 
+        // Delete character function (moved from deleted section)
+        async function deleteCharacter(characterId, displayName) {
+            if (!confirm(`Are you sure you want to delete character '${displayName}' (${characterId})? This will also delete all associated files.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Successfully deleted character: ${displayName}`);
+                    listCharacters(); // Refresh the character list
+                } else {
+                    alert(`Failed to delete character: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                alert(`Error deleting character: ${error.message}`);
+            }
+        }
+
+        // Edit character function - toggle edit mode
+        function editCharacter(characterId) {
+            const characterCard = document.getElementById(`char-${characterId}`);
+            const displayDiv = document.getElementById(`display-${characterId}`);
+            const editDiv = document.getElementById(`edit-${characterId}`);
+            
+            // Add editing class for visual feedback
+            characterCard.classList.add('editing');
+            
+            // Hide display mode, show edit mode
+            displayDiv.style.display = 'none';
+            editDiv.style.display = 'block';
+        }
+
+        // Cancel character edit - toggle back to display mode
+        function cancelCharacterEdit(characterId) {
+            const characterCard = document.getElementById(`char-${characterId}`);
+            const displayDiv = document.getElementById(`display-${characterId}`);
+            const editDiv = document.getElementById(`edit-${characterId}`);
+            
+            // Remove editing class
+            characterCard.classList.remove('editing');
+            
+            // Clear image removal tracking
+            if (imagesToRemove[characterId]) {
+                imagesToRemove[characterId].clear();
+            }
+            
+            // Clear new image file selection
+            const newImageInput = document.getElementById(`edit-new-images-${characterId}`);
+            if (newImageInput) {
+                newImageInput.value = '';
+            }
+            
+            // Show display mode, hide edit mode
+            displayDiv.style.display = 'block';
+            editDiv.style.display = 'none';
+        }
+
+        // Track images marked for removal
+        const imagesToRemove = {};
+
+        // Show selected files for new images
+        function showSelectedFiles(characterId) {
+            const fileInput = document.getElementById(`edit-new-images-${characterId}`);
+            const selectedFilesDiv = document.getElementById(`selected-files-${characterId}`);
+            
+            if (fileInput.files.length > 0) {
+                const fileNames = Array.from(fileInput.files).map(file => file.name).join(', ');
+                selectedFilesDiv.innerHTML = `📁 Selected: ${fileInput.files.length} file(s) - ${fileNames}`;
+                selectedFilesDiv.style.color = '#007bff';
+            } else {
+                selectedFilesDiv.innerHTML = '';
+            }
+        }
+
+        // Toggle image for removal
+        function toggleImageForRemoval(characterId, imageKey, imgElement) {
+            if (!imagesToRemove[characterId]) {
+                imagesToRemove[characterId] = new Set();
+            }
+            
+            const removeIndicator = document.getElementById(`remove-${characterId}-${imageKey}`);
+            
+            if (imagesToRemove[characterId].has(imageKey)) {
+                // Remove from removal list
+                imagesToRemove[characterId].delete(imageKey);
+                imgElement.style.border = '2px solid #ddd';
+                imgElement.style.opacity = '1';
+                removeIndicator.style.display = 'none';
+            } else {
+                // Add to removal list
+                imagesToRemove[characterId].add(imageKey);
+                imgElement.style.border = '2px solid red';
+                imgElement.style.opacity = '0.5';
+                removeIndicator.style.display = 'block';
+            }
+        }
+
+        // Save character changes with image management
+        async function saveCharacterChanges(characterId) {
+            const displayName = document.getElementById(`edit-name-${characterId}`).value.trim();
+            const speed = document.getElementById(`edit-speed-${characterId}`).value;
+            const nfeSteps = document.getElementById(`edit-nfe-${characterId}`).value;
+            const crossFadeDuration = document.getElementById(`edit-crossfade-${characterId}`).value;
+            const removeSilences = document.getElementById(`edit-silences-${characterId}`).checked;
+            const newImageFiles = document.getElementById(`edit-new-images-${characterId}`).files;
+            
+            if (!displayName) {
+                alert('Display name cannot be empty');
+                return;
+            }
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('displayName', displayName);
+            formData.append('speed', speed);
+            formData.append('nfeSteps', nfeSteps);
+            formData.append('crossFadeDuration', crossFadeDuration);
+            formData.append('removeSilences', removeSilences.toString());
+            
+            // Add images to remove
+            if (imagesToRemove[characterId] && imagesToRemove[characterId].size > 0) {
+                const keysToRemove = Array.from(imagesToRemove[characterId]).join(',');
+                formData.append('removeImageKeys', keysToRemove);
+                console.log('🗑️ Images to remove:', keysToRemove);
+            }
+            
+            // Add new images
+            if (newImageFiles && newImageFiles.length > 0) {
+                console.log('📁 Adding new images:', newImageFiles.length);
+                for (let i = 0; i < newImageFiles.length; i++) {
+                    formData.append('newImageFiles', newImageFiles[i]);
+                    console.log('📷 Adding image:', newImageFiles[i].name);
+                }
+            }
+            
+            // Debug: Log all form data
+            console.log('📝 Form data being sent:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}:`, value);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Successfully updated character: ${displayName}`);
+                    // Clear the removal tracking for this character
+                    if (imagesToRemove[characterId]) {
+                        imagesToRemove[characterId].clear();
+                    }
+                    listCharacters(); // Refresh the character list to show updated data
+                } else {
+                    console.error('❌ Update failed:', response.status, data);
+                    let errorMessage = 'Unknown error';
+                    if (data.detail) {
+                        if (Array.isArray(data.detail)) {
+                            errorMessage = data.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join('\n');
+                        } else {
+                            errorMessage = data.detail;
+                        }
+                    }
+                    alert(`Failed to update character: ${errorMessage}\nStatus: ${response.status}`);
+                }
+            } catch (error) {
+                alert(`Error updating character: ${error.message}`);
+            }
+        }
+
         function loadCharactersForSelection(characters) {
             const selectionDiv = document.getElementById('script-characters');
             selectionDiv.innerHTML = '';
@@ -555,101 +964,10 @@
         }
 
         // Functions to populate character dropdowns for Update, Get, and Delete
-        async function loadCharactersForUpdate() {
-            try {
-                const response = await fetch(`${API_BASE}/characters`);
-                const characters = await response.json();
-                
-                const selectElement = document.getElementById('updateCharacterId');
-                selectElement.innerHTML = '<option value="">-- Select a character to update --</option>';
-                
-                characters.forEach(char => {
-                    const option = document.createElement('option');
-                    option.value = char.id;
-                    option.textContent = `${char.displayName} (${char.id}) - ${char.imageCount} images, ${char.hasAudio ? 'Audio ✅' : 'No Audio ❌'}`;
-                    selectElement.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading characters for update:', error);
-                alert('Failed to load characters. Please try again.');
-            }
-        }
-
-        async function loadCharactersForGet() {
-            try {
-                const response = await fetch(`${API_BASE}/characters`);
-                const characters = await response.json();
-                
-                const selectElement = document.getElementById('getCharacterId');
-                selectElement.innerHTML = '<option value="">-- Select a character to view --</option>';
-                
-                characters.forEach(char => {
-                    const option = document.createElement('option');
-                    option.value = char.id;
-                    option.textContent = `${char.displayName} (${char.id}) - ${char.imageCount} images, ${char.hasAudio ? 'Audio ✅' : 'No Audio ❌'}`;
-                    selectElement.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading characters for get:', error);
-                alert('Failed to load characters. Please try again.');
-            }
-        }
-
-        async function loadCharactersForDelete() {
-            try {
-                const response = await fetch(`${API_BASE}/characters`);
-                const characters = await response.json();
-                
-                const selectElement = document.getElementById('deleteCharacterId');
-                selectElement.innerHTML = '<option value="">-- Select a character to delete --</option>';
-                
-                characters.forEach(char => {
-                    const option = document.createElement('option');
-                    option.value = char.id;
-                    option.textContent = `${char.displayName} (${char.id}) - ${char.imageCount} images, ${char.hasAudio ? 'Audio ✅' : 'No Audio ❌'}`;
-                    selectElement.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading characters for delete:', error);
-                alert('Failed to load characters. Please try again.');
-            }
-        }
-
-        // Helper function to populate all character dropdowns at once
+                // Helper function to populate character dropdown for script selection
         function populateCharacterDropdowns(characters) {
-            // Update dropdown
-            const updateSelect = document.getElementById('updateCharacterId');
-            updateSelect.innerHTML = '<option value="">-- Select a character to update --</option>';
-            
-            // Get dropdown
-            const getSelect = document.getElementById('getCharacterId');
-            getSelect.innerHTML = '<option value="">-- Select a character to view --</option>';
-            
-            // Delete dropdown
-            const deleteSelect = document.getElementById('deleteCharacterId');
-            deleteSelect.innerHTML = '<option value="">-- Select a character to delete --</option>';
-            
-            characters.forEach(char => {
-                const optionText = `${char.displayName} (${char.id}) - ${char.imageCount} images, ${char.hasAudio ? 'Audio ✅' : 'No Audio ❌'}`;
-                
-                // Update dropdown
-                const updateOption = document.createElement('option');
-                updateOption.value = char.id;
-                updateOption.textContent = optionText;
-                updateSelect.appendChild(updateOption);
-                
-                // Get dropdown
-                const getOption = document.createElement('option');
-                getOption.value = char.id;
-                getOption.textContent = optionText;
-                getSelect.appendChild(getOption);
-                
-                // Delete dropdown
-                const deleteOption = document.createElement('option');
-                deleteOption.value = char.id;
-                deleteOption.textContent = optionText;
-                deleteSelect.appendChild(deleteOption);
-            });
+            // No longer needed for character updates since they're inline now
+            // Just keeping this function name for compatibility with existing calls
         }
 
         // Alias for backward compatibility
@@ -725,81 +1043,8 @@
                 alert(`Error creating character: ${error.message}`);
             }
         });
-        document.getElementById('updateCharacterForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const characterId = document.getElementById('updateCharacterId').value;
-            const displayName = document.getElementById('updateDisplayName').value;
-            const speed = document.getElementById('updateSpeed').value;
-            const nfeSteps = document.getElementById('updateNfeSteps').value;
-            const crossFadeDuration = document.getElementById('updateCrossFadeDuration').value;
-            const removeSilences = document.getElementById('updateRemoveSilences').value;
-            
-            const payload = {};
-            
-            if (displayName) payload.displayName = displayName;
-            
-            if (speed || nfeSteps || crossFadeDuration || removeSilences) {
-                payload.config = {};
-                if (speed) payload.config.speed = parseFloat(speed);
-                if (nfeSteps) payload.config.nfeSteps = parseInt(nfeSteps);
-                if (crossFadeDuration) payload.config.crossFadeDuration = parseFloat(crossFadeDuration);
-                if (removeSilences) payload.config.removeSilences = removeSilences === 'true';
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                displayResult('updateCharacterResult', data);
-                
-                if (response.ok) {
-                    listCharacters();
-                }
-            } catch (error) {
-                displayResult('updateCharacterResult', { error: error.message });
-            }
-        });
-        document.getElementById('getCharacterForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const characterId = document.getElementById('getCharacterId').value;
-            
-            try {
-                const response = await fetch(`${API_BASE}/characters/${characterId}`);
-                const data = await response.json();
-                displayResult('getCharacterResult', data);
-            } catch (error) {
-                displayResult('getCharacterResult', { error: error.message });
-            }
-        });
-        document.getElementById('deleteCharacterForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const characterId = document.getElementById('deleteCharacterId').value;
-            
-            if (!confirm(`Are you sure you want to delete character '${characterId}'? This will also delete all associated files.`)) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/characters/${characterId}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                displayResult('deleteCharacterResult', data);
-                
-                if (response.ok) {
-                    document.getElementById('deleteCharacterForm').reset();
-                    listCharacters();
-                }
-            } catch (error) {
-                displayResult('deleteCharacterResult', { error: error.message });
-            }
-        });
+
+
 
         async function checkF5TTSStatus() {
             try {
@@ -927,12 +1172,12 @@
                 
                 let html = '<div class="status-success"><h4>📋 Scripts Loaded Successfully</h4></div>';
                 scripts.forEach(script => {
-                    const audioInfo = script.hasAudio ? 
-                        `✅ Audio: ${script.audioCount}/${script.dialogue.length} lines` : 
-                        '❌ No audio generated';
+                    const audioInfo = script.audioCount === script.dialogue.length ? 
+                        `✅ Audio: ${script.audioCount}/${script.dialogue.length} lines ready` : 
+                        `⚠️ Audio: ${script.audioCount}/${script.dialogue.length} lines (will auto-generate missing)`;
                     
-                                    const videoInfo = script.finalVideoPath ?
-                    `✅ Video: ${getAbsolutePath(script.finalVideoPath)}` : 
+                    const videoInfo = script.finalVideoPath ?
+                        `✅ Video: ${getAbsolutePath(script.finalVideoPath)} (${formatFileSize(script.videoSize)})` : 
                         '⏳ No video generated';
                     
                     html += `
@@ -955,12 +1200,8 @@
                                 <button onclick="editScript('${script.id}')" style="background-color: #6f42c1; color: white;">✏️ Edit Script</button>
                                 <button onclick="deleteScript('${script.id}')" class="danger">🗑️ Delete</button>
                                 
-                                <button onclick="generateAudioForScript('${script.id}')" class="success" ${script.audioCount === script.dialogue.length ? 'disabled title="All audio files already generated"' : ''}>
-                                    🎤 Generate Audio ${script.audioCount === script.dialogue.length ? '(Complete)' : `(${script.audioCount}/${script.dialogue.length})`}
-                                </button>
-                                
-                                <button onclick="generateVideoForScript('${script.id}')" style="background-color: #2196F3; color: white;" ${script.audioCount < script.dialogue.length ? 'disabled title="Generate all audio files first"' : ''}>
-                                    🎬 Generate Video
+                                <button onclick="generateVideoForScript('${script.id}')" style="background-color: #2196F3; color: white;">
+                                    🎬 Generate Video ${script.audioCount < script.dialogue.length ? '(+Audio)' : ''}
                                 </button>
                                 
                                 ${script.finalVideoPath ? 
@@ -1006,6 +1247,8 @@
                     ${script.word ? `<p><strong>Word:</strong> ${script.word}</p>` : ''}
                     <p><strong>Audio Count:</strong> ${script.audioCount}/${script.dialogue.length}</p>
                     ${script.finalVideoPath ? `<p><strong>Final Video:</strong> ${getAbsolutePath(script.finalVideoPath)}</p>` : ''}
+                    ${script.videoDuration ? `<p><strong>Duration:</strong> ${script.videoDuration.toFixed(2)}s</p>` : ''}
+                    ${script.videoSize ? `<p><strong>Video Size:</strong> ${formatFileSize(script.videoSize)}</p>` : ''}
                     <p><strong>Created:</strong> ${new Date(script.createdAt).toLocaleString()}</p>
                     <h4>Dialogue:</h4>
                     ${dialogueHtml}
@@ -1017,51 +1260,7 @@
             }
         }
 
-        async function generateAudioForScript(scriptId) {
-            try {
-                document.getElementById('video-status').innerHTML = `
-                    <div class="status-warning">
-                        <p>🎤 Generating audio for script: ${scriptId}...</p>
-                        <p>⏳ This may take a few minutes depending on the number of dialogue lines...</p>
-                        <p>🔄 The system will only generate audio for lines that don't already have audio files.</p>
-                    </div>
-                `;
-                
-                const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-audio`, {
-                    method: 'POST'
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById('video-status').innerHTML = `
-                        <div class="status-success">
-                            <h4>✅ Audio Generation Complete!</h4>
-                            <p><strong>Status:</strong> ${result.message}</p>
-                            <p><strong>Completed:</strong> ${result.completedLines}/${result.totalLines} lines</p>
-                            <p><strong>Script:</strong> ${scriptId}</p>
-                        </div>
-                    `;
-                    listScripts(); // Refresh the scripts list
-                } else {
-                    document.getElementById('video-status').innerHTML = `
-                        <div class="status-error">
-                            <h4>❌ Audio Generation Failed</h4>
-                            <p><strong>Error:</strong> ${result.detail}</p>
-                            <p><strong>Script:</strong> ${scriptId}</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                document.getElementById('video-status').innerHTML = `
-                    <div class="status-error">
-                        <h4>❌ Audio Generation Error</h4>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                        <p><strong>Script:</strong> ${scriptId}</p>
-                    </div>
-                `;
-            }
-        }
+
 
         async function generateVideoForScript(scriptId) {
             try {
@@ -1070,13 +1269,14 @@
                         <h4>🎬 Video Generation Started</h4>
                         <p><strong>Script:</strong> ${scriptId}</p>
                         <p>⏳ This may take several minutes depending on the script length...</p>
+                        <p>🎤 Checking and generating missing audio files...</p>
                         <p>🎙️ Initializing subtitle generation...</p>
                         <p>🎵 Processing audio files...</p>
                         <p>🎥 Generating final video with FFmpeg...</p>
                     </div>
                 `;
                 document.getElementById('video-controls').innerHTML = `
-                    <p style="font-style: italic;">🔄 Video generation in progress... Please wait.</p>
+                    <p style="font-style: italic;">🔄 Video generation in progress (including audio)... Please wait.</p>
                 `;
                 
                 const response = await fetch(`${API_BASE}/scripts/${scriptId}/generate-video`, {
@@ -1092,7 +1292,9 @@
                             <p><strong>Status:</strong> ${result.message}</p>
                             <p><strong>Final Video:</strong> ${getAbsolutePath(result.finalVideoPath)}</p>
                             <p><strong>Duration:</strong> ${result.duration ? result.duration.toFixed(2) + 's' : 'Unknown'}</p>
+                            <p><strong>Size:</strong> ${formatFileSize(result.videoSize)}</p>
                             <p><strong>Script:</strong> ${scriptId}</p>
+                            <p><em>✅ Audio files were automatically generated/verified before video creation</em></p>
                         </div>
                     `;
                     document.getElementById('video-controls').innerHTML = `
@@ -1163,7 +1365,7 @@
                 }
                 
                 const videoPath = getAbsolutePath(script.finalVideoPath);
-                const fileSizeMB = await getFileSize(script.finalVideoPath);
+                const videoSize = formatFileSize(script.videoSize);
                 
                 document.getElementById('video-status').innerHTML = `
                     <div class="status-success">
@@ -1178,7 +1380,7 @@
                         </div>
                         <div class="form-row">
                             <span><strong>🎵 Audio:</strong> ${script.audioCount}/${script.dialogue.length} lines</span>
-                            <span><strong>📊 Size:</strong> ${fileSizeMB}</span>
+                            <span><strong>📊 Size:</strong> ${videoSize}</span>
                         </div>
                         <p><strong>📅 Created:</strong> ${new Date(script.createdAt).toLocaleString()}</p>
                         <p><strong>🔄 Updated:</strong> ${new Date(script.updatedAt).toLocaleString()}</p>
@@ -1201,13 +1403,13 @@
             }
         }
         
-        async function getFileSize(filePath) {
-            try {
-                // This is a simplified approach - in a real app you'd have an API endpoint for file info
-                return "~25MB"; // Based on the logs showing 25MB file
-            } catch (error) {
-                return "Unknown";
-            }
+        // Helper function to format file size from bytes to readable format
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === 0) return 'Unknown';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            const size = (bytes / Math.pow(1024, i)).toFixed(2);
+            return `${size} ${sizes[i]}`;
         }
 
         // Script editing variables

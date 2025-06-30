@@ -1,0 +1,14 @@
+gradio_client>=0.8.0
+openai
+python-dotenv
+requests
+pydub
+datetime
+moviepy
+firebase-admin
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+PyJWT
+email-validator
