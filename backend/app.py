@@ -33,7 +33,8 @@ from models import (
     ScriptRequest, DialogueLine, ScriptResponse, ScriptUpdate,
     AudioGenerationStatus, AudioGenerationResponse,
     VideoGenerationStatus, VideoGenerationResponse,
-    SignupRequest, LoginRequest, UserResponse, AuthResponse
+    SignupRequest, LoginRequest, UserResponse, AuthResponse,
+    StarResponse
 )
 
 # Import Services
@@ -46,8 +47,8 @@ from audio_service import (
 )
 from video_service import VideoGenerator
 from openai_service import getOpenaiClient, generateScriptWithOpenai
-from firebase_service import initialize_firebase_service, get_firebase_service
-from jwt_service import get_jwt_service
+from firebase_service import initializeFirebaseService, getFirebaseService
+from jwt_service import getJwtService
 
 load_dotenv()
 
@@ -74,7 +75,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Initialize Firebase Service
 try:
-    firebase_service = initialize_firebase_service("firebase.json")
+    firebase_service = initializeFirebaseService("firebase.json")
     print("🔥 Firebase initialized successfully!")
 except Exception as e:
     print(f"❌ Firebase initialization failed: {str(e)}")
@@ -106,6 +107,8 @@ app.add_middleware(
 
 # Mount static files for serving images
 app.mount("/api/static", StaticFiles(directory=API_DATA_DIR), name="static")
+# Mount video files for direct access
+app.mount("/api/videos", StaticFiles(directory=VIDEO_OUTPUT_DIR), name="videos")
 
 # JWT Authentication
 security = HTTPBearer()
@@ -114,9 +117,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     """JWT authentication dependency"""
     try:
         token = credentials.credentials
-        jwt_service = get_jwt_service()
+        jwt_service = getJwtService()
         
-        payload = jwt_service.verify_token(token)
+        payload = jwt_service.verifyToken(token)
         if not payload:
             raise HTTPException(
                 status_code=401,
@@ -125,8 +128,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             )
         
         # Get user data from Firebase
-        firebase_service = get_firebase_service()
-        user_data = firebase_service.get_user_by_id(payload['user_id'])
+        firebase_service = getFirebaseService()
+        user_data = firebase_service.getUserById(payload['user_id'])
         
         if not user_data:
             raise HTTPException(
@@ -208,6 +211,72 @@ def convert_images_dict_to_urls(images_dict: Dict[str, str], request: Request = 
     logger.debug(f"🖼️ Converted {len(images_dict)} image paths to URLs")
     return urls_dict
 
+def build_character_response(char_id: str, char_data: Dict[str, Any], request: Request, current_user: Dict[str, Any]) -> CharacterResponse:
+    """Build a complete CharacterResponse with ownership information"""
+    try:
+        # Basic character data
+        audio_file = char_data.get("audioFile", "")
+        has_audio = bool(audio_file and os.path.exists(audio_file))
+        
+        # Convert file paths to URLs
+        audio_url = convert_local_path_to_url(audio_file, request)
+        images = char_data.get("images", {})
+        images_urls = convert_images_dict_to_urls(images, request)
+        image_count = len(images)
+        
+        # Configuration
+        config_data = char_data.get("config", {})
+        default_config = getDefaultConfig(USER_PROFILES_FILE)
+        
+        config = CharacterConfig(
+            speed=config_data.get("speed", default_config.speed),
+            nfeSteps=config_data.get("nfeSteps", default_config.nfeSteps),
+            crossFadeDuration=config_data.get("crossFadeDuration", default_config.crossFadeDuration),
+            removeSilences=config_data.get("removeSilences", default_config.removeSilences)
+        )
+        
+        # Ownership information
+        created_by = char_data.get("createdBy")
+        created_by_name = None
+        is_owner = False
+        
+        if created_by:
+            # Get creator's name
+            firebase_service = getFirebaseService()
+            created_by_name = firebase_service.getUserNameById(created_by)
+            
+            # Check if current user is the owner
+            is_owner = (current_user and current_user.get('id') == created_by)
+        
+        # Star information
+        starred_count = char_data.get("starred", 0)
+        is_starred = False
+        if current_user:
+            firebase_service = getFirebaseService()
+            is_starred = firebase_service.isCharacterStarredByUser(char_id, current_user.get('id'))
+        
+        return CharacterResponse(
+            id=char_id,
+            displayName=char_data.get("displayName", char_id.title()),
+            audioFile=audio_url,
+            config=config,
+            images=images_urls,
+            outputPrefix=char_data.get("outputPrefix", char_id),
+            createdAt=char_data.get("createdAt", datetime.now().isoformat()),
+            updatedAt=char_data.get("updatedAt", datetime.now().isoformat()),
+            hasAudio=has_audio,
+            imageCount=image_count,
+            createdBy=created_by,
+            createdByName=created_by_name,
+            isOwner=is_owner,
+            starred=starred_count,
+            isStarred=is_starred
+        )
+        
+    except Exception as e:
+        logger.error(f"💥 Error building character response: {str(e)}")
+        raise
+
 # API Endpoints
 
 @app.get("/")
@@ -226,10 +295,10 @@ async def signup(request: SignupRequest):
         logger.info(f"🔐 Signup request for email: {request.email}")
         
         # Get Firebase service
-        firebase_service = get_firebase_service()
+        firebase_service = getFirebaseService()
         
         # Create user in Firebase Auth and Firestore
-        success, message, user_id = firebase_service.create_user(
+        success, message, user_id = firebase_service.createUser(
             request.email, 
             request.password, 
             request.name
@@ -239,13 +308,13 @@ async def signup(request: SignupRequest):
             raise HTTPException(status_code=400, detail=message)
         
         # Get user data from Firestore
-        user_data = firebase_service.get_user_by_id(user_id)
+        user_data = firebase_service.getUserById(user_id)
         if not user_data:
             raise HTTPException(status_code=500, detail="Failed to retrieve user data after creation")
         
         # Create JWT token
-        jwt_service = get_jwt_service()
-        token, expires_in = jwt_service.create_token(user_id, request.email)
+        jwt_service = getJwtService()
+        token, expires_in = jwt_service.createToken(user_id, request.email)
         
         # Create user response
         user_response = UserResponse(
@@ -280,22 +349,22 @@ async def login(request: LoginRequest):
         logger.info(f"🔐 Login request for email: {request.email}")
         
         # Get Firebase service
-        firebase_service = get_firebase_service()
+        firebase_service = getFirebaseService()
         
         # Verify user credentials (email and password)
-        success, message, user_id = firebase_service.verify_user_password(request.email, request.password)
+        success, message, user_id = firebase_service.verifyUserPassword(request.email, request.password)
         if not success:
             logger.warning(f"🔒 Login failed for {request.email}: {message}")
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
         # Get user data from Firestore
-        user_data = firebase_service.get_user_by_id(user_id)
+        user_data = firebase_service.getUserById(user_id)
         if not user_data:
             raise HTTPException(status_code=500, detail="Failed to retrieve user data")
         
         # Create JWT token
-        jwt_service = get_jwt_service()
-        token, expires_in = jwt_service.create_token(user_id, request.email)
+        jwt_service = getJwtService()
+        token, expires_in = jwt_service.createToken(user_id, request.email)
         
         # Create user response
         user_response = UserResponse(
@@ -346,21 +415,21 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(secu
     """Refresh JWT token"""
     try:
         old_token = credentials.credentials
-        jwt_service = get_jwt_service()
+        jwt_service = getJwtService()
         
-        result = jwt_service.refresh_token(old_token)
+        result = jwt_service.refreshToken(old_token)
         if not result:
             raise HTTPException(status_code=401, detail="Invalid or expired token")
         
         new_token, expires_in = result
         
         # Get user data from the old token
-        payload = jwt_service.decode_token_without_verification(old_token)
+        payload = jwt_service.decodeTokenWithoutVerification(old_token)
         if not payload:
             raise HTTPException(status_code=401, detail="Invalid token format")
         
-        firebase_service = get_firebase_service()
-        user_data = firebase_service.get_user_by_id(payload['user_id'])
+        firebase_service = getFirebaseService()
+        user_data = firebase_service.getUserById(payload['user_id'])
         
         if not user_data:
             raise HTTPException(status_code=401, detail="User not found")
@@ -413,37 +482,7 @@ async def list_characters(request: Request, current_user: dict = Depends(get_cur
         
         characters = []
         for char_id, char_data in users.items():
-            audio_file = char_data.get("audioFile", "")
-            has_audio = bool(audio_file and os.path.exists(audio_file))
-            
-            # Convert local file paths to URLs
-            audio_url = convert_local_path_to_url(audio_file, request)
-            images = char_data.get("images", {})
-            images_urls = convert_images_dict_to_urls(images, request)
-            image_count = len(images)
-            
-            config_data = char_data.get("config", {})
-            default_config = getDefaultConfig(USER_PROFILES_FILE)
-            
-            config = CharacterConfig(
-                speed=config_data.get("speed", default_config.speed),
-                nfeSteps=config_data.get("nfeSteps", default_config.nfeSteps),
-                crossFadeDuration=config_data.get("crossFadeDuration", default_config.crossFadeDuration),
-                removeSilences=config_data.get("removeSilences", default_config.removeSilences)
-            )
-            
-            character = CharacterResponse(
-                id=char_id,
-                displayName=char_data.get("displayName", char_id.title()),
-                audioFile=audio_url,
-                config=config,
-                images=images_urls,
-                outputPrefix=char_data.get("outputPrefix", char_id),
-                createdAt=char_data.get("createdAt", datetime.now().isoformat()),
-                updatedAt=char_data.get("updatedAt", datetime.now().isoformat()),
-                hasAudio=has_audio,
-                imageCount=image_count
-            )
+            character = build_character_response(char_id, char_data, request, current_user)
             characters.append(character)
         
         return characters
@@ -462,37 +501,7 @@ async def get_character(character_id: str, request: Request, current_user: dict 
         
         char_data = users[character_id]
         
-        audio_file = char_data.get("audioFile", "")
-        has_audio = bool(audio_file and os.path.exists(audio_file))
-        
-        # Convert local file paths to URLs
-        audio_url = convert_local_path_to_url(audio_file, request)
-        images = char_data.get("images", {})
-        images_urls = convert_images_dict_to_urls(images, request)
-        image_count = len(images)
-        
-        config_data = char_data.get("config", {})
-        default_config = getDefaultConfig(USER_PROFILES_FILE)
-        
-        config = CharacterConfig(
-            speed=config_data.get("speed", default_config.speed),
-            nfeSteps=config_data.get("nfeSteps", default_config.nfeSteps),
-            crossFadeDuration=config_data.get("crossFadeDuration", default_config.crossFadeDuration),
-            removeSilences=config_data.get("removeSilences", default_config.removeSilences)
-        )
-        
-        return CharacterResponse(
-            id=character_id,
-            displayName=char_data.get("displayName", character_id.title()),
-            audioFile=audio_url,
-            config=config,
-            images=images_urls,
-            outputPrefix=char_data.get("outputPrefix", character_id),
-            createdAt=char_data.get("createdAt", datetime.now().isoformat()),
-            updatedAt=char_data.get("updatedAt", datetime.now().isoformat()),
-            hasAudio=has_audio,
-            imageCount=image_count
-        )
+        return build_character_response(character_id, char_data, request, current_user)
     except HTTPException:
         raise
     except Exception as e:
@@ -519,8 +528,8 @@ async def update_character(
         logger.info(f"🖼️ New images: {len(newImageFiles) if newImageFiles else 0}, Remove keys: {removeImageKeys}")
         
         # Check ownership first
-        firebase_service = get_firebase_service()
-        char_data = firebase_service.get_user_profile(character_id)
+        firebase_service = getFirebaseService()
+        char_data = firebase_service.getUserProfile(character_id)
         
         if not char_data:
             raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
@@ -665,7 +674,7 @@ async def update_character(
             update_data["images"] = char_data["images"]
         
         # Use Firebase update with ownership check
-        success = firebase_service.update_character_with_owner_check(
+        success = firebase_service.updateCharacterWithOwnerCheck(
             character_id, 
             update_data, 
             current_user['id']
@@ -676,7 +685,7 @@ async def update_character(
         
         logger.info(f"✅ Updated character: {character_id}")
         
-        return await get_character(character_id, request)
+        return await get_character(character_id, request, current_user)
     except HTTPException:
         raise
     except Exception as e:
@@ -689,8 +698,8 @@ async def update_character(
 async def delete_character(character_id: str, current_user: dict = Depends(get_current_user)):
     try:
         # Get character data before deletion and check ownership
-        firebase_service = get_firebase_service()
-        char_data = firebase_service.get_user_profile(character_id)
+        firebase_service = getFirebaseService()
+        char_data = firebase_service.getUserProfile(character_id)
         
         if not char_data:
             raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
@@ -727,12 +736,12 @@ async def delete_character(character_id: str, current_user: dict = Depends(get_c
                     logger.warning(f"⚠️ Could not delete image {image_path}: {str(e)}")
         
         # Delete from Firebase with owner cleanup
-        success = firebase_service.delete_character_with_owner_cleanup(character_id)
+        success = firebase_service.deleteCharacterWithOwnerCleanup(character_id)
         if not success:
             raise HTTPException(status_code=500, detail="Failed to delete character from database")
         
         # Handle default user update if needed
-        profiles = firebase_service.get_all_user_profiles()
+        profiles = firebase_service.getAllUserProfiles()
         if profiles.get("defaultUser") == character_id:
             remaining_users = list(profiles.get("users", {}).keys())
             new_default = remaining_users[0] if remaining_users else None
@@ -866,8 +875,8 @@ async def create_complete_character(
         
         try:
             # Use new ownership tracking method
-            firebase_service = get_firebase_service()
-            success = firebase_service.create_character_with_owner(
+            firebase_service = getFirebaseService()
+            success = firebase_service.createCharacterWithOwner(
                 character_id, 
                 char_data, 
                 current_user['id']
@@ -889,22 +898,8 @@ async def create_complete_character(
                 pass
             raise HTTPException(status_code=500, detail=f"Failed to save character data: {str(e)}")
         
-        # Convert local paths to URLs for response
-        audio_url = convert_local_path_to_url(audio_path, request)
-        images_urls = convert_images_dict_to_urls(images_dict, request)
-        
-        return CharacterResponse(
-            id=character_id,
-            displayName=displayName,
-            audioFile=audio_url,
-            config=config,
-            images=images_urls,
-            outputPrefix=character_id,
-            createdAt=current_time,
-            updatedAt=current_time,
-            hasAudio=True,
-            imageCount=len(images_dict)
-        )
+        # Build response using helper function (char_data already has createdBy)
+        return build_character_response(character_id, char_data, request, current_user)
         
     except HTTPException:
         raise
@@ -913,50 +908,60 @@ async def create_complete_character(
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 @app.post("/api/scripts/generate", response_model=ScriptResponse)
-async def generate_script(request: ScriptRequest):
+async def generateScript(request: ScriptRequest, currentUser: dict = Depends(get_current_user)):
     try:
-        logger.info(f"📝 Generating script for characters: {request.selectedCharacters}")
+        logger.info(f"🎬 User {currentUser['email']} generating script for characters: {request.selectedCharacters}")
         
-        profiles = loadUserProfiles(USER_PROFILES_FILE)
-        users = profiles.get("users", {})
+        # Load user profiles to validate characters
+        userProfiles = loadUserProfiles(USER_PROFILES_FILE)
+        users = userProfiles.get("users", {})
         
-        for char_id in request.selectedCharacters:
-            if char_id not in users:
-                raise HTTPException(status_code=400, detail=f"Character '{char_id}' not found")
+        # Validate all selected characters exist
+        for charId in request.selectedCharacters:
+            if charId not in users:
+                logger.warning(f"❌ Character '{charId}' not found for user {currentUser['email']}")
+                raise HTTPException(status_code=400, detail=f"Character '{charId}' not found")
         
-        dialogue_lines = await generateScriptWithOpenai(
+        # Generate dialogue using OpenAI
+        logger.info(f"🤖 Generating dialogue with OpenAI for prompt: {request.prompt[:50]}...")
+        dialogueLines = await generateScriptWithOpenai(
             request.selectedCharacters, 
             request.prompt, 
             request.word
         )
         
-        script_id = generateScriptId()
-        current_time = datetime.now().isoformat()
+        # Create unique script ID and timestamps
+        scriptId = generateScriptId()
+        currentTime = datetime.now().isoformat()
         
-        script_data = {
-            "id": script_id,
+        # Build script data (ownership fields will be added by Firebase service)
+        scriptData = {
+            "id": scriptId,
             "selectedCharacters": request.selectedCharacters,
             "originalPrompt": request.prompt,
             "word": request.word,
-            "dialogue": [{"speaker": line.speaker, "text": line.text, "audioFile": ""} for line in dialogue_lines],
-            "createdAt": current_time,
-            "updatedAt": current_time
+            "dialogue": [{"speaker": line.speaker, "text": line.text, "audioFile": ""} for line in dialogueLines],
+            "createdByName": currentUser['name']  # Keep display name for convenience
         }
         
-        scripts = loadScripts(SCRIPTS_FILE)
-        scripts["scripts"][script_id] = script_data
-        saveScripts(scripts, SCRIPTS_FILE)
+        # Save script to Firebase with associations
+        firebaseService = getFirebaseService()
+        success = firebaseService.createScriptWithAssociations(scriptId, scriptData, currentUser['id'])
         
-        logger.info(f"✅ Generated script: {script_id}")
+        if not success:
+            logger.error(f"💥 Failed to save script {scriptId} to Firebase")
+            raise HTTPException(status_code=500, detail="Failed to save script to database")
+        
+        logger.info(f"✅ Generated script {scriptId} for user {currentUser['email']} with {len(dialogueLines)} dialogue lines")
         
         return ScriptResponse(
-            id=script_data["id"],
-            selectedCharacters=script_data["selectedCharacters"],
-            originalPrompt=script_data["originalPrompt"],
-            word=script_data.get("word"),
-            dialogue=script_data["dialogue"],
-            createdAt=script_data["createdAt"],
-            updatedAt=script_data["updatedAt"],
+            id=scriptData["id"],
+            selectedCharacters=scriptData["selectedCharacters"],
+            originalPrompt=scriptData["originalPrompt"],
+            word=scriptData.get("word"),
+            dialogue=scriptData["dialogue"],
+            createdAt=scriptData["createdAt"],
+            updatedAt=scriptData["updatedAt"],
             hasAudio=False,
             audioCount=0,
             finalVideoPath=None,
@@ -966,294 +971,371 @@ async def generate_script(request: ScriptRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error generating script: {str(e)}")
+        logger.error(f"💥 Script generation failed for user {currentUser['email']}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate script: {str(e)}")
 
 @app.get("/api/scripts", response_model=List[ScriptResponse])
-async def list_scripts():
+async def listScripts(currentUser: dict = Depends(get_current_user)):
     try:
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        logger.info(f"📋 User {currentUser['email']} requesting all scripts")
         
-        script_responses = []
-        for script_data in scripts.values():
-            dialogue_lines = script_data.get("dialogue", [])
+        # Get all scripts from Firebase
+        firebaseService = getFirebaseService()
+        scriptsData = firebaseService.getAllScripts()
+        scripts = scriptsData.get("scripts", {})
+        
+        scriptResponses = []
+        userScriptCount = 0
+        otherScriptCount = 0
+        
+        for scriptData in scripts.values():
+            # Check if this script belongs to current user
+            isOwner = scriptData.get("createdBy") == currentUser['id']
+            if isOwner:
+                userScriptCount += 1
+                continue  # Skip user's own scripts - they can get them from /api/my-scripts
             
-            audio_count = 0
-            for dialogue_line in dialogue_lines:
-                audio_file = dialogue_line.get("audioFile", "")
-                if audio_file and os.path.exists(audio_file):
-                    audio_count += 1
+            dialogueLines = scriptData.get("dialogue", [])
             
-            script_response = ScriptResponse(
-                id=script_data["id"],
-                selectedCharacters=script_data["selectedCharacters"],
-                originalPrompt=script_data["originalPrompt"],
-                word=script_data.get("word"),
-                dialogue=dialogue_lines,
-                createdAt=script_data["createdAt"],
-                updatedAt=script_data["updatedAt"],
-                hasAudio=audio_count > 0,
-                audioCount=audio_count,
-                finalVideoPath=script_data.get("finalVideoPath"),
-                videoDuration=script_data.get("videoDuration"),
-                videoSize=script_data.get("videoSize")
+            # Count audio files that exist
+            audioCount = 0
+            for dialogueLine in dialogueLines:
+                audioFile = dialogueLine.get("audioFile", "")
+                if audioFile and os.path.exists(audioFile):
+                    audioCount += 1
+            
+            scriptResponse = ScriptResponse(
+                id=scriptData["id"],
+                selectedCharacters=scriptData["selectedCharacters"],
+                originalPrompt=scriptData["originalPrompt"],
+                word=scriptData.get("word"),
+                dialogue=dialogueLines,
+                createdAt=scriptData["createdAt"],
+                updatedAt=scriptData["updatedAt"],
+                hasAudio=audioCount > 0,
+                audioCount=audioCount,
+                finalVideoPath=scriptData.get("finalVideoPath"),
+                videoDuration=scriptData.get("videoDuration"),
+                videoSize=scriptData.get("videoSize")
             )
-            script_responses.append(script_response)
+            scriptResponses.append(scriptResponse)
+            otherScriptCount += 1
         
-        return script_responses
+        logger.info(f"📊 Retrieved {otherScriptCount} other users' scripts (excluded {userScriptCount} owned by {currentUser['email']})")
+        return scriptResponses
         
     except Exception as e:
-        logger.error(f"💥 Error listing scripts: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to list scripts for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to list scripts: {str(e)}")
 
-@app.get("/api/scripts/{script_id}", response_model=ScriptResponse)
-async def get_script(script_id: str):
+@app.get("/api/scripts/{scriptId}", response_model=ScriptResponse)
+async def getScript(scriptId: str, currentUser: dict = Depends(get_current_user)):
     try:
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        logger.info(f"🔍 User {currentUser['email']} requesting script: {scriptId}")
         
-        if script_id not in scripts:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        scriptData = firebaseService.getScript(scriptId)
         
-        script_data = scripts[script_id]
-        dialogue_lines = script_data.get("dialogue", [])
+        if not scriptData:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        audio_count = 0
-        for dialogue_line in dialogue_lines:
-            audio_file = dialogue_line.get("audioFile", "")
-            if audio_file and os.path.exists(audio_file):
-                audio_count += 1
+        dialogueLines = scriptData.get("dialogue", [])
+        
+        # Count existing audio files
+        audioCount = 0
+        for dialogueLine in dialogueLines:
+            audioFile = dialogueLine.get("audioFile", "")
+            if audioFile and os.path.exists(audioFile):
+                audioCount += 1
+        
+        # Check ownership
+        isOwner = scriptData.get("createdBy") == currentUser['id']
+        ownerInfo = f" (Owner: {scriptData.get('createdByName', 'Unknown')})" if not isOwner else " (Your script)"
+        
+        logger.info(f"✅ Retrieved script {scriptId} for user {currentUser['email']}{ownerInfo}")
         
         return ScriptResponse(
-            id=script_data["id"],
-            selectedCharacters=script_data["selectedCharacters"],
-            originalPrompt=script_data["originalPrompt"],
-            word=script_data.get("word"),
-            dialogue=dialogue_lines,
-            createdAt=script_data["createdAt"],
-            updatedAt=script_data["updatedAt"],
-            hasAudio=audio_count > 0,
-            audioCount=audio_count,
-            finalVideoPath=script_data.get("finalVideoPath"),
-            videoDuration=script_data.get("videoDuration"),
-            videoSize=script_data.get("videoSize")
+            id=scriptData["id"],
+            selectedCharacters=scriptData["selectedCharacters"],
+            originalPrompt=scriptData["originalPrompt"],
+            word=scriptData.get("word"),
+            dialogue=dialogueLines,
+            createdAt=scriptData["createdAt"],
+            updatedAt=scriptData["updatedAt"],
+            hasAudio=audioCount > 0,
+            audioCount=audioCount,
+            finalVideoPath=scriptData.get("finalVideoPath"),
+            videoDuration=scriptData.get("videoDuration"),
+            videoSize=scriptData.get("videoSize")
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error getting script {script_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to get script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get script: {str(e)}")
 
-@app.put("/api/scripts/{script_id}", response_model=ScriptResponse)
-async def update_script(script_id: str, updates: ScriptUpdate):
+@app.put("/api/scripts/{scriptId}", response_model=ScriptResponse)
+async def updateScript(scriptId: str, updates: ScriptUpdate, currentUser: dict = Depends(get_current_user)):
     try:
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        logger.info(f"✏️ User {currentUser['email']} updating script: {scriptId}")
         
-        if script_id not in scripts:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        scriptData = firebaseService.getScript(scriptId)
         
-        script_data = scripts[script_id]
-        old_dialogue = script_data.get("dialogue", [])
-        new_dialogue_updates = updates.dialogue
+        if not scriptData:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        logger.info(f"📝 Updating script {script_id} with {len(new_dialogue_updates)} dialogue lines")
+        # Check ownership (users can only edit their own scripts)
+        scriptOwner = scriptData.get("createdBy")
+        if scriptOwner and scriptOwner != currentUser['id']:
+            logger.warning(f"🚫 User {currentUser['email']} denied access to edit script {scriptId} (owned by {scriptData.get('createdByName', 'Unknown')})")
+            raise HTTPException(
+                status_code=403, 
+                detail="Access denied. You can only edit scripts you created."
+            )
         
-        updated_dialogue = []
-        deleted_audio_files = []
-        dialogue_changed = False
+        oldDialogue = scriptData.get("dialogue", [])
+        newDialogueUpdates = updates.dialogue
         
-        for i, new_line in enumerate(new_dialogue_updates):
-            old_line = old_dialogue[i] if i < len(old_dialogue) else None
+        logger.info(f"📝 Updating script {scriptId} with {len(newDialogueUpdates)} dialogue lines")
+        
+        updatedDialogue = []
+        deletedAudioFiles = []
+        dialogueChanged = False
+        
+        # Process each dialogue line for changes
+        for i, newLine in enumerate(newDialogueUpdates):
+            oldLine = oldDialogue[i] if i < len(oldDialogue) else None
             
-            new_dialogue_line = {
-                "speaker": new_line.speaker,
-                "text": new_line.text,
+            newDialogueLine = {
+                "speaker": newLine.speaker,
+                "text": newLine.text,
                 "audioFile": ""
             }
             
-            if old_line:
-                old_text = old_line.get("text", "").strip()
-                old_speaker = old_line.get("speaker", "").strip()
-                old_audio = old_line.get("audioFile", "")
+            if oldLine:
+                oldText = oldLine.get("text", "").strip()
+                oldSpeaker = oldLine.get("speaker", "").strip()
+                oldAudio = oldLine.get("audioFile", "")
                 
-                new_text = new_line.text.strip()
-                new_speaker = new_line.speaker.strip()
+                newText = newLine.text.strip()
+                newSpeaker = newLine.speaker.strip()
                 
-                text_changed = old_text != new_text
-                speaker_changed = old_speaker != new_speaker
+                textChanged = oldText != newText
+                speakerChanged = oldSpeaker != newSpeaker
                 
-                if text_changed or speaker_changed:
-                    dialogue_changed = True
-                    if old_audio and old_audio.strip() and os.path.exists(old_audio):
+                if textChanged or speakerChanged:
+                    dialogueChanged = True
+                    # Delete old audio file if text or speaker changed
+                    if oldAudio and oldAudio.strip() and os.path.exists(oldAudio):
                         try:
-                            os.remove(old_audio)
-                            deleted_audio_files.append(old_audio)
-                            logger.info(f"🗑️ Deleted audio file for changed line {i}: {old_audio}")
+                            os.remove(oldAudio)
+                            deletedAudioFiles.append(oldAudio)
+                            logger.info(f"🗑️ Deleted audio file for changed line {i}: {oldAudio}")
                         except Exception as e:
-                            logger.warning(f"⚠️ Could not delete audio file {old_audio}: {str(e)}")
+                            logger.warning(f"⚠️ Could not delete audio file {oldAudio}: {str(e)}")
                     
-                    logger.info(f"📝 Line {i} changed - {'text' if text_changed else ''}{'speaker' if speaker_changed else ''} - audio cleared")
+                    changeType = "text" if textChanged else ""
+                    changeType += " speaker" if speakerChanged else ""
+                    logger.info(f"📝 Line {i} changed ({changeType.strip()}) - audio cleared")
                 else:
-                    if old_audio and old_audio.strip() and os.path.exists(old_audio):
-                        new_dialogue_line["audioFile"] = old_audio
-                        logger.info(f"✅ Line {i} unchanged - keeping existing audio: {old_audio}")
+                    # Keep existing audio if line unchanged
+                    if oldAudio and oldAudio.strip() and os.path.exists(oldAudio):
+                        newDialogueLine["audioFile"] = oldAudio
+                        logger.info(f"✅ Line {i} unchanged - keeping existing audio")
                     else:
                         logger.info(f"📝 Line {i} unchanged - no existing audio")
             else:
-                dialogue_changed = True
-                logger.info(f"➕ New line {i} added: {new_line.speaker} - {new_line.text[:30]}...")
+                dialogueChanged = True
+                logger.info(f"➕ New line {i} added: {newLine.speaker} - {newLine.text[:30]}...")
             
-            updated_dialogue.append(new_dialogue_line)
+            updatedDialogue.append(newDialogueLine)
         
-        if len(old_dialogue) > len(new_dialogue_updates):
-            dialogue_changed = True
-            for i in range(len(new_dialogue_updates), len(old_dialogue)):
-                old_line = old_dialogue[i]
-                old_audio = old_line.get("audioFile", "")
-                if old_audio and old_audio.strip() and os.path.exists(old_audio):
+        # Handle removed lines
+        if len(oldDialogue) > len(newDialogueUpdates):
+            dialogueChanged = True
+            for i in range(len(newDialogueUpdates), len(oldDialogue)):
+                oldLine = oldDialogue[i]
+                oldAudio = oldLine.get("audioFile", "")
+                if oldAudio and oldAudio.strip() and os.path.exists(oldAudio):
                     try:
-                        os.remove(old_audio)
-                        deleted_audio_files.append(old_audio)
-                        logger.info(f"🗑️ Deleted audio file for removed line {i}: {old_audio}")
+                        os.remove(oldAudio)
+                        deletedAudioFiles.append(oldAudio)
+                        logger.info(f"🗑️ Deleted audio file for removed line {i}: {oldAudio}")
                     except Exception as e:
-                        logger.warning(f"⚠️ Could not delete audio file {old_audio}: {str(e)}")
+                        logger.warning(f"⚠️ Could not delete audio file {oldAudio}: {str(e)}")
         
-        script_data["dialogue"] = updated_dialogue
-        script_data["updatedAt"] = datetime.now().isoformat()
+        # Update script data
+        scriptData["dialogue"] = updatedDialogue
+        scriptData["updatedAt"] = datetime.now().isoformat()
         
-        if dialogue_changed:
+        # Clear video data if dialogue changed
+        if dialogueChanged:
             logger.info("🎬 Clearing video data since dialogue was modified")
-            script_data["finalVideoPath"] = None
-            script_data["videoDuration"] = None
-            script_data["videoSize"] = None
+            scriptData["finalVideoPath"] = None
+            scriptData["videoDuration"] = None
+            scriptData["videoSize"] = None
         
-        saveScripts(scripts_data, SCRIPTS_FILE)
+        # Save to Firebase
+        success = firebaseService.saveScript(scriptId, scriptData)
+        if not success:
+            logger.error(f"💥 Failed to save updated script {scriptId} to Firebase")
+            raise HTTPException(status_code=500, detail="Failed to save script updates")
         
-        audio_count = sum(1 for line in updated_dialogue if line.get("audioFile", "").strip() and os.path.exists(line.get("audioFile", "")))
-        logger.info(f"📊 Script {script_id} update summary:")
-        logger.info(f"   Total lines: {len(updated_dialogue)}")
-        logger.info(f"   Lines with audio: {audio_count}")
-        logger.info(f"   Audio files deleted: {len(deleted_audio_files)}")
+        # Count remaining audio files
+        audioCount = sum(1 for line in updatedDialogue if line.get("audioFile", "").strip() and os.path.exists(line.get("audioFile", "")))
         
-        logger.info(f"✅ Updated script: {script_id}")
+        logger.info(f"📊 Script {scriptId} update summary for user {currentUser['email']}:")
+        logger.info(f"   • Total lines: {len(updatedDialogue)}")
+        logger.info(f"   • Lines with audio: {audioCount}")
+        logger.info(f"   • Audio files deleted: {len(deletedAudioFiles)}")
+        logger.info(f"   • Dialogue changed: {'Yes' if dialogueChanged else 'No'}")
+        
+        logger.info(f"✅ Successfully updated script {scriptId}")
         
         return ScriptResponse(
-            id=script_data["id"],
-            selectedCharacters=script_data["selectedCharacters"],
-            originalPrompt=script_data["originalPrompt"],
-            word=script_data.get("word"),
-            dialogue=updated_dialogue,
-            createdAt=script_data["createdAt"],
-            updatedAt=script_data["updatedAt"],
-            hasAudio=audio_count > 0,
-            audioCount=audio_count,
-            finalVideoPath=script_data.get("finalVideoPath"),
-            videoDuration=script_data.get("videoDuration"),
-            videoSize=script_data.get("videoSize")
+            id=scriptData["id"],
+            selectedCharacters=scriptData["selectedCharacters"],
+            originalPrompt=scriptData["originalPrompt"],
+            word=scriptData.get("word"),
+            dialogue=updatedDialogue,
+            createdAt=scriptData["createdAt"],
+            updatedAt=scriptData["updatedAt"],
+            hasAudio=audioCount > 0,
+            audioCount=audioCount,
+            finalVideoPath=scriptData.get("finalVideoPath"),
+            videoDuration=scriptData.get("videoDuration"),
+            videoSize=scriptData.get("videoSize")
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error updating script {script_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to update script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update script: {str(e)}")
 
-@app.delete("/api/scripts/{script_id}")
-async def delete_script(script_id: str):
+@app.delete("/api/scripts/{scriptId}")
+async def deleteScript(scriptId: str, currentUser: dict = Depends(get_current_user)):
     try:
+        logger.info(f"🗑️ User {currentUser['email']} attempting to delete script: {scriptId}")
+        
         # Get script data before deletion
-        firebase_service = get_firebase_service()
-        script = firebase_service.get_script(script_id)
+        firebaseService = getFirebaseService()
+        script = firebaseService.getScript(scriptId)
         
         if not script:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        dialogue_lines = script.get("dialogue", [])
-        deleted_audio_files = []
+        # Check ownership (users can only delete their own scripts)
+        scriptOwner = script.get("createdBy")
+        if scriptOwner and scriptOwner != currentUser['id']:
+            logger.warning(f"🚫 User {currentUser['email']} denied access to delete script {scriptId} (owned by {script.get('createdByName', 'Unknown')})")
+            raise HTTPException(
+                status_code=403, 
+                detail="Access denied. You can only delete scripts you created."
+            )
+        
+        dialogueLines = script.get("dialogue", [])
+        deletedMediaFiles = []
         
         # Delete audio files
-        for dialogue_line in dialogue_lines:
-            audio_path = dialogue_line.get("audioFile", "")
-            if audio_path and os.path.exists(audio_path):
+        for dialogueLine in dialogueLines:
+            audioPath = dialogueLine.get("audioFile", "")
+            if audioPath and os.path.exists(audioPath):
                 try:
-                    os.remove(audio_path)
-                    deleted_audio_files.append(audio_path)
-                    logger.info(f"🗑️ Deleted audio: {audio_path}")
+                    os.remove(audioPath)
+                    deletedMediaFiles.append(audioPath)
+                    logger.info(f"🗑️ Deleted audio: {os.path.basename(audioPath)}")
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not delete audio {audio_path}: {str(e)}")
+                    logger.warning(f"⚠️ Could not delete audio {audioPath}: {str(e)}")
         
         # Delete video file if exists
-        final_video_path = script.get("finalVideoPath", "")
-        if final_video_path and os.path.exists(final_video_path):
+        finalVideoPath = script.get("finalVideoPath", "")
+        if finalVideoPath and os.path.exists(finalVideoPath):
             try:
-                os.remove(final_video_path)
-                deleted_audio_files.append(final_video_path)
-                logger.info(f"🗑️ Deleted video: {final_video_path}")
+                os.remove(finalVideoPath)
+                deletedMediaFiles.append(finalVideoPath)
+                logger.info(f"🗑️ Deleted video: {os.path.basename(finalVideoPath)}")
             except Exception as e:
-                logger.warning(f"⚠️ Could not delete video {final_video_path}: {str(e)}")
+                logger.warning(f"⚠️ Could not delete video {finalVideoPath}: {str(e)}")
         
-        # Delete from Firebase
-        success = firebase_service.delete_script(script_id)
+        # Delete from Firebase with associations cleanup
+        success = firebaseService.deleteScriptWithAssociations(scriptId)
         if not success:
+            logger.error(f"💥 Failed to delete script {scriptId} from Firebase")
             raise HTTPException(status_code=500, detail="Failed to delete script from database")
         
-        logger.info(f"✅ Deleted script: {script_id}")
+        logger.info(f"✅ Successfully deleted script {scriptId} for user {currentUser['email']} ({len(deletedMediaFiles)} media files removed)")
         
         return {
-            "message": f"Script '{script_id}' deleted successfully",
-            "deletedAudioFiles": deleted_audio_files
+            "message": f"Script '{scriptId}' deleted successfully",
+            "deletedMediaFiles": deletedMediaFiles,
+            "deletedCount": len(deletedMediaFiles)
         }
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error deleting script {script_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to delete script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete script: {str(e)}")
 
-@app.get("/api/scripts/{script_id}/audio-status")
-async def get_audio_generation_status(script_id: str):
+@app.get("/api/scripts/{scriptId}/audio-status")
+async def getAudioGenerationStatus(scriptId: str, currentUser: dict = Depends(get_current_user)):
     try:
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        logger.info(f"🎵 User {currentUser['email']} checking audio status for script: {scriptId}")
         
-        if script_id not in scripts:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        script = firebaseService.getScript(scriptId)
         
-        script = scripts[script_id]
-        dialogue_lines = script.get("dialogue", [])
+        if not script:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        total_lines = len(dialogue_lines)
-        completed_lines = 0
+        dialogueLines = script.get("dialogue", [])
+        totalLines = len(dialogueLines)
+        completedLines = 0
         
-        for dialogue_line in dialogue_lines:
-            audio_file = dialogue_line.get("audioFile", "")
-            if audio_file and os.path.exists(audio_file):
-                completed_lines += 1
+        # Count completed audio files
+        for dialogueLine in dialogueLines:
+            audioFile = dialogueLine.get("audioFile", "")
+            if audioFile and os.path.exists(audioFile):
+                completedLines += 1
         
-        if completed_lines == total_lines:
+        # Determine status
+        if completedLines == totalLines and totalLines > 0:
             status = "completed"
-        elif completed_lines > 0:
+        elif completedLines > 0:
             status = "partial"
         else:
             status = "pending"
         
+        # Check ownership for logging
+        isOwner = script.get("createdBy") == currentUser['id']
+        ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
+        
+        logger.info(f"📊 Audio status for script {scriptId}{ownerInfo}: {completedLines}/{totalLines} completed ({status})")
+        
         return AudioGenerationStatus(
-            scriptId=script_id,
+            scriptId=scriptId,
             status=status,
-            totalLines=total_lines,
-            processedLines=total_lines,
-            completedLines=completed_lines,
-            failedLines=total_lines - completed_lines
+            totalLines=totalLines,
+            processedLines=totalLines,
+            completedLines=completedLines,
+            failedLines=totalLines - completedLines
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error getting audio status for script {script_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to get audio status for script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get audio status: {str(e)}")
 
 @app.get("/api/f5tts/status")
 async def get_f5tts_status():
@@ -1273,150 +1355,174 @@ async def get_f5tts_status():
             "timestamp": datetime.now().isoformat()
         }
 
-@app.post("/api/scripts/{script_id}/generate-video", response_model=VideoGenerationResponse)
-async def generate_script_video(script_id: str, background_video: Optional[str] = None):
+@app.post("/api/scripts/{scriptId}/generate-video", response_model=VideoGenerationResponse)
+async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_current_user), backgroundVideo: Optional[str] = None):
     try:
-        logger.info(f"🎬 Video generation requested for script: {script_id}")
+        logger.info(f"🎬 User {currentUser['email']} requesting video generation for script: {scriptId}")
         
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        scriptsData = firebaseService.getAllScripts()
+        scripts = scriptsData.get("scripts", {})
         
-        if script_id not in scripts:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        if scriptId not in scripts:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        script = scripts[script_id]
-        dialogue_lines = script.get("dialogue", [])
+        script = scripts[scriptId]
+        dialogueLines = script.get("dialogue", [])
         
-        if not dialogue_lines:
+        if not dialogueLines:
+            logger.warning(f"❌ Script '{scriptId}' has no dialogue lines for user {currentUser['email']}")
             raise HTTPException(status_code=400, detail="Script has no dialogue lines")
         
+        # Check ownership for logging
+        isOwner = script.get("createdBy") == currentUser['id']
+        ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
+        
+        logger.info(f"🎥 Processing video generation for script {scriptId}{ownerInfo} with {len(dialogueLines)} dialogue lines")
+        
         # Load user profiles (needed for both audio and video generation)
-        user_profiles = loadUserProfiles(USER_PROFILES_FILE)
+        userProfiles = loadUserProfiles(USER_PROFILES_FILE)
         
         # Check for missing audio files
-        missing_audio = []
-        for i, line in enumerate(dialogue_lines):
-            audio_file = line.get("audioFile", "")
-            if not audio_file or not os.path.exists(audio_file):
-                missing_audio.append(i)
+        missingAudio = []
+        for i, line in enumerate(dialogueLines):
+            audioFile = line.get("audioFile", "")
+            if not audioFile or not os.path.exists(audioFile):
+                missingAudio.append(i)
         
         # Generate missing audio files if any
-        if missing_audio:
-            logger.info(f"🎤 Generating audio for {len(missing_audio)} missing lines before video generation...")
+        if missingAudio:
+            logger.info(f"🎤 Generating audio for {len(missingAudio)} missing lines before video generation...")
             
             try:
-                audio_result = await generateAudioForScript(
-                    script_id,
-                    scripts_data,
-                    user_profiles,
+                audioResult = await generateAudioForScript(
+                    scriptId,
+                    scriptsData,
+                    userProfiles,
                     GENERATED_AUDIO_DIR
                 )
-                logger.info(f"🎵 Audio generation result: {audio_result.message}")
+                logger.info(f"🎵 Audio generation result: {audioResult.message}")
                 
                 # Save updated scripts data with audio information
-                saveScripts(scripts_data, SCRIPTS_FILE)
+                firebaseService.saveScripts(scriptsData)
                 
                 # Reload script data after audio generation
-                script = scripts_data.get("scripts", {})[script_id]
-                dialogue_lines = script.get("dialogue", [])
+                script = scriptsData.get("scripts", {})[scriptId]
+                dialogueLines = script.get("dialogue", [])
                 
                 # Verify all audio files are now available
-                still_missing = []
-                for i, line in enumerate(dialogue_lines):
-                    audio_file = line.get("audioFile", "")
-                    if not audio_file or not os.path.exists(audio_file):
-                        still_missing.append(f"Line {i+1} ({line.get('speaker', 'unknown')})")
+                stillMissing = []
+                for i, line in enumerate(dialogueLines):
+                    audioFile = line.get("audioFile", "")
+                    if not audioFile or not os.path.exists(audioFile):
+                        stillMissing.append(f"Line {i+1} ({line.get('speaker', 'unknown')})")
                 
-                if still_missing:
+                if stillMissing:
+                    logger.error(f"💥 Audio generation incomplete for script {scriptId}: {len(stillMissing)} lines still missing")
                     raise HTTPException(
                         status_code=500, 
-                        detail=f"Failed to generate audio for {len(still_missing)} lines. Cannot proceed with video generation. Missing: {', '.join(still_missing[:3])}{'...' if len(still_missing) > 3 else ''}"
+                        detail=f"Failed to generate audio for {len(stillMissing)} lines. Cannot proceed with video generation. Missing: {', '.join(stillMissing[:3])}{'...' if len(stillMissing) > 3 else ''}"
                     )
                 
-            except HTTPException as audio_error:
-                logger.error(f"❌ Audio generation failed: {audio_error.detail}")
+            except HTTPException as audioError:
+                logger.error(f"❌ Audio generation failed for script {scriptId}: {audioError.detail}")
                 raise HTTPException(
                     status_code=500, 
-                    detail=f"Audio generation failed before video generation: {audio_error.detail}"
+                    detail=f"Audio generation failed before video generation: {audioError.detail}"
                 )
         else:
-            logger.info(f"✅ All audio files already exist: {len(dialogue_lines)} files ready")
+            logger.info(f"✅ All {len(dialogueLines)} audio files already exist for script {scriptId}")
         
         # Proceed with video generation
-        video_generator = VideoGenerator()
+        logger.info(f"🎬 Starting video generation for script {scriptId}...")
+        videoGenerator = VideoGenerator()
         
-        result = await video_generator.generateVideo(
-            script_id, 
-            scripts_data, 
-            user_profiles,
+        result = await videoGenerator.generateVideo(
+            scriptId, 
+            scriptsData, 
+            userProfiles,
             VIDEO_OUTPUT_DIR,
             BACKGROUND_DIR, 
             DEFAULT_BACKGROUND_VIDEO,
             FONT_PATH,
-            background_video
+            backgroundVideo
         )
         
         # Save updated scripts data with video information
-        saveScripts(scripts_data, SCRIPTS_FILE)
+        firebaseService.saveScripts(scriptsData)
         
-        logger.info(f"✅ Video generation completed for script: {script_id}")
+        logger.info(f"✅ Video generation completed for script {scriptId} for user {currentUser['email']}")
         return result
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Video generation API error for script {script_id}: {str(e)}")
+        logger.error(f"💥 Video generation failed for script {scriptId} for user {currentUser['email']}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
 
-@app.get("/api/scripts/{script_id}/video-status", response_model=VideoGenerationStatus)
-async def get_video_generation_status(script_id: str):
+@app.get("/api/scripts/{scriptId}/video-status", response_model=VideoGenerationStatus)
+async def getVideoGenerationStatus(scriptId: str, currentUser: dict = Depends(get_current_user)):
     try:
-        scripts_data = loadScripts(SCRIPTS_FILE)
-        scripts = scripts_data.get("scripts", {})
+        logger.info(f"🎬 User {currentUser['email']} checking video status for script: {scriptId}")
         
-        if script_id not in scripts:
-            raise HTTPException(status_code=404, detail=f"Script '{script_id}' not found")
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        script = firebaseService.getScript(scriptId)
         
-        script = scripts[script_id]
-        final_video_path = script.get("finalVideoPath", "")
+        if not script:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        if final_video_path and os.path.exists(final_video_path) and os.path.getsize(final_video_path) > 0:
+        finalVideoPath = script.get("finalVideoPath", "")
+        
+        # Check ownership for logging
+        isOwner = script.get("createdBy") == currentUser['id']
+        ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
+        
+        # Check if video exists and is valid
+        if finalVideoPath and os.path.exists(finalVideoPath) and os.path.getsize(finalVideoPath) > 0:
             status = "completed"
-            message = f"Video generated successfully: {os.path.basename(final_video_path)}"
+            message = f"Video generated successfully: {os.path.basename(finalVideoPath)}"
             progress = 100.0
+            logger.info(f"✅ Video completed for script {scriptId}{ownerInfo}: {os.path.basename(finalVideoPath)}")
         else:
-            dialogue_lines = script.get("dialogue", [])
-            total_lines = len(dialogue_lines)
-            audio_lines = 0
+            # Check audio readiness
+            dialogueLines = script.get("dialogue", [])
+            totalLines = len(dialogueLines)
+            audioLines = 0
             
-            for line in dialogue_lines:
-                audio_file = line.get("audioFile", "")
-                if audio_file and os.path.exists(audio_file):
-                    audio_lines += 1
+            for line in dialogueLines:
+                audioFile = line.get("audioFile", "")
+                if audioFile and os.path.exists(audioFile):
+                    audioLines += 1
             
-            if audio_lines == total_lines and total_lines > 0:
+            if audioLines == totalLines and totalLines > 0:
                 status = "pending"
-                message = f"Ready for video generation ({audio_lines}/{total_lines} audio files ready)"
+                message = f"Ready for video generation ({audioLines}/{totalLines} audio files ready)"
                 progress = 0.0
+                logger.info(f"⏳ Script {scriptId}{ownerInfo} ready for video generation")
             else:
                 status = "pending"
-                message = f"Waiting for audio generation ({audio_lines}/{total_lines} audio files ready)"
+                message = f"Waiting for audio generation ({audioLines}/{totalLines} audio files ready)"
                 progress = 0.0
+                logger.info(f"⏳ Script {scriptId}{ownerInfo} waiting for audio: {audioLines}/{totalLines} files ready")
         
         return VideoGenerationStatus(
-            scriptId=script_id,
+            scriptId=scriptId,
             status=status,
             stage="ready" if status == "pending" else "completed",
             progress=progress,
             message=message,
-            finalVideoPath=final_video_path if final_video_path else None
+            finalVideoPath=finalVideoPath if finalVideoPath else None
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"💥 Error getting video status for script {script_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"💥 Failed to get video status for script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get video status: {str(e)}")
 
 @app.get("/api/system/ffmpeg-status")
 async def check_ffmpeg_status():
@@ -1489,52 +1595,165 @@ async def test_image_serving():
 async def get_my_characters(request: Request, current_user: dict = Depends(get_current_user)):
     """Get all characters created by the current user"""
     try:
-        firebase_service = get_firebase_service()
-        user_characters = firebase_service.get_user_characters(current_user['id'])
+        firebase_service = getFirebaseService()
+        user_characters = firebase_service.getUserCharacters(current_user['id'])
         
         characters = []
         for char_data in user_characters:
             char_id = char_data['id']
-            
-            # Check if files exist
-            audio_file = char_data.get("audioFile", "")
-            has_audio = bool(audio_file and os.path.exists(audio_file))
-            
-            # Convert local file paths to URLs
-            audio_url = convert_local_path_to_url(audio_file, request)
-            images = char_data.get("images", {})
-            images_urls = convert_images_dict_to_urls(images, request)
-            image_count = len(images)
-            
-            config_data = char_data.get("config", {})
-            default_config = getDefaultConfig(USER_PROFILES_FILE)
-            
-            config = CharacterConfig(
-                speed=config_data.get("speed", default_config.speed),
-                nfeSteps=config_data.get("nfeSteps", default_config.nfeSteps),
-                crossFadeDuration=config_data.get("crossFadeDuration", default_config.crossFadeDuration),
-                removeSilences=config_data.get("removeSilences", default_config.removeSilences)
-            )
-            
-            character = CharacterResponse(
-                id=char_id,
-                displayName=char_data.get("displayName", char_id.title()),
-                audioFile=audio_url,
-                config=config,
-                images=images_urls,
-                outputPrefix=char_data.get("outputPrefix", char_id),
-                createdAt=char_data.get("createdAt", datetime.now().isoformat()),
-                updatedAt=char_data.get("updatedAt", datetime.now().isoformat()),
-                hasAudio=has_audio,
-                imageCount=image_count
-            )
+            character = build_character_response(char_id, char_data, request, current_user)
             characters.append(character)
         
         logger.info(f"📄 Retrieved {len(characters)} characters for user {current_user['id']}")
         return characters
     except Exception as e:
         logger.error(f"💥 Error getting user characters: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to get user's characters: {str(e)}")
+
+@app.get("/api/my-scripts", response_model=List[ScriptResponse])
+async def getMyScripts(currentUser: dict = Depends(get_current_user)):
+    """Get all scripts created by the current user"""
+    try:
+        logger.info(f"📝 User {currentUser['email']} requesting their own scripts")
+        
+        # Get user's scripts from Firebase
+        firebaseService = getFirebaseService()
+        userScripts = firebaseService.getUserScripts(currentUser['id'])
+        
+        scriptResponses = []
+        
+        for scriptData in userScripts:
+            dialogueLines = scriptData.get("dialogue", [])
+            
+            # Count audio files that exist
+            audioCount = 0
+            for dialogueLine in dialogueLines:
+                audioFile = dialogueLine.get("audioFile", "")
+                if audioFile and os.path.exists(audioFile):
+                    audioCount += 1
+            
+            scriptResponse = ScriptResponse(
+                id=scriptData["id"],
+                selectedCharacters=scriptData["selectedCharacters"],
+                originalPrompt=scriptData["originalPrompt"],
+                word=scriptData.get("word"),
+                dialogue=dialogueLines,
+                createdAt=scriptData["createdAt"],
+                updatedAt=scriptData["updatedAt"],
+                hasAudio=audioCount > 0,
+                audioCount=audioCount,
+                finalVideoPath=scriptData.get("finalVideoPath"),
+                videoDuration=scriptData.get("videoDuration"),
+                videoSize=scriptData.get("videoSize")
+            )
+            scriptResponses.append(scriptResponse)
+        
+        logger.info(f"📊 Retrieved {len(scriptResponses)} scripts for user {currentUser['email']}")
+        return scriptResponses
+        
+    except Exception as e:
+        logger.error(f"💥 Failed to get user scripts for {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get user scripts: {str(e)}")
+
+# Star/Favorite Endpoints
+
+@app.post("/api/characters/{character_id}/star", response_model=StarResponse)
+async def star_character(character_id: str, current_user: dict = Depends(get_current_user)):
+    """Star a character and add to user's favorites"""
+    try:
+        logger.info(f"⭐ User {current_user['id']} attempting to star character {character_id}")
+        
+        firebase_service = getFirebaseService()
+        
+        # Star the character
+        success, message, starred_count = firebase_service.starCharacter(character_id, current_user['id'])
+        
+        if not success:
+            logger.warning(f"⚠️ Failed to star character {character_id}: {message}")
+            if "already starred" in message.lower():
+                raise HTTPException(status_code=409, detail=message)
+            elif "not found" in message.lower():
+                raise HTTPException(status_code=404, detail=message)
+            else:
+                raise HTTPException(status_code=400, detail=message)
+        
+        logger.info(f"✅ Character {character_id} starred by user {current_user['id']}")
+        
+        return StarResponse(
+            success=True,
+            message=message,
+            characterId=character_id,
+            starred=starred_count,
+            isStarred=True
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error starring character: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to star character: {str(e)}")
+
+@app.delete("/api/characters/{character_id}/star", response_model=StarResponse)
+async def unstar_character(character_id: str, current_user: dict = Depends(get_current_user)):
+    """Unstar a character and remove from user's favorites"""
+    try:
+        logger.info(f"⭐ User {current_user['id']} attempting to unstar character {character_id}")
+        
+        firebase_service = getFirebaseService()
+        
+        # Unstar the character
+        success, message, starred_count = firebase_service.unstarCharacter(character_id, current_user['id'])
+        
+        if not success:
+            logger.warning(f"⚠️ Failed to unstar character {character_id}: {message}")
+            if "not starred" in message.lower():
+                raise HTTPException(status_code=409, detail=message)
+            elif "not found" in message.lower():
+                raise HTTPException(status_code=404, detail=message)
+            else:
+                raise HTTPException(status_code=400, detail=message)
+        
+        logger.info(f"✅ Character {character_id} unstarred by user {current_user['id']}")
+        
+        return StarResponse(
+            success=True,
+            message=message,
+            characterId=character_id,
+            starred=starred_count,
+            isStarred=False
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error unstarring character: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to unstar character: {str(e)}")
+
+@app.get("/api/my-favorites", response_model=List[CharacterResponse])
+async def get_my_favorite_characters(request: Request, current_user: dict = Depends(get_current_user)):
+    """Get all favorite characters for the current user"""
+    try:
+        logger.info(f"📋 Getting favorite characters for user {current_user['id']}")
+        
+        firebase_service = getFirebaseService()
+        
+        # Get favorite characters data
+        favorite_chars_data = firebase_service.getUserFavoriteCharacters(current_user['id'])
+        
+        # Build response list
+        response_list = []
+        for char_data in favorite_chars_data:
+            char_id = char_data.get('id')
+            if char_id:
+                character_response = build_character_response(char_id, char_data, request, current_user)
+                response_list.append(character_response)
+        
+        logger.info(f"✅ Retrieved {len(response_list)} favorite characters for user {current_user['id']}")
+        return response_list
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting favorite characters: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get favorite characters: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")

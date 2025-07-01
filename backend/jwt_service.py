@@ -11,91 +11,82 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 class JWTService:
-    """JWT Token Service for user authentication"""
     
     def __init__(self):
-        self.jwt_secret = os.getenv('JWT_TOKEN', 'thisisjwttoken')
+        self.jwtSecret = os.getenv('JWT_TOKEN', 'thisisjwttoken')
         self.algorithm = 'HS256'
-        self.expiration_hours = 24  # Token expires in 24 hours
+        self.expirationHours = 24
     
-    def create_token(self, user_id: str, email: str) -> tuple[str, int]:
-        """Create a JWT token for user authentication"""
+    def createToken(self, userId: str, email: str) -> tuple[str, int]:
         try:
-            expiration_time = datetime.utcnow() + timedelta(hours=self.expiration_hours)
+            expirationTime = datetime.utcnow() + timedelta(hours=self.expirationHours)
             
             payload = {
-                'user_id': user_id,
+                'user_id': userId,
                 'email': email,
-                'exp': expiration_time,
+                'exp': expirationTime,
                 'iat': datetime.utcnow(),
                 'type': 'access'
             }
             
-            token = jwt.encode(payload, self.jwt_secret, algorithm=self.algorithm)
-            expires_in = int(self.expiration_hours * 3600)  # Convert to seconds
+            token = jwt.encode(payload, self.jwtSecret, algorithm=self.algorithm)
+            expiresIn = int(self.expirationHours * 3600)
             
-            logger.info(f"✅ Created JWT token for user: {email}")
-            return token, expires_in
+            logger.info(f"🔐 Created JWT token for: {email}")
+            return token, expiresIn
             
         except Exception as e:
-            logger.error(f"💥 Error creating JWT token: {str(e)}")
+            logger.error(f"�� JWT token creation failed: {str(e)}")
             raise
     
-    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Verify and decode a JWT token"""
+    def verifyToken(self, token: str) -> Optional[Dict[str, Any]]:
         try:
-            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.algorithm])
+            payload = jwt.decode(token, self.jwtSecret, algorithms=[self.algorithm])
             
-            # Check if token is expired
             if datetime.utcnow() > datetime.fromtimestamp(payload['exp']):
-                logger.warning("⚠️ JWT token has expired")
+                logger.warning("⚠️ JWT token expired")
                 return None
             
-            logger.info(f"✅ JWT token verified for user: {payload.get('email')}")
+            logger.info(f"✅ JWT verified: {payload.get('email')}")
             return payload
             
         except jwt.ExpiredSignatureError:
-            logger.warning("⚠️ JWT token has expired")
+            logger.warning("⚠️ JWT token expired")
             return None
         except jwt.InvalidTokenError:
             logger.warning("⚠️ Invalid JWT token")
             return None
         except Exception as e:
-            logger.error(f"💥 Error verifying JWT token: {str(e)}")
+            logger.error(f"💥 JWT verification failed: {str(e)}")
             return None
     
-    def decode_token_without_verification(self, token: str) -> Optional[Dict[str, Any]]:
-        """Decode token without verification (for debugging)"""
+    def decodeTokenWithoutVerification(self, token: str) -> Optional[Dict[str, Any]]:
         try:
             payload = jwt.decode(token, options={"verify_signature": False})
             return payload
         except Exception as e:
-            logger.error(f"💥 Error decoding JWT token: {str(e)}")
+            logger.error(f"💥 JWT decode failed: {str(e)}")
             return None
     
-    def refresh_token(self, token: str) -> Optional[tuple[str, int]]:
-        """Refresh an existing JWT token"""
+    def refreshToken(self, token: str) -> Optional[tuple[str, int]]:
         try:
-            payload = self.verify_token(token)
+            payload = self.verifyToken(token)
             if not payload:
                 return None
             
-            # Create new token with same user data
-            new_token, expires_in = self.create_token(
+            newToken, expiresIn = self.createToken(
                 payload['user_id'], 
                 payload['email']
             )
             
-            logger.info(f"✅ Refreshed JWT token for user: {payload['email']}")
-            return new_token, expires_in
+            logger.info(f"🔄 JWT refreshed for: {payload['email']}")
+            return newToken, expiresIn
             
         except Exception as e:
-            logger.error(f"💥 Error refreshing JWT token: {str(e)}")
+            logger.error(f"💥 JWT refresh failed: {str(e)}")
             return None
 
-# Global JWT service instance
-jwt_service = JWTService()
+jwtService = JWTService()
 
-def get_jwt_service() -> JWTService:
-    """Get the global JWT service instance"""
-    return jwt_service 
+def getJwtService() -> JWTService:
+    return jwtService 

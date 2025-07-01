@@ -29,6 +29,8 @@ class CharacterResponse(BaseModel):
     createdBy: Optional[str] = None  # User ID who created this character
     createdByName: Optional[str] = None  # Display name of the creator
     isOwner: bool = False  # Whether the current requesting user owns this character
+    starred: int = 0  # Number of users who have starred this character
+    isStarred: bool = False  # Whether the current user has starred this character
 
 
 class SystemStatus(BaseModel):
@@ -107,7 +109,7 @@ class VideoGenerationResponse(BaseModel):
     message: str
     finalVideoPath: Optional[str] = None
     duration: Optional[float] = None
-    videoSize: Optional[int] = None
+    videoSize: Optional[int] = None 
 
 
 # Authentication Models
@@ -139,3 +141,18 @@ class AuthResponse(BaseModel):
     token: Optional[str] = None
     user: Optional[UserResponse] = None
     expiresIn: Optional[int] = None  # Token expiration in seconds
+
+
+# Star/Favorite Models
+
+class StarResponse(BaseModel):
+    success: bool
+    message: str
+    characterId: str
+    starred: int  # Updated star count
+    isStarred: bool  # User's current star status
+
+
+class FavoriteCharacter(BaseModel):
+    charId: str
+    charName: str

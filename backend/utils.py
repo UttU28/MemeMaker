@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import Dict, Any
 from fastapi import UploadFile, HTTPException
 from models import CharacterConfig
-from firebase_service import get_firebase_service
+from firebase_service import getFirebaseService
 
 logger = logging.getLogger(__name__)
 
 def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
     try:
-        firebase_service = get_firebase_service()
-        profiles_data = firebase_service.get_all_user_profiles()
+        firebase_service = getFirebaseService()
+        profiles_data = firebase_service.getAllUserProfiles()
         
         if not profiles_data.get("users"):
             defaultData = {
@@ -31,7 +31,7 @@ def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
                 "defaultUser": None,
                 "createdAt": datetime.now().isoformat() + 'Z'
             }
-            firebase_service.save_user_profiles(defaultData)
+            firebase_service.saveUserProfiles(defaultData)
             return defaultData
         
         if "default" not in profiles_data:
@@ -54,8 +54,8 @@ def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
 
 def saveUserProfiles(data: Dict[str, Any], userProfilesFile: str = None) -> None:
     try:
-        firebase_service = get_firebase_service()
-        success = firebase_service.save_user_profiles(data)
+        firebase_service = getFirebaseService()
+        success = firebase_service.saveUserProfiles(data)
         
         if not success:
             raise Exception("Failed to save user profiles to Firebase")
@@ -118,15 +118,15 @@ def validateImageFile(file: UploadFile) -> bool:
 
 def loadScripts(scriptsFile: str = None) -> Dict[str, Any]:
     try:
-        firebase_service = get_firebase_service()
-        scripts_data = firebase_service.get_all_scripts()
+        firebase_service = getFirebaseService()
+        scripts_data = firebase_service.getAllScripts()
         
         if not scripts_data.get("scripts"):
             defaultData = {
                 "scripts": {},
                 "createdAt": datetime.now().isoformat()
             }
-            firebase_service.save_scripts(defaultData)
+            firebase_service.saveScripts(defaultData)
             return defaultData
         
         if "createdAt" not in scripts_data:
@@ -139,8 +139,8 @@ def loadScripts(scriptsFile: str = None) -> Dict[str, Any]:
 
 def saveScripts(data: Dict[str, Any], scriptsFile: str = None) -> None:
     try:
-        firebase_service = get_firebase_service()
-        success = firebase_service.save_scripts(data)
+        firebase_service = getFirebaseService()
+        success = firebase_service.saveScripts(data)
         
         if not success:
             raise Exception("Failed to save scripts to Firebase")
