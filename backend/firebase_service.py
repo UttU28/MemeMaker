@@ -880,116 +880,203 @@ class FirebaseService:
             return []
 
     def updateScriptWithCharacterAssociations(self, scriptId: str, newScriptData: Dict[str, Any]) -> bool:
-        """Update a script and handle character association changes"""
+        """Update script and maintain character associations"""
         try:
-            # Get current script data
-            oldScriptData = self.getScript(scriptId)
-            if not oldScriptData:
-                logger.warning(f"⚠️ Script {scriptId} not found for update")
+            # Get current script to see what characters were previously associated
+            currentScript = self.getScript(scriptId)
+            if not currentScript:
+                logger.error(f"💥 Script {scriptId} not found for character association update")
                 return False
             
-            oldCharacters = set(oldScriptData.get('selectedCharacters', []))
+            oldCharacters = set(currentScript.get('selectedCharacters', []))
             newCharacters = set(newScriptData.get('selectedCharacters', []))
-            ownerUserId = oldScriptData.get('createdBy')
-            
-            # Characters to remove from
-            charactersToRemove = oldCharacters - newCharacters
-            # Characters to add to
-            charactersToAdd = newCharacters - oldCharacters
             
             batch = self.db.batch()
             
-            # Update the script
-            newScriptData['updatedAt'] = datetime.now().isoformat()
+            # Update the script itself
             scriptRef = self.db.collection('scripts').document(scriptId)
-            batch.update(scriptRef, newScriptData)
+            newScriptData['updatedAt'] = datetime.now().isoformat()
+            batch.set(scriptRef, newScriptData)
             
-            # Update user's generatedScripts array with new info
-            if ownerUserId:
-                try:
-                    userRef = self.db.collection('users').document(ownerUserId)
-                    
-                    # Remove old script info
-                    oldScriptInfo = {
-                        'id': scriptId,
-                        'originalPrompt': oldScriptData.get('originalPrompt', '')[:50] + ('...' if len(oldScriptData.get('originalPrompt', '')) > 50 else ''),
-                        'selectedCharacters': oldScriptData.get('selectedCharacters', []),
-                        'createdAt': oldScriptData.get('createdAt', '')
-                    }
-                    
-                    # Add new script info
-                    newScriptInfo = {
-                        'id': scriptId,
-                        'originalPrompt': newScriptData.get('originalPrompt', '')[:50] + ('...' if len(newScriptData.get('originalPrompt', '')) > 50 else ''),
-                        'selectedCharacters': newScriptData.get('selectedCharacters', []),
-                        'createdAt': oldScriptData.get('createdAt', '')
-                    }
-                    
-                    batch.update(userRef, {
-                        'generatedScripts': firestore.ArrayRemove([oldScriptInfo]),
-                        'updatedAt': datetime.now().isoformat()
-                    })
-                    
-                    batch.update(userRef, {
-                        'generatedScripts': firestore.ArrayUnion([newScriptInfo]),
-                        'updatedAt': datetime.now().isoformat()
-                    })
-                    
-                except Exception as e:
-                    logger.warning(f"⚠️ Could not update user's scripts: {str(e)}")
+            # Handle removed character associations
+            removedCharacters = oldCharacters - newCharacters
+            for charId in removedCharacters:
+                # Remove script from character's scripts array
+                charRef = self.db.collection('users').document(charId)
+                charDoc = charRef.get()
+                if charDoc.exists:
+                    charData = charDoc.to_dict()
+                    charScripts = charData.get('scripts', [])
+                    if scriptId in charScripts:
+                        charScripts.remove(scriptId)
+                        batch.update(charRef, {'scripts': charScripts, 'updatedAt': datetime.now()})
             
-            # Remove script from old characters
-            for characterId in charactersToRemove:
-                try:
-                    characterRef = self.db.collection('user_profiles').document(characterId)
-                    characterDoc = characterRef.get()
-                    
-                    if characterDoc.exists:
-                        oldScriptReference = {
-                            'scriptId': scriptId,
-                            'scriptPrompt': oldScriptData.get('originalPrompt', '')[:30] + ('...' if len(oldScriptData.get('originalPrompt', '')) > 30 else ''),
-                            'createdBy': ownerUserId,
-                            'createdAt': oldScriptData.get('createdAt', '')
-                        }
-                        
-                        batch.update(characterRef, {
-                            'scripts': firestore.ArrayRemove([oldScriptReference]),
-                            'updatedAt': datetime.now().isoformat()
-                        })
-                        
-                except Exception as e:
-                    logger.warning(f"⚠️ Could not remove script from character {characterId}: {str(e)}")
-            
-            # Add script to new characters
-            for characterId in charactersToAdd:
-                try:
-                    characterRef = self.db.collection('user_profiles').document(characterId)
-                    characterDoc = characterRef.get()
-                    
-                    if characterDoc.exists:
-                        newScriptReference = {
-                            'scriptId': scriptId,
-                            'scriptPrompt': newScriptData.get('originalPrompt', '')[:30] + ('...' if len(newScriptData.get('originalPrompt', '')) > 30 else ''),
-                            'createdBy': ownerUserId,
-                            'createdAt': oldScriptData.get('createdAt', '')
-                        }
-                        
-                        batch.update(characterRef, {
-                            'scripts': firestore.ArrayUnion([newScriptReference]),
-                            'updatedAt': datetime.now().isoformat()
-                        })
-                        
-                except Exception as e:
-                    logger.warning(f"⚠️ Could not add script to character {characterId}: {str(e)}")
+            # Handle new character associations
+            addedCharacters = newCharacters - oldCharacters
+            for charId in addedCharacters:
+                # Add script to character's scripts array
+                charRef = self.db.collection('users').document(charId)
+                charDoc = charRef.get()
+                if charDoc.exists:
+                    charData = charDoc.to_dict()
+                    charScripts = charData.get('scripts', [])
+                    if scriptId not in charScripts:
+                        charScripts.append(scriptId)
+                        batch.update(charRef, {'scripts': charScripts, 'updatedAt': datetime.now()})
             
             batch.commit()
-            
-            logger.info(f"✅ Updated script {scriptId} - removed from {len(charactersToRemove)} characters, added to {len(charactersToAdd)} characters")
+            logger.info(f"✅ Updated script {scriptId} with character associations")
             return True
             
         except Exception as e:
-            logger.error(f"💥 Error updating script with character associations: {str(e)}")
+            logger.error(f"💥 Error updating script {scriptId} with character associations: {str(e)}")
             return False
+
+    # Activity Tracking Constants
+    class ActivityType:
+        # Script Activities
+        SCRIPT_CREATED = "script_created"
+        SCRIPT_UPDATED = "script_updated"
+        SCRIPT_DELETED = "script_deleted"
+        
+        # Character Activities
+        CHARACTER_CREATED = "character_created"
+        CHARACTER_UPDATED = "character_updated"
+        CHARACTER_DELETED = "character_deleted"
+        CHARACTER_STARRED = "character_starred"
+        CHARACTER_UNSTARRED = "character_unstarred"
+        
+        # Video Activities
+        VIDEO_GENERATION_STARTED = "video_generation_started"
+        VIDEO_GENERATION_COMPLETED = "video_generation_completed"
+
+    def addUserActivity(self, userId: str, activityType: str, message: str, additionalData: Dict[str, Any] = None) -> bool:
+        """Add an activity to the user's activity log"""
+        try:
+            userRef = self.db.collection('users').document(userId)
+            userDoc = userRef.get()
+            
+            if not userDoc.exists:
+                logger.error(f"💥 User {userId} not found for activity logging")
+                return False
+            
+            userData = userDoc.to_dict()
+            activities = userData.get('activities', [])
+            
+            # Create new activity
+            newActivity = {
+                'type': activityType,
+                'message': message,
+                'timestamp': datetime.now().isoformat(),
+                'id': f"{activityType}_{int(datetime.now().timestamp() * 1000)}"  # Unique ID
+            }
+            
+            # Add additional data if provided
+            if additionalData:
+                newActivity.update(additionalData)
+            
+            # Add to beginning of list (newest first)
+            activities.insert(0, newActivity)
+            
+            # Keep only the latest 100 activities to prevent unlimited growth
+            if len(activities) > 100:
+                activities = activities[:100]
+            
+            # Update user document
+            userRef.update({
+                'activities': activities,
+                'updatedAt': datetime.now()
+            })
+            
+            logger.info(f"📝 Added activity for user {userId}: {activityType}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error adding activity for user {userId}: {str(e)}")
+            return False
+
+    def getUserActivities(self, userId: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get user's activity log"""
+        try:
+            userRef = self.db.collection('users').document(userId)
+            userDoc = userRef.get()
+            
+            if not userDoc.exists:
+                logger.warning(f"⚠️ User {userId} not found for activity retrieval")
+                return []
+            
+            userData = userDoc.to_dict()
+            activities = userData.get('activities', [])
+            
+            # Return limited number of activities
+            limited_activities = activities[:limit] if limit else activities
+            
+            logger.info(f"📋 Retrieved {len(limited_activities)} activities for user {userId}")
+            return limited_activities
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting activities for user {userId}: {str(e)}")
+            return []
+
+    def clearUserActivities(self, userId: str) -> bool:
+        """Clear all activities for a user (admin function)"""
+        try:
+            userRef = self.db.collection('users').document(userId)
+            userRef.update({
+                'activities': [],
+                'updatedAt': datetime.now()
+            })
+            
+            logger.info(f"🗑️ Cleared all activities for user {userId}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error clearing activities for user {userId}: {str(e)}")
+            return False
+
+    def addScriptActivity(self, userId: str, activityType: str, scriptId: str, scriptTitle: str = None):
+        """Helper method to add script-related activities"""
+        script_name = scriptTitle or scriptId
+        
+        messages = {
+            self.ActivityType.SCRIPT_CREATED: f"Created script '{script_name}'",
+            self.ActivityType.SCRIPT_UPDATED: f"Updated script '{script_name}'",
+            self.ActivityType.SCRIPT_DELETED: f"Deleted script '{script_name}'"
+        }
+        
+        message = messages.get(activityType, f"Script activity: {activityType}")
+        return self.addUserActivity(userId, activityType, message, {'scriptId': scriptId})
+
+    def addCharacterActivity(self, userId: str, activityType: str, characterId: str, characterName: str = None):
+        """Helper method to add character-related activities"""
+        char_name = characterName or characterId
+        
+        messages = {
+            self.ActivityType.CHARACTER_CREATED: f"Created character '{char_name}'",
+            self.ActivityType.CHARACTER_UPDATED: f"Updated character '{char_name}'",
+            self.ActivityType.CHARACTER_DELETED: f"Deleted character '{char_name}'",
+            self.ActivityType.CHARACTER_STARRED: f"Starred character '{char_name}'",
+            self.ActivityType.CHARACTER_UNSTARRED: f"Unstarred character '{char_name}'"
+        }
+        
+        message = messages.get(activityType, f"Character activity: {activityType}")
+        return self.addUserActivity(userId, activityType, message, {'characterId': characterId})
+
+    def addVideoActivity(self, userId: str, activityType: str, scriptId: str, scriptTitle: str = None, videoPath: str = None):
+        """Helper method to add video-related activities"""
+        script_name = scriptTitle or scriptId
+        
+        messages = {
+            self.ActivityType.VIDEO_GENERATION_STARTED: f"Started video generation for script '{script_name}'",
+            self.ActivityType.VIDEO_GENERATION_COMPLETED: f"Completed video generation for script '{script_name}'"
+        }
+        
+        message = messages.get(activityType, f"Video activity: {activityType}")
+        additional_data = {'scriptId': scriptId}
+        if videoPath:
+            additional_data['videoPath'] = videoPath
+        
+        return self.addUserActivity(userId, activityType, message, additional_data)
 
 firebaseService = None
 

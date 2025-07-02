@@ -34,7 +34,7 @@ from models import (
     AudioGenerationStatus, AudioGenerationResponse,
     VideoGenerationStatus, VideoGenerationResponse,
     SignupRequest, LoginRequest, UserResponse, AuthResponse,
-    StarResponse
+    StarResponse, UserActivity, UserActivityResponse, ActivityStats
 )
 
 # Import Services
@@ -178,7 +178,16 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"detail": serializable_errors}
     )
 
-# Helper functions for converting file paths to URLs
+# Helper functions for converting file paths to URLs and datetime objects
+def convert_datetime_to_string(dt_obj):
+    """Convert Firebase datetime object to ISO string"""
+    if hasattr(dt_obj, 'isoformat'):
+        return dt_obj.isoformat()
+    elif hasattr(dt_obj, 'timestamp'):
+        return datetime.fromtimestamp(dt_obj.timestamp()).isoformat()
+    else:
+        return str(dt_obj)
+
 def convert_local_path_to_url(local_path: str, request: Request = None) -> str:
     """Convert local file path to HTTP URL accessible by frontend"""
     if not local_path:
@@ -323,8 +332,8 @@ async def signup(request: SignupRequest):
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
-            createdAt=user_data['createdAt'],
-            updatedAt=user_data['updatedAt']
+            createdAt=convert_datetime_to_string(user_data['createdAt']),
+            updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
         
         logger.info(f"✅ User signup successful: {request.email}")
@@ -373,8 +382,8 @@ async def login(request: LoginRequest):
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
-            createdAt=user_data['createdAt'],
-            updatedAt=user_data['updatedAt']
+            createdAt=convert_datetime_to_string(user_data['createdAt']),
+            updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
         
         logger.info(f"✅ User login successful: {request.email}")
@@ -403,8 +412,8 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
             email=current_user['email'],
             isVerified=current_user['isVerified'],
             subscription=current_user['subscription'],
-            createdAt=current_user['createdAt'],
-            updatedAt=current_user['updatedAt']
+            createdAt=convert_datetime_to_string(current_user['createdAt']),
+            updatedAt=convert_datetime_to_string(current_user['updatedAt'])
         )
     except Exception as e:
         logger.error(f"💥 Error getting user profile: {str(e)}")
@@ -440,8 +449,8 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(secu
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
-            createdAt=user_data['createdAt'],
-            updatedAt=user_data['updatedAt']
+            createdAt=convert_datetime_to_string(user_data['createdAt']),
+            updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
         
         return AuthResponse(
@@ -683,6 +692,14 @@ async def update_character(
         if not success:
             raise HTTPException(status_code=500, detail="Failed to update character")
         
+        # Log character update activity
+        firebase_service.addCharacterActivity(
+            current_user['id'], 
+            firebase_service.ActivityType.CHARACTER_UPDATED, 
+            character_id, 
+            char_data.get("displayName", character_id)
+        )
+        
         logger.info(f"✅ Updated character: {character_id}")
         
         return await get_character(character_id, request, current_user)
@@ -739,6 +756,14 @@ async def delete_character(character_id: str, current_user: dict = Depends(get_c
         success = firebase_service.deleteCharacterWithOwnerCleanup(character_id)
         if not success:
             raise HTTPException(status_code=500, detail="Failed to delete character from database")
+        
+        # Log character deletion activity
+        firebase_service.addCharacterActivity(
+            current_user['id'], 
+            firebase_service.ActivityType.CHARACTER_DELETED, 
+            character_id, 
+            char_data.get("displayName", character_id)
+        )
         
         # Handle default user update if needed
         profiles = firebase_service.getAllUserProfiles()
@@ -885,6 +910,14 @@ async def create_complete_character(
             if not success:
                 raise Exception("Failed to save character with ownership tracking")
             
+            # Log character creation activity
+            firebase_service.addCharacterActivity(
+                current_user['id'], 
+                firebase_service.ActivityType.CHARACTER_CREATED, 
+                character_id, 
+                displayName
+            )
+            
             logger.info(f"✅ Created character: {character_id} ({displayName}) for user {current_user['id']}")
             
         except Exception as e:
@@ -951,6 +984,14 @@ async def generateScript(request: ScriptRequest, currentUser: dict = Depends(get
         if not success:
             logger.error(f"💥 Failed to save script {scriptId} to Firebase")
             raise HTTPException(status_code=500, detail="Failed to save script to database")
+        
+        # Log script creation activity
+        firebaseService.addScriptActivity(
+            currentUser['id'], 
+            firebaseService.ActivityType.SCRIPT_CREATED, 
+            scriptId, 
+            request.prompt[:50] + "..." if len(request.prompt) > 50 else request.prompt
+        )
         
         logger.info(f"✅ Generated script {scriptId} for user {currentUser['email']} with {len(dialogueLines)} dialogue lines")
         
@@ -1187,6 +1228,14 @@ async def updateScript(scriptId: str, updates: ScriptUpdate, currentUser: dict =
             logger.error(f"💥 Failed to save updated script {scriptId} to Firebase")
             raise HTTPException(status_code=500, detail="Failed to save script updates")
         
+        # Log script update activity
+        firebaseService.addScriptActivity(
+            currentUser['id'], 
+            firebaseService.ActivityType.SCRIPT_UPDATED, 
+            scriptId, 
+            scriptData.get("originalPrompt", "")[:50] + "..." if len(scriptData.get("originalPrompt", "")) > 50 else scriptData.get("originalPrompt", scriptId)
+        )
+        
         # Count remaining audio files
         audioCount = sum(1 for line in updatedDialogue if line.get("audioFile", "").strip() and os.path.exists(line.get("audioFile", "")))
         
@@ -1270,6 +1319,14 @@ async def deleteScript(scriptId: str, currentUser: dict = Depends(get_current_us
         if not success:
             logger.error(f"💥 Failed to delete script {scriptId} from Firebase")
             raise HTTPException(status_code=500, detail="Failed to delete script from database")
+        
+        # Log script deletion activity
+        firebaseService.addScriptActivity(
+            currentUser['id'], 
+            firebaseService.ActivityType.SCRIPT_DELETED, 
+            scriptId, 
+            script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId)
+        )
         
         logger.info(f"✅ Successfully deleted script {scriptId} for user {currentUser['email']} ({len(deletedMediaFiles)} media files removed)")
         
@@ -1435,6 +1492,14 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
         else:
             logger.info(f"✅ All {len(dialogueLines)} audio files already exist for script {scriptId}")
         
+        # Log video generation start activity
+        firebaseService.addVideoActivity(
+            currentUser['id'], 
+            firebaseService.ActivityType.VIDEO_GENERATION_STARTED, 
+            scriptId, 
+            script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId)
+        )
+        
         # Proceed with video generation
         logger.info(f"🎬 Starting video generation for script {scriptId}...")
         videoGenerator = VideoGenerator()
@@ -1452,6 +1517,16 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
         
         # Save updated scripts data with video information
         firebaseService.saveScripts(scriptsData)
+        
+        # Log video generation completion activity
+        final_video_path = result.finalVideoPath if hasattr(result, 'finalVideoPath') else None
+        firebaseService.addVideoActivity(
+            currentUser['id'], 
+            firebaseService.ActivityType.VIDEO_GENERATION_COMPLETED, 
+            scriptId, 
+            script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId),
+            final_video_path
+        )
         
         logger.info(f"✅ Video generation completed for script {scriptId} for user {currentUser['email']}")
         return result
@@ -1677,6 +1752,16 @@ async def star_character(character_id: str, current_user: dict = Depends(get_cur
             else:
                 raise HTTPException(status_code=400, detail=message)
         
+        # Log character starring activity
+        char_data = firebase_service.getUserProfile(character_id)
+        char_name = char_data.get("displayName", character_id) if char_data else character_id
+        firebase_service.addCharacterActivity(
+            current_user['id'], 
+            firebase_service.ActivityType.CHARACTER_STARRED, 
+            character_id, 
+            char_name
+        )
+        
         logger.info(f"✅ Character {character_id} starred by user {current_user['id']}")
         
         return StarResponse(
@@ -1712,6 +1797,16 @@ async def unstar_character(character_id: str, current_user: dict = Depends(get_c
                 raise HTTPException(status_code=404, detail=message)
             else:
                 raise HTTPException(status_code=400, detail=message)
+        
+        # Log character unstarring activity
+        char_data = firebase_service.getUserProfile(character_id)
+        char_name = char_data.get("displayName", character_id) if char_data else character_id
+        firebase_service.addCharacterActivity(
+            current_user['id'], 
+            firebase_service.ActivityType.CHARACTER_UNSTARRED, 
+            character_id, 
+            char_name
+        )
         
         logger.info(f"✅ Character {character_id} unstarred by user {current_user['id']}")
         
@@ -1754,6 +1849,113 @@ async def get_my_favorite_characters(request: Request, current_user: dict = Depe
     except Exception as e:
         logger.error(f"💥 Error getting favorite characters: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get favorite characters: {str(e)}")
+
+# User Activity Endpoints
+
+@app.get("/api/my-activities", response_model=UserActivityResponse)
+async def get_my_activities(current_user: dict = Depends(get_current_user), limit: int = 50):
+    """Get current user's activity log"""
+    try:
+        logger.info(f"📋 Getting activities for user {current_user['id']} (limit: {limit})")
+        
+        firebase_service = getFirebaseService()
+        activities_data = firebase_service.getUserActivities(current_user['id'], limit)
+        
+        # Convert to UserActivity models
+        activities = []
+        for activity_data in activities_data:
+            activity = UserActivity(
+                id=activity_data.get('id', ''),
+                type=activity_data.get('type', ''),
+                message=activity_data.get('message', ''),
+                timestamp=convert_datetime_to_string(activity_data.get('timestamp', '')),
+                scriptId=activity_data.get('scriptId'),
+                characterId=activity_data.get('characterId'),
+                videoPath=activity_data.get('videoPath')
+            )
+            activities.append(activity)
+        
+        logger.info(f"✅ Retrieved {len(activities)} activities for user {current_user['id']}")
+        
+        return UserActivityResponse(
+            activities=activities,
+            totalCount=len(activities),
+            limit=limit
+        )
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting user activities: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get user activities: {str(e)}")
+
+@app.get("/api/my-activity-stats", response_model=ActivityStats)
+async def get_my_activity_stats(current_user: dict = Depends(get_current_user)):
+    """Get current user's activity statistics"""
+    try:
+        logger.info(f"📊 Getting activity stats for user {current_user['id']}")
+        
+        firebase_service = getFirebaseService()
+        activities_data = firebase_service.getUserActivities(current_user['id'], limit=None)  # Get all activities
+        
+        script_activities = 0
+        character_activities = 0
+        video_activities = 0
+        last_activity_at = None
+        
+        for activity in activities_data:
+            activity_type = activity.get('type', '')
+            
+            if activity_type.startswith('script_'):
+                script_activities += 1
+            elif activity_type.startswith('character_'):
+                character_activities += 1
+            elif activity_type.startswith('video_'):
+                video_activities += 1
+            
+            # Get the most recent activity timestamp
+            timestamp = convert_datetime_to_string(activity.get('timestamp', ''))
+            if not last_activity_at or (timestamp > last_activity_at):
+                last_activity_at = timestamp
+        
+        total_activities = len(activities_data)
+        
+        logger.info(f"✅ Activity stats for user {current_user['id']}: {total_activities} total activities")
+        
+        return ActivityStats(
+            scriptActivities=script_activities,
+            characterActivities=character_activities,
+            videoActivities=video_activities,
+            totalActivities=total_activities,
+            lastActivityAt=last_activity_at
+        )
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting activity stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get activity stats: {str(e)}")
+
+@app.delete("/api/my-activities")
+async def clear_my_activities(current_user: dict = Depends(get_current_user)):
+    """Clear all activities for the current user"""
+    try:
+        logger.info(f"🗑️ Clearing activities for user {current_user['id']}")
+        
+        firebase_service = getFirebaseService()
+        success = firebase_service.clearUserActivities(current_user['id'])
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to clear activities")
+        
+        logger.info(f"✅ Cleared activities for user {current_user['id']}")
+        
+        return {
+            "message": "All activities cleared successfully",
+            "success": True
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error clearing activities: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to clear activities: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")

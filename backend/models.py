@@ -156,3 +156,29 @@ class StarResponse(BaseModel):
 class FavoriteCharacter(BaseModel):
     charId: str
     charName: str
+
+
+# User Activity Models
+
+class UserActivity(BaseModel):
+    id: str
+    type: str
+    message: str
+    timestamp: str
+    scriptId: Optional[str] = None
+    characterId: Optional[str] = None
+    videoPath: Optional[str] = None
+
+
+class UserActivityResponse(BaseModel):
+    activities: List[UserActivity]
+    totalCount: int
+    limit: int
+
+
+class ActivityStats(BaseModel):
+    scriptActivities: int = 0
+    characterActivities: int = 0
+    videoActivities: int = 0
+    totalActivities: int = 0
+    lastActivityAt: Optional[str] = None
