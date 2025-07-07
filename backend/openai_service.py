@@ -13,61 +13,35 @@ def getOpenaiClient():
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
     return OpenAI(api_key=apiKey)
 
-def loadScriptGenerationPrompt() -> str:
-    try:
-        import sys
-        sys.path.append('src')
-        from prompts import SCRIPT_GENERATION_PROMPT
-        return SCRIPT_GENERATION_PROMPT
-    except ImportError:
-        return """
-You are an expert dialogue scriptwriter specializing in political satire and educational content.
 
-Your task is to create engaging, witty, and insightful dialogue scripts that bring complex topics to life through character interactions.
 
-Selected Characters: {characters}
-Topic/Situation: {topic}
-
-Additional Context: {additional_context}
-
-Generate a natural, engaging dialogue between these characters about the given topic. Format output as: {{Character}} their dialogue line
-"""
-
-async def generateScriptWithOpenai(selectedCharacters: List[str], prompt: str, word: Optional[str] = None) -> List[DialogueLine]:
+async def generateScriptWithOpenai(selectedCharacters: List[str], prompt: str) -> List[DialogueLine]:
     """Generate script using OpenAI API"""
     try:
         client = getOpenaiClient()
         
-        scriptPromptTemplate = loadScriptGenerationPrompt()
-        
-        if word:
-            topic = f"Explaining the concept/word: {word}"
-            additionalContext = f"User's situation/context: {prompt}"
-        else:
-            topic = prompt
-            additionalContext = "Focus on creating an engaging dialogue that explores this topic naturally."
-        
-        systemPrompt = f"""You are a dialogue scriptwriter. Create engaging conversations between characters about given topics.
+        systemPrompt = f"""You are an expert dialogue scriptwriter specializing in political satire and educational content.
+
+Create engaging, witty, and insightful dialogue scripts that bring complex topics to life through character interactions.
 
 Characters available: {', '.join(selectedCharacters)}
 Always use the exact character names provided.
 Format each line as: Character: dialogue text
 
-Keep responses natural and engaging."""
+Keep responses natural, engaging, and true to each character's personality (4-6 lines total)."""
         
         userPrompt = f"""
 Create a dialogue script for the following:
 
 Characters: {', '.join(selectedCharacters)}
-Topic: {topic}
-Context: {additionalContext}
+Topic: {prompt}
 
 Format each line as: Character: their dialogue
 Example:
 Modi: This is what I would say about this topic.
 Palki: And this is my response to that point.
 
-Keep it engaging and natural (4-6 lines total).
+Make it engaging, witty, and educational while maintaining respect for each character.
 """
         
         response = client.chat.completions.create(

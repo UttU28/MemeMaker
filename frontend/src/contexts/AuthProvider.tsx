@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { apiService } from '../services/api';
+import { authAPI } from '../services/api';
 import type { User, LoginRequest, SignupRequest } from '../services/api';
 import { AuthContext } from './AuthContext';
 import type { AuthContextType } from './AuthContext';
@@ -11,27 +11,27 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('authToken'));
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user && !!token;
 
   const saveToken = (newToken: string) => {
     setToken(newToken);
-    localStorage.setItem('token', newToken);
+    localStorage.setItem('authToken', newToken);
   };
 
   const clearToken = () => {
     setToken(null);
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
   };
 
   const login = async (data: LoginRequest) => {
     try {
       setIsLoading(true);
-      const response = await apiService.login(data);
+      const response = await authAPI.login(data);
       
-      if (response.success) {
+      if (response.success && response.user && response.token) {
         setUser(response.user);
         saveToken(response.token);
       } else {
@@ -48,9 +48,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signup = async (data: SignupRequest) => {
     try {
       setIsLoading(true);
-      const response = await apiService.signup(data);
+      const response = await authAPI.signup(data);
       
-      if (response.success) {
+      if (response.success && response.user && response.token) {
         setUser(response.user);
         saveToken(response.token);
       } else {
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshUser = async () => {
     try {
-      const userData = await apiService.getCurrentUser();
+      const userData = await authAPI.getCurrentUser();
       setUser(userData);
     } catch (error) {
       console.error('Refresh user error:', error);
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       if (token) {
         try {
-          const userData = await apiService.getCurrentUser();
+          const userData = await authAPI.getCurrentUser();
           setUser(userData);
         } catch (error) {
           console.error('Auth initialization error:', error);

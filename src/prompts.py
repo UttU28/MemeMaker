@@ -62,8 +62,6 @@ Script Requirements:
 Selected Characters: {characters}
 Topic/Situation: {topic}
 
-Additional Context: {additional_context}
-
 Generate a natural, engaging dialogue between these characters about the given topic. Make it witty, insightful, and true to each character's personality.
 """
 

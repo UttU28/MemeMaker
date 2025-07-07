@@ -5,29 +5,30 @@ import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 import theme from './theme';
 import Dashboard from './components/Dashboard';
-import { ProtectedDashboard } from './components/ProtectedDashboard';
+import { DashboardLayout } from './components/DashboardLayout';
 import { Auth } from './pages/Auth';
+import { LoadingScreen } from './components/LoadingScreen';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen message="Verifying your credentials..." />;
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/auth" replace />;
 };
 
-// Public Route Component (redirect to dashboard if authenticated)
+// Public Route Component (redirect to profile if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen message="Loading Meme Maker..." />;
   }
 
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+  return isAuthenticated ? <Navigate to="/profile" replace /> : <>{children}</>;
 };
 
 // App Routes Component (needs to be inside AuthProvider)
@@ -52,12 +53,17 @@ const AppRoutes: React.FC = () => {
           } 
         />
         <Route 
-          path="/dashboard" 
+          path="/profile" 
           element={
             <ProtectedRoute>
-              <ProtectedDashboard />
+              <DashboardLayout />
             </ProtectedRoute>
           } 
+        />
+        {/* Legacy redirect for old dashboard route */}
+        <Route 
+          path="/dashboard" 
+          element={<Navigate to="/profile" replace />} 
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

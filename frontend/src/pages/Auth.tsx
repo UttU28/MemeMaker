@@ -13,6 +13,7 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Fade,
 } from '@mui/material';
 import {
   Email as EmailIcon,
@@ -148,7 +149,6 @@ export const Auth: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -156,231 +156,263 @@ export const Auth: React.FC = () => {
       }}
     >
       <Container maxWidth="sm">
-        <Paper
-          elevation={24}
-          sx={{
-            borderRadius: 4,
-            overflow: 'hidden',
-            backdropFilter: 'blur(10px)',
-            background: 'rgba(255, 255, 255, 0.95)',
-          }}
-        >
-          <Box sx={{ p: 4 }}>
-            <Typography
-              variant="h4"
-              align="center"
-              sx={{
-                mb: 3,
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Meme Maker
-            </Typography>
-
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              variant="fullWidth"
-              sx={{
-                mb: 2,
-                '& .MuiTab-root': {
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                },
-              }}
-            >
-              <Tab label="Login" />
-              <Tab label="Sign Up" />
-            </Tabs>
-
-            <Divider sx={{ mb: 3 }} />
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {error}
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <TabPanel value={activeTab} index={0}>
-                {/* Login Form */}
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="Password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </TabPanel>
-
-              <TabPanel value={activeTab} index={1}>
-                {/* Signup Form */}
-                <TextField
-                  fullWidth
-                  label="Full Name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="Password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </TabPanel>
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={isLoading}
+        <Fade in timeout={800}>
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              overflow: 'hidden',
+              backgroundColor: 'rgba(30, 41, 59, 0.9)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(148, 163, 184, 0.1)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}
+          >
+            <Box sx={{ p: 4 }}>
+              <Typography
+                variant="h3"
+                align="center"
                 sx={{
-                  mt: 3,
-                  mb: 2,
-                  background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #5a67d8, #6b46c1)',
-                  },
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  textTransform: 'none',
+                  mb: 3,
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
               >
-                {isLoading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  activeTab === 0 ? 'Login' : 'Sign Up'
-                )}
-              </Button>
-            </form>
+                Meme Maker
+              </Typography>
 
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ mt: 2, color: 'text.secondary' }}
-            >
-              {activeTab === 0 ? "Don't have an account? " : "Already have an account? "}
-              <Button
-                variant="text"
-                onClick={() => setActiveTab(activeTab === 0 ? 1 : 0)}
-                sx={{ textTransform: 'none', fontWeight: 'bold' }}
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                variant="fullWidth"
+                sx={{ mb: 3 }}
               >
-                {activeTab === 0 ? 'Sign Up' : 'Login'}
-              </Button>
-            </Typography>
-          </Box>
-        </Paper>
+                <Tab label="Login" />
+                <Tab label="Sign Up" />
+              </Tabs>
+
+              <Divider sx={{ mb: 3 }} />
+
+              {error && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                  {error}
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <TabPanel value={activeTab} index={0}>
+                  {/* Login Form */}
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Enter your email"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Enter your password"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </TabPanel>
+
+                <TabPanel value={activeTab} index={1}>
+                  {/* Signup Form */}
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Enter your full name"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Enter your email"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Create a password"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder="Confirm your password"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </TabPanel>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  disabled={isLoading}
+                  sx={{
+                    mt: 4,
+                    mb: 2,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 20px 25px -5px rgba(99, 102, 241, 0.4)',
+                    },
+                    '&:disabled': {
+                      background: 'rgba(148, 163, 184, 0.3)',
+                      color: 'rgba(148, 163, 184, 0.7)',
+                    },
+                  }}
+                >
+                  {isLoading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <CircularProgress 
+                        size={20} 
+                        sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          '& .MuiCircularProgress-circle': {
+                            strokeLinecap: 'round',
+                          },
+                        }} 
+                      />
+                      <Typography variant="body2">
+                        {activeTab === 0 ? 'Signing in...' : 'Creating account...'}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    activeTab === 0 ? 'Sign In' : 'Create Account'
+                  )}
+                </Button>
+              </form>
+
+              <Box sx={{ textAlign: 'center', mt: 3 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {activeTab === 0 ? "Don't have an account? " : "Already have an account? "}
+                  <Button
+                    variant="text"
+                    onClick={() => setActiveTab(activeTab === 0 ? 1 : 0)}
+                    sx={{ 
+                      textTransform: 'none', 
+                      fontWeight: 600,
+                      color: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                      },
+                    }}
+                  >
+                    {activeTab === 0 ? 'Sign Up' : 'Sign In'}
+                  </Button>
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Fade>
       </Container>
     </Box>
   );

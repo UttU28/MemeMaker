@@ -42,8 +42,7 @@ class SystemStatus(BaseModel):
 
 class ScriptRequest(BaseModel):
     selectedCharacters: List[str] = Field(..., min_items=2, max_items=5)
-    prompt: str = Field(..., min_length=10, max_length=500)
-    word: Optional[str] = Field(None, max_length=50)
+    prompt: str = Field(..., min_length=10, max_length=2000)
 
 
 class DialogueLine(BaseModel):
@@ -56,7 +55,6 @@ class ScriptResponse(BaseModel):
     id: str
     selectedCharacters: List[str]
     originalPrompt: str
-    word: Optional[str]
     dialogue: List[DialogueLine]
     createdAt: str
     updatedAt: str

@@ -179,6 +179,140 @@ const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            border: '1px solid rgba(148, 163, 184, 0.2)',
+            borderRadius: 8,
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              border: '1px solid rgba(99, 102, 241, 0.5)',
+            },
+            '&.Mui-focused': {
+              border: '1px solid #6366f1',
+              boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.1)',
+            },
+            '& fieldset': {
+              border: 'none',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: '#94a3b8',
+            '&.Mui-focused': {
+              color: '#6366f1',
+            },
+          },
+          '& input': {
+            color: '#f1f5f9',
+            '&::placeholder': {
+              color: '#94a3b8',
+              opacity: 0.7,
+            },
+            '&:-webkit-autofill': {
+              WebkitBoxShadow: '0 0 0 100px rgba(15, 23, 42, 0.8) inset !important',
+              WebkitTextFillColor: '#f1f5f9 !important',
+              borderRadius: '8px',
+              transition: 'background-color 5000s ease-in-out 0s',
+            },
+            '&:-webkit-autofill:hover': {
+              WebkitBoxShadow: '0 0 0 100px rgba(15, 23, 42, 0.8) inset !important',
+              WebkitTextFillColor: '#f1f5f9 !important',
+            },
+            '&:-webkit-autofill:focus': {
+              WebkitBoxShadow: '0 0 0 100px rgba(15, 23, 42, 0.8) inset !important',
+              WebkitTextFillColor: '#f1f5f9 !important',
+            },
+            '&:-webkit-autofill:active': {
+              WebkitBoxShadow: '0 0 0 100px rgba(15, 23, 42, 0.8) inset !important',
+              WebkitTextFillColor: '#f1f5f9 !important',
+            },
+          },
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
+          textTransform: 'none',
+          fontSize: '1rem',
+          color: '#94a3b8',
+          '&.Mui-selected': {
+            color: '#6366f1',
+          },
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          '& .MuiTabs-indicator': {
+            height: 3,
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          },
+        },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          '&.MuiAlert-standardError': {
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            color: '#fca5a5',
+            '& .MuiAlert-icon': {
+              color: '#ef4444',
+            },
+          },
+          '&.MuiAlert-standardSuccess': {
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            color: '#6ee7b7',
+            '& .MuiAlert-icon': {
+              color: '#10b981',
+            },
+          },
+          '&.MuiAlert-standardWarning': {
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+            color: '#fcd34d',
+            '& .MuiAlert-icon': {
+              color: '#f59e0b',
+            },
+          },
+          '&.MuiAlert-standardInfo': {
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+            color: '#a5b4fc',
+            '& .MuiAlert-icon': {
+              color: '#6366f1',
+            },
+          },
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: 'rgba(148, 163, 184, 0.1)',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
+          '& .MuiChip-label': {
+            paddingLeft: 12,
+            paddingRight: 12,
+          },
+        },
+      },
+    },
 
   },
 });

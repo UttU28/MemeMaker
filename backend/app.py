@@ -959,8 +959,7 @@ async def generateScript(request: ScriptRequest, currentUser: dict = Depends(get
         logger.info(f"🤖 Generating dialogue with OpenAI for prompt: {request.prompt[:50]}...")
         dialogueLines = await generateScriptWithOpenai(
             request.selectedCharacters, 
-            request.prompt, 
-            request.word
+            request.prompt
         )
         
         # Create unique script ID and timestamps
@@ -972,7 +971,6 @@ async def generateScript(request: ScriptRequest, currentUser: dict = Depends(get
             "id": scriptId,
             "selectedCharacters": request.selectedCharacters,
             "originalPrompt": request.prompt,
-            "word": request.word,
             "dialogue": [{"speaker": line.speaker, "text": line.text, "audioFile": ""} for line in dialogueLines],
             "createdByName": currentUser['name']  # Keep display name for convenience
         }
@@ -999,7 +997,6 @@ async def generateScript(request: ScriptRequest, currentUser: dict = Depends(get
             id=scriptData["id"],
             selectedCharacters=scriptData["selectedCharacters"],
             originalPrompt=scriptData["originalPrompt"],
-            word=scriptData.get("word"),
             dialogue=scriptData["dialogue"],
             createdAt=scriptData["createdAt"],
             updatedAt=scriptData["updatedAt"],
@@ -1049,7 +1046,6 @@ async def listScripts(currentUser: dict = Depends(get_current_user)):
                 id=scriptData["id"],
                 selectedCharacters=scriptData["selectedCharacters"],
                 originalPrompt=scriptData["originalPrompt"],
-                word=scriptData.get("word"),
                 dialogue=dialogueLines,
                 createdAt=scriptData["createdAt"],
                 updatedAt=scriptData["updatedAt"],
@@ -1101,7 +1097,6 @@ async def getScript(scriptId: str, currentUser: dict = Depends(get_current_user)
             id=scriptData["id"],
             selectedCharacters=scriptData["selectedCharacters"],
             originalPrompt=scriptData["originalPrompt"],
-            word=scriptData.get("word"),
             dialogue=dialogueLines,
             createdAt=scriptData["createdAt"],
             updatedAt=scriptData["updatedAt"],
@@ -1251,7 +1246,6 @@ async def updateScript(scriptId: str, updates: ScriptUpdate, currentUser: dict =
             id=scriptData["id"],
             selectedCharacters=scriptData["selectedCharacters"],
             originalPrompt=scriptData["originalPrompt"],
-            word=scriptData.get("word"),
             dialogue=updatedDialogue,
             createdAt=scriptData["createdAt"],
             updatedAt=scriptData["updatedAt"],
@@ -1711,7 +1705,6 @@ async def getMyScripts(currentUser: dict = Depends(get_current_user)):
                 id=scriptData["id"],
                 selectedCharacters=scriptData["selectedCharacters"],
                 originalPrompt=scriptData["originalPrompt"],
-                word=scriptData.get("word"),
                 dialogue=dialogueLines,
                 createdAt=scriptData["createdAt"],
                 updatedAt=scriptData["updatedAt"],

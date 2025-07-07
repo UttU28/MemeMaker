@@ -1,5 +1,7 @@
 # 🎬 AI Voice Cloning & Automated Video Generation System
-
+speed 0.3 to 2 : 1 defaul;t
+NFE Steps: 4 - 64: 32 default
+Cross Fade Duration 0 - 1: 0.15 default 
 > **A comprehensive AI-powered pipeline that transforms GRE vocabulary words into engaging educational videos with cloned voices, dynamic visuals, and intelligent content generation.**
 
 ## 🌟 Project Overview

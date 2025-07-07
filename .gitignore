@@ -8,3 +8,4 @@ video_output/
 background/
 __pycache__/
 apiData/
+firebase.json
