@@ -173,6 +173,7 @@ class UserResponse(BaseModel):
     email: str
     isVerified: bool = False
     subscription: str = "free"
+    tokens: int = 0
     createdAt: str
     updatedAt: str
 
@@ -224,3 +225,8 @@ class ActivityStats(BaseModel):
     videoActivities: int = 0
     totalActivities: int = 0
     lastActivityAt: Optional[str] = None
+
+
+class MyScriptsResponse(BaseModel):
+    scripts: List[ScriptResponse]
+    userTokens: int

@@ -7,11 +7,13 @@ import {
   Button,
   Avatar,
   IconButton,
+  Chip,
 } from '@mui/material';
 import {
   AccountCircle,
   ExitToApp,
   Menu as MenuIcon,
+  PlaylistPlay,
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -96,6 +98,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
               Meme Maker
             </Typography>
+          </Box>
+          
+          {/* Token Display */}
+          <Box sx={{ mr: 2 }}>
+            <Chip 
+              icon={<PlaylistPlay />}
+              label={`${user.tokens || 0} tokens`}
+              color="warning"
+              size="small"
+              sx={{
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+                '& .MuiChip-label': {
+                  px: 2,
+                },
+              }}
+            />
           </Box>
           <Button
             color="inherit"

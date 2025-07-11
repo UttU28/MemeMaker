@@ -34,7 +34,8 @@ import {
   Download as DownloadIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
-import { scriptAPI, type Script, API_BASE_URL } from '../../services/api';
+import { scriptAPI, type Script, type MyScriptsResponse, API_BASE_URL } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 
 // Dynamic Processing Message Component
 interface DynamicProcessingMessageProps {
@@ -598,6 +599,7 @@ export const VideosTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const targetScriptId = searchParams.get('script');
+  const { updateUserTokens } = useAuth();
 
   // Fetch scripts with embedded video job information
   const fetchScripts = async (showLoader: boolean = true) => {
@@ -605,8 +607,12 @@ export const VideosTab: React.FC = () => {
       if (showLoader) {
         setLoading(true);
       }
-      const scriptsData = await scriptAPI.getMyScripts();
-      setScripts(scriptsData);
+      const response: MyScriptsResponse = await scriptAPI.getMyScripts();
+      setScripts(response.scripts);
+      
+      // Update user tokens if they changed
+      updateUserTokens(response.userTokens);
+      
       setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load scripts';

@@ -268,15 +268,21 @@ class FirebaseService:
                     logger.warning(f"⚠️ Could not update display name: {str(e)}")
                 
                 currentTime = datetime.now().isoformat()
+                # Get tokens from environment variable
+                from dotenv import load_dotenv
+                load_dotenv()
+                initial_tokens = int(os.getenv('TOKENS_TO_GIVE', '20'))
+                
                 userData = {
                     'name': name,
                     'email': email,
                     'isVerified': False,
-                                    'subscription': 'free',
-                'generatedCharacters': [],
-                'generatedScripts': [],
-                'favCharacters': [],
-                'createdAt': currentTime,
+                    'subscription': 'free',
+                    'tokens': initial_tokens,
+                    'generatedCharacters': [],
+                    'generatedScripts': [],
+                    'favCharacters': [],
+                    'createdAt': currentTime,
                     'updatedAt': currentTime
                 }
                 
@@ -424,6 +430,55 @@ class FirebaseService:
         except Exception as e:
             logger.error(f"💥 Error deleting user {userId}: {str(e)}")
             return False
+    
+    def checkTokenBalance(self, userId: str) -> Optional[int]:
+        """Check the current token balance for a user"""
+        try:
+            user_data = self.getUserById(userId)
+            if not user_data:
+                logger.warning(f"⚠️ User {userId} not found for token balance check")
+                return None
+            
+            tokens = user_data.get('tokens', 0)
+            logger.info(f"🪙 User {userId} has {tokens} tokens")
+            return tokens
+            
+        except Exception as e:
+            logger.error(f"💥 Error checking token balance for user {userId}: {str(e)}")
+            return None
+    
+    def deductTokens(self, userId: str, amount: int = 1) -> tuple[bool, str, int]:
+        """
+        Deduct tokens from a user's account
+        Returns: (success, message, remaining_tokens)
+        """
+        try:
+            user_data = self.getUserById(userId)
+            if not user_data:
+                logger.warning(f"⚠️ User {userId} not found for token deduction")
+                return False, "User not found", 0
+            
+            current_tokens = user_data.get('tokens', 0)
+            
+            if current_tokens < amount:
+                logger.warning(f"⚠️ User {userId} has insufficient tokens: {current_tokens} < {amount}")
+                return False, f"Insufficient tokens. You have {current_tokens} tokens, but need {amount}.", current_tokens
+            
+            new_token_count = current_tokens - amount
+            
+            # Update user's token count
+            user_ref = self.db.collection('users').document(userId)
+            user_ref.update({
+                'tokens': new_token_count,
+                'updatedAt': datetime.now().isoformat()
+            })
+            
+            logger.info(f"✅ Deducted {amount} tokens from user {userId}: {current_tokens} → {new_token_count}")
+            return True, f"Successfully deducted {amount} token(s). Remaining: {new_token_count}", new_token_count
+            
+        except Exception as e:
+            logger.error(f"💥 Error deducting tokens from user {userId}: {str(e)}")
+            return False, f"Token deduction failed: {str(e)}", 0
     
     def createCharacterWithOwner(self, characterId: str, characterData: Dict[str, Any], ownerUserId: str) -> bool:
         try:
@@ -949,6 +1004,10 @@ class FirebaseService:
         # Video Activities
         VIDEO_GENERATION_STARTED = "video_generation_started"
         VIDEO_GENERATION_COMPLETED = "video_generation_completed"
+        
+        # Token Activities
+        TOKEN_DEDUCTED = "token_deducted"
+        TOKEN_CREDITED = "token_credited"
 
     def addUserActivity(self, userId: str, activityType: str, message: str, additionalData: Dict[str, Any] = None) -> bool:
         """Add an activity to the user's activity log"""
@@ -1085,6 +1144,35 @@ class FirebaseService:
             
         except Exception as e:
             logger.error(f"💥 Error adding video activity: {str(e)}")
+            return False
+    
+    def addTokenActivity(self, userId: str, activityType: str, tokenAmount: int, remainingTokens: int, scriptId: str = None, scriptTitle: str = None):
+        """Add a token-related activity to the user's activity log"""
+        try:
+            if activityType == self.ActivityType.TOKEN_DEDUCTED:
+                if scriptId and scriptTitle:
+                    message = f"Video generated for '{scriptTitle}' - {tokenAmount} token deducted (Remaining: {remainingTokens})"
+                else:
+                    message = f"{tokenAmount} token deducted (Remaining: {remainingTokens})"
+            elif activityType == self.ActivityType.TOKEN_CREDITED:
+                message = f"{tokenAmount} token(s) credited (Total: {remainingTokens})"
+            else:
+                message = f"Token activity: {activityType} - {tokenAmount} tokens (Remaining: {remainingTokens})"
+            
+            additionalData = {
+                'tokenAmount': tokenAmount,
+                'remainingTokens': remainingTokens
+            }
+            
+            if scriptId:
+                additionalData['scriptId'] = scriptId
+            if scriptTitle:
+                additionalData['scriptTitle'] = scriptTitle
+            
+            return self.addUserActivity(userId, activityType, message, additionalData)
+            
+        except Exception as e:
+            logger.error(f"💥 Error adding token activity: {str(e)}")
             return False
 
     # Video Generation Job Management

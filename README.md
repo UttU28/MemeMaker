@@ -1,99 +1,121 @@
-# 🎬 AI Voice Cloning & Automated Video Generation System
-speed 0.3 to 2 : 1 defaul;t
-NFE Steps: 4 - 64: 32 default
-Cross Fade Duration 0 - 1: 0.15 default 
-> **A comprehensive AI-powered pipeline that transforms GRE vocabulary words into engaging educational videos with cloned voices, dynamic visuals, and intelligent content generation.**
+# �� AI Voice Cloning & Video Generation Platform
+
+> **A comprehensive full-stack platform that transforms text prompts into professional videos with AI-generated scripts, cloned voices, and dynamic visuals - featuring user authentication, token-based billing, and real-time progress tracking.**
 
 ## 🌟 Project Overview
 
-This sophisticated system combines multiple AI technologies to automatically create educational videos from vocabulary words. It generates natural dialogues, clones specific voices, detects emotional contexts, and produces professional-quality videos with subtitles and visual elements.
+This sophisticated platform combines cutting-edge AI technologies to create a complete video production pipeline. Users can generate custom scripts, clone voices, and produce professional-quality videos with an intuitive web interface, secure authentication, and a token-based billing system.
 
 ### ✨ Key Features
 
-- **🤖 AI Dialogue Generation**: Creates natural conversations using OpenAI GPT or local Ollama models
-- **🎤 Voice Cloning**: High-quality speech synthesis using F5-TTS with custom voice profiles
-- **😊 Mood Detection**: Intelligent emotion recognition for character expression matching
-- **🎥 Automated Video Production**: Complete video pipeline with backgrounds, overlays, and subtitles
-- **🔄 Bulk Processing**: Continuous processing of large vocabulary datasets
-- **🎲 Dynamic Content**: Random background selection for variety
-- **📱 Mobile-Optimized**: Vertical video format (1080x1920) for social media
+- **🔐 User Authentication**: Secure JWT-based authentication with Firebase integration
+- **🪙 Token-Based Billing**: Credit system for video generation (configurable token amounts)
+- **🤖 AI Script Generation**: Natural dialogue creation using OpenAI GPT models
+- **🎤 Voice Cloning**: High-quality speech synthesis with F5-TTS
+- **👥 Character Management**: Create and manage voice characters with emotional expressions
+- **🎥 Automated Video Production**: Background processing with real-time progress tracking
+- **📱 Modern Web Interface**: Responsive React app with Material-UI components
+- **⭐ Social Features**: Star favorite characters and track user activities
+- **🔄 Real-Time Updates**: Live progress tracking and token balance updates
 
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Input Word    │───▶│  LLM Service    │───▶│   Dialogue      │
-│   (GRE Vocab)   │    │ (OpenAI/Ollama) │    │  Generation     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Final Video     │◀───│ Video Pipeline  │◀───│ Voice Cloning   │
-│   Output        │    │   (FFmpeg)      │    │   (F5-TTS)      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                ▲                        │
-                                │                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Background     │───▶│ Mood Detection  │◀───│ Audio Files     │
-│   Videos        │    │ & Image Match   │    │  Generation     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    FRONTEND (React + TypeScript)               │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐   │
+│ │  Authentication │ │   Dashboard     │ │   Video Gen     │   │
+│ │   & Profile     │ │  & Characters   │ │  & Scripts      │   │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                │ REST API + JWT
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    BACKEND (FastAPI + Python)                  │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐   │
+│ │  Authentication │ │   Token System  │ │ Background Jobs │   │
+│ │   & User Mgmt   │ │  & Validation   │ │ & Video Gen     │   │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                │ Firebase SDK
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATABASE (Firebase Firestore)               │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐   │
+│ │      Users      │ │   Characters    │ │    Scripts      │   │
+│ │   & Tokens      │ │  & Favorites    │ │  & Video Jobs   │   │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## 🛠️ Technology Stack
 
-### Core AI Services
-- **🧠 Large Language Models**: OpenAI GPT-3.5/4 or Local Ollama (Llama 3.2)
-- **🎤 Text-to-Speech**: F5-TTS (High-quality voice cloning)
-- **📝 Subtitle Generation**: Simple timing-based subtitle generation
-- **😊 Emotion AI**: Custom mood detection system
+### Frontend
+- **⚛️ React 18** with TypeScript
+- **🎨 Material-UI (MUI)** for modern UI components
+- **🔄 React Router** for navigation
+- **🏗️ Vite** for fast development and building
+- **📱 Responsive Design** with glassmorphism effects
 
-### Media Processing
-- **🎬 Video Processing**: FFmpeg with CUDA acceleration
-- **🔊 Audio Processing**: PyDub, AudioSegment
-- **📝 Subtitle Generation**: SRT format with word-level timing
+### Backend
+- **🚀 FastAPI** with Python 3.8+
+- **🔐 JWT Authentication** with Firebase Auth
+- **📊 Pydantic** for data validation
+- **🎤 F5-TTS** for voice cloning
+- **🤖 OpenAI GPT** for script generation
+- **🎬 FFmpeg** for video processing
 
-### Infrastructure
-- **🖥️ GPU Acceleration**: NVIDIA CUDA for video encoding
-- **🌐 Web Interface**: Gradio (F5-TTS integration)
-- **💾 Data Storage**: JSON-based configuration and progress tracking
+### Database & Infrastructure
+- **🔥 Firebase Firestore** for data storage
+- **🔑 Firebase Auth** for user management
+- **⚡ Background Processing** with async tasks
+- **📈 Real-time Updates** with polling
 
 ## 📁 Project Structure
 
 ```
 VoiceClonning_F5-TTS/
-├── 🎬 main.py                 # Main pipeline orchestrator
-├── 📥 downloadCrop.py         # YouTube video downloader & processor
-├── 📝 prompts.py             # LLM prompt templates
-├── ⚙️ requirements.txt        # Python dependencies
-├── 📚 README.md              # This documentation
+├── 🖥️ frontend/                  # React TypeScript application
+│   ├── 📁 src/
+│   │   ├── 🎨 components/       # Reusable UI components
+│   │   ├── 📄 pages/            # Application pages
+│   │   ├── 🔧 services/         # API integration
+│   │   ├── 🎯 contexts/         # React contexts
+│   │   └── 🎨 theme.ts          # Material-UI theme
+│   ├── 📦 package.json
+│   └── ⚙️ vite.config.ts
 │
-├── 📊 data/                   # Core data directory
-│   ├── 🎞️ background/        # Background video library (001-020)
-│   ├── 🖼️ images/            # Character emotion images
-│   ├── 🔊 audio_files/       # Voice samples & generated audio
-│   ├── 🎥 video_output/      # Final processed videos
-│   ├── 📄 greWords.json      # GRE vocabulary database (4977+ words)
-│   ├── 👥 userProfiles.json  # Voice & character configurations
-│   ├── 💾 wordData.json      # Processing metadata & progress
-│   └── 🎬 outro.mp4          # Video ending sequence
+├── 🖧 backend/                   # FastAPI Python application
+│   ├── 🚀 app.py                # Main FastAPI application
+│   ├── 📊 models.py             # Pydantic data models
+│   ├── 🔥 firebase_service.py   # Firebase integration
+│   ├── 🎤 audio_service.py      # F5-TTS integration
+│   ├── 🎬 video_service.py      # Video generation
+│   ├── 🔄 background_video_service.py  # Background processing
+│   ├── 🔐 jwt_service.py        # JWT token management
+│   └── 📦 requirements.txt
 │
-├── 🔧 src/                   # Core modules
-│   ├── 🤖 llm.py            # Language model service
-│   ├── 🎤 client.py         # F5-TTS integration
-│   ├── ⚙️ config.py         # Configuration management
-│   └── 🛠️ utils.py          # Audio/file utilities
+├── 📊 data/                      # Media assets and data
+│   ├── 🎞️ background/           # Background videos
+│   ├── 🖼️ images/               # Character expression images
+│   ├── 🔊 audio_files/          # Voice samples
+│   └── 🎥 video_output/         # Generated videos
 │
-├── 🏗️ F5-TTS/               # Voice cloning engine
-└── 📊 logs/                 # Processing logs & analytics
+├── 🏗️ F5-TTS/                   # Voice cloning engine
+├── 🚀 main.py                   # Legacy CLI interface
+└── 📚 README.md                 # This documentation
 ```
 
 ## 🚀 Installation & Setup
 
 ### Prerequisites
-- **Python 3.8+**
-- **NVIDIA GPU** with CUDA support
+- **Node.js 18+** and npm
+- **Python 3.8+** with pip
+- **NVIDIA GPU** with CUDA support (recommended)
 - **FFmpeg** with CUDA encoding
-- **8GB+ RAM** recommended
+- **Firebase Project** with Firestore enabled
 
 ### 1. Clone Repository
 ```bash
@@ -101,21 +123,48 @@ git clone <repository-url>
 cd VoiceClonning_F5-TTS
 ```
 
-### 2. Create Virtual Environment
+### 2. Backend Setup
 ```bash
+cd backend
 python -m venv env
 # Windows
 env\Scripts\activate
 # Linux/Mac
 source env/bin/activate
-```
 
-### 3. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Setup F5-TTS Service
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+```
+
+### 4. Firebase Configuration
+```bash
+# Place your Firebase credentials in backend/firebase.json
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "...",
+  "private_key": "...",
+  "client_email": "...",
+  "client_id": "...",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token"
+}
+```
+
+### 5. Environment Variables
+```bash
+# Create backend/.env
+OPENAI_API_KEY=your_openai_key_here
+TOKENS_TO_GIVE=20
+JWT_SECRET=your_jwt_secret_here
+```
+
+### 6. Setup F5-TTS Service
 ```bash
 cd F5-TTS
 pip install -e .
@@ -123,262 +172,182 @@ pip install -e .
 python -m f5_tts.gradio_app
 ```
 
-### 5. Configure Environment
-```bash
-# Create .env file
-echo "OPENAI_API_KEY=your_openai_key_here" > .env
-echo "OLLAMA_URL=http://localhost:11434" >> .env
-```
-
-### 6. Prepare Voice Samples
-Place voice samples in `data/audio_files/`:
-- `Modi.wav`, `Palki.wav`, `JaiShankar.wav`, etc.
-
 ## 🎯 Usage Guide
 
-### Single Word Processing
+### Development Mode
+
+**Start Backend Server:**
 ```bash
-# Process a single vocabulary word (background auto-selected)
-python main.py "aberrant"
+cd backend
+python app.py
+# Server runs on http://localhost:8000
 ```
 
-### Bulk Processing (Recommended)
+**Start Frontend Development:**
 ```bash
-# Process all unused words continuously (each gets random background)
-python main.py --bulk
-# or
-python main.py -b
+cd frontend
+npm run dev
+# App runs on http://localhost:5173
 ```
 
-### Background Video Management
+**Start F5-TTS Service:**
 ```bash
-# Download and prepare background videos from YouTube
-python downloadCrop.py
+cd F5-TTS
+python -m f5_tts.gradio_app
+# Service runs on http://localhost:7860
 ```
 
-### Key Features
-- **🎲 Automatic Background Selection**: Each video gets a randomly selected background
-- **🔄 Continuous Processing**: Bulk mode processes all words until completion
-- **⚡ GPU Acceleration**: CUDA-accelerated video processing for speed
-- **📊 Progress Tracking**: Real-time progress updates and statistics
+### Production Deployment
 
-## 🔄 Complete Workflow
-
-### 1. **Word Input**
-- Single word: Manual input
-- Bulk mode: Automatic from `greWords.json`
-
-### 2. **Dialogue Generation**
-- LLM creates natural conversation around the word
-- Multiple characters discuss word meaning and usage
-- Contextual examples and explanations
-
-### 3. **Voice Synthesis**
-- F5-TTS clones specific character voices
-- High-quality audio generation (16kHz, mono)
-- Automatic silence trimming and cleanup
-
-### 4. **Mood Detection**
-- AI analyzes dialogue tone and emotion
-- Matches appropriate character expressions
-- Selects corresponding facial expression images
-
-### 5. **Video Assembly**
-- Random background video selection
-- Character image overlays with timing
-- Audio synchronization and mixing
-- CUDA-accelerated video encoding
-
-### 6. **Subtitle Generation**
-- Simple timing-based subtitle generation
-- Word-level timing based on audio duration
-- Styled subtitles with automatic word grouping
-- Main word overlay with emphasis
-
-### 7. **Final Output**
-- Mobile-optimized format (1080x1920)
-- H.264 encoding with NVIDIA acceleration
-- Automatic file naming and organization
-
-## ⚙️ Configuration Files
-
-### `userProfiles.json`
-Defines character voices and emotions:
-```json
-{
-  "users": {
-    "modi": {
-      "displayName": "Modi",
-      "audioFile": "Modi.wav",
-      "emotions": {
-        "confident": "data/images/modi_confidentl.png",
-        "serious": "data/images/modi_seriousr.png"
-      }
-    }
-  }
-}
+**Build Frontend:**
+```bash
+cd frontend
+npm run build
+# Creates optimized build in dist/
 ```
 
-### `greWords.json`
-Vocabulary database with progress tracking:
-```json
-{
-  "1": {
-    "word": "abate",
-    "used": false,
-    "finalVideoFile": ""
-  }
-}
+**Start Production Backend:**
+```bash
+cd backend
+uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-## 🎨 Character System
+## 🔄 Complete User Flow
 
-### Available Characters
-- **Modi**: Political leader voice & expressions
-- **Palki**: News anchor voice & analytical expressions  
-- **JaiShankar**: Diplomatic voice & strategic expressions
-- **Shashi**: Eloquent speaker voice & thoughtful expressions
-- **Rahul**: Young politician voice & varied expressions
+### 1. **User Registration & Authentication**
+- User creates account with email/password
+- JWT token issued for session management
+- Initial token balance assigned (configurable)
 
-### Emotion Types
-- `confident`, `serious`, `amused`, `analytical`
-- `diplomatic`, `eloquent`, `contemplative`
-- `surprised`, `confused`, `sheepish`
+### 2. **Character Management**
+- Create voice characters with audio samples
+- Upload character images for different emotions
+- Set voice configuration (speed, quality, etc.)
+- Star favorite characters from community
 
-## 🎬 Video Production Features
+### 3. **Script Generation**
+- Select 2-5 characters for dialogue
+- Provide text prompt for conversation topic
+- AI generates natural dialogue between characters
+- Edit and refine script as needed
 
-### Background Videos
-- 20 unique background videos (`background001.mp4` - `background020.mp4`)
-- Random selection for variety
-- Mobile-optimized format (1080x1920)
-- 1.5-minute segments for consistency
+### 4. **Video Production**
+- Token validation before generation starts
+- Background processing with progress tracking
+- Audio generation for each dialogue line
+- Video assembly with character images and backgrounds
+- Token deduction upon successful completion
 
-### Visual Effects
-- Dynamic character overlays
-- Emotion-synchronized expressions
-- Professional subtitle styling
-- Word emphasis and highlighting
-- Smooth transitions and timing
+### 5. **Content Management**
+- View generated videos and scripts
+- Track user activity and statistics
+- Manage token balance and usage
+- Share and favorite community content
 
-### Audio Processing
-- Multi-speaker voice cloning
-- Automatic silence detection
-- Audio concatenation and mixing
-- Volume normalization
-- High-quality output (24kHz AAC)
+## 🎨 Key Features Deep Dive
 
-## 🚀 Performance & Optimization
+### Authentication System
+- **JWT-based Security**: Secure token authentication
+- **Firebase Integration**: User management and data storage
+- **Protected Routes**: Role-based access control
+- **Token Refresh**: Automatic session renewal
 
-### GPU Acceleration
-- **NVIDIA CUDA**: Video encoding acceleration
-- **H.264 NVENC**: Hardware-accelerated compression
-- **Memory Optimization**: Efficient batch processing
+### Token Management
+- **Pre-validation**: Check balance before video generation
+- **Post-deduction**: Charge only on successful completion
+- **Activity Logging**: Track all token transactions
+- **Real-time Updates**: Live balance updates in UI
 
-### Processing Speed
-- **Single Word**: ~2-3 minutes
-- **Bulk Processing**: ~150 words/hour
-- **Background Preparation**: ~30 seconds per 1.5min segment
+### Character System
+- **Voice Cloning**: High-quality speech synthesis
+- **Emotion Support**: Multiple expressions per character
+- **Community Features**: Star and favorite system
+- **Ownership Tracking**: User-created content management
+
+### Video Generation
+- **Background Processing**: Async job queue system
+- **Progress Tracking**: Real-time status updates
+- **Quality Control**: Professional video output
+- **Error Handling**: Robust failure recovery
+
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/signup` - User registration
+- `POST /api/login` - User authentication
+- `GET /api/me` - Current user profile
+- `POST /api/refresh-token` - Token renewal
+
+### Characters
+- `GET /api/characters` - List all characters
+- `POST /api/characters/complete` - Create new character
+- `PUT /api/characters/{id}` - Update character
+- `DELETE /api/characters/{id}` - Delete character
+- `POST /api/characters/{id}/star` - Star character
+
+### Scripts & Videos
+- `POST /api/scripts/generate` - Generate new script
+- `GET /api/my-scripts` - User's scripts with token info
+- `PUT /api/scripts/{id}` - Update script
+- `POST /api/scripts/{id}/generate-video` - Start video generation
+- `GET /api/scripts/{id}/video-status` - Check video progress
+
+### User Management
+- `GET /api/my-activities` - User activity log
+- `GET /api/my-favorites` - Favorite characters
+- `GET /api/my-video-jobs` - Video generation jobs
+
+## 📊 Performance & Scaling
+
+### Optimization Features
+- **GPU Acceleration**: CUDA-based video processing
+- **Async Processing**: Non-blocking background jobs
+- **Efficient Polling**: Smart progress updates
+- **Caching**: Reduced regeneration overhead
 
 ### Quality Settings
-- **Video**: 1080x1920, H.264, CRF 23
-- **Audio**: 24kHz, AAC, stereo
-- **Subtitles**: SRT with word-level timing
+- **Video**: 1080x1920 (mobile-optimized)
+- **Audio**: 24kHz AAC, high-quality voice synthesis
+- **Processing**: ~2-3 minutes per video
+- **Storage**: Firebase Firestore for scalability
 
-## 🔧 Advanced Features
+## 🛡️ Security Features
 
-### Bulk Processing
-- Continuous processing with progress tracking
-- Automatic error recovery and skipping
-- Session statistics and completion metrics
-- Graceful interruption (Ctrl+C) with saved progress
+- **JWT Authentication**: Secure token-based auth
+- **Input Validation**: Pydantic model validation
+- **File Upload Security**: Type and size restrictions
+- **Rate Limiting**: Token-based usage control
+- **Error Handling**: Secure error responses
 
-### Error Handling
-- Robust exception handling at each step
-- Automatic fallbacks (GPU→CPU, OpenAI→Ollama)
-- Missing file detection and replacement
-- Process recovery and continuation
-
-### Monitoring & Logging
-- Detailed processing logs
-- Performance metrics tracking
-- Error reporting and debugging
-- Progress visualization
-
-## 📈 Use Cases
-
-### Educational Content
-- **Vocabulary Building**: GRE, SAT, academic preparation
-- **Language Learning**: Pronunciation and context
-- **Academic Videos**: Professional educational content
-
-### Content Creation
-- **Social Media**: Instagram, TikTok, YouTube Shorts
-- **E-learning**: Course materials and tutorials
-- **Marketing**: Educational brand content
-
-### Accessibility
-- **Audio Learning**: For visual learners
-- **Multi-language**: Easy voice adaptation
-- **Consistent Quality**: Automated production standards
-
-## 🛠️ Troubleshooting
-
-### Common Issues
-
-**F5-TTS Connection Failed**
-```bash
-# Check Gradio service
-curl http://localhost:7860/
-# Restart if needed
-cd F5-TTS && python -m f5_tts.gradio_app
-```
-
-**CUDA/GPU Issues**
-```bash
-# Verify CUDA installation
-nvidia-smi
-# Check FFmpeg CUDA support
-ffmpeg -hwaccels
-```
-
-**Audio Generation Fails**
-- Verify voice samples in `data/audio_files/`
-- Check file permissions and formats
-- Ensure F5-TTS service is running
-
-**Video Processing Errors**
-- Confirm background videos exist
-- Check disk space availability
-- Verify FFmpeg installation
-
-## 🔮 Future Enhancements
+## 🚀 Future Enhancements
 
 ### Planned Features
-- **Multi-language Support**: International voice cloning
-- **Advanced Emotions**: More nuanced expression detection
-- **Interactive Mode**: Real-time preview and editing
-- **Cloud Integration**: Scalable processing infrastructure
-- **API Interface**: RESTful service for integration
+- **Payment Integration**: Stripe/PayPal for token purchases
+- **Advanced Analytics**: Usage statistics and insights
+- **Mobile App**: React Native companion app
+- **API Monetization**: Developer API access
+- **Multi-language**: International voice support
 
-### Optimization Goals
-- **Faster Processing**: Optimized pipeline efficiency
-- **Better Quality**: Enhanced voice and video quality
-- **More Voices**: Expanded character library
-- **Smart Caching**: Reduced regeneration overhead
+### Technical Improvements
+- **Microservices**: Service decomposition
+- **Container Deployment**: Docker orchestration
+- **CDN Integration**: Global content delivery
+- **Real-time Notifications**: WebSocket integration
 
 ## 🤝 Contributing
 
 ### Development Setup
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature/new-feature`
-3. Follow coding standards and add tests
-4. Submit pull request with detailed description
+2. Follow installation instructions
+3. Create feature branch: `git checkout -b feature/new-feature`
+4. Test thoroughly (frontend + backend)
+5. Submit PR with detailed description
 
-### Guidelines
-- Follow Python PEP 8 style guidelines
-- Add comprehensive docstrings
-- Include error handling and logging
-- Test with both single and bulk processing
+### Code Standards
+- **TypeScript**: Strict type checking
+- **Python**: PEP 8 style guidelines
+- **Testing**: Unit tests for critical functions
+- **Documentation**: Clear inline comments
 
 ## 📄 License
 
@@ -386,19 +355,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **F5-TTS**: High-quality voice cloning technology
-- **OpenAI**: GPT language models for dialogue generation
-- **Ollama**: Local LLM inference capability
-- **Simple Subtitles**: Timing-based subtitle generation
-- **FFmpeg**: Powerful multimedia processing framework
+- **F5-TTS**: Advanced voice cloning technology
+- **OpenAI**: GPT models for script generation
+- **Firebase**: Backend infrastructure and auth
+- **Material-UI**: Modern React components
+- **FastAPI**: High-performance Python framework
 
 ---
 
 ## 📞 Support
 
-For issues, questions, or contributions:
-- **Documentation**: This README and inline code comments
-- **Logs**: Check `logs/` directory for detailed error information
-- **Testing**: Use single word mode for debugging before bulk processing
+For technical support or questions:
+- Check the detailed README files in `frontend/` and `backend/` directories
+- Review API documentation in backend code
+- Test with development mode before production deployment
 
-**Happy Video Creation! 🎬✨** 
+**🎬 Create Amazing Videos with AI! ✨** 

@@ -163,15 +163,32 @@ class BackgroundVideoService:
                 firebase_service.saveScript(script_id, script_data)
                 logger.info(f"✅ Updated script {script_id} with video information")
             
-            # Log video completion activity
+            # Deduct tokens for successful video generation
             if user_id:
-                firebase_service.addVideoActivity(
-                    user_id, 
-                    firebase_service.ActivityType.VIDEO_GENERATION_COMPLETED, 
-                    script_id, 
-                    script_data.get('originalPrompt', '')[:50] + "..." if len(script_data.get('originalPrompt', '')) > 50 else script_data.get('originalPrompt', script_id),
-                    final_video_path
-                )
+                success, message, remaining_tokens = firebase_service.deductTokens(user_id, 1)
+                if success:
+                    logger.info(f"✅ Deducted 1 token from user {user_id} for video generation. Remaining: {remaining_tokens}")
+                    
+                    # Log token deduction activity
+                    script_title = script_data.get('originalPrompt', '')[:50] + "..." if len(script_data.get('originalPrompt', '')) > 50 else script_data.get('originalPrompt', script_id)
+                    firebase_service.addTokenActivity(
+                        user_id, 
+                        firebase_service.ActivityType.TOKEN_DEDUCTED, 
+                        1, 
+                        remaining_tokens,
+                        script_id,
+                        script_title
+                    )
+                else:
+                    logger.warning(f"⚠️ Failed to deduct tokens from user {user_id}: {message}")
+                    # Still log the video completion even if token deduction fails
+                    firebase_service.addVideoActivity(
+                        user_id, 
+                        firebase_service.ActivityType.VIDEO_GENERATION_COMPLETED, 
+                        script_id, 
+                        script_data.get('originalPrompt', '')[:50] + "..." if len(script_data.get('originalPrompt', '')) > 50 else script_data.get('originalPrompt', script_id),
+                        final_video_path
+                    )
             
             logger.info(f"✅ Successfully completed video generation job: {job_id}")
             

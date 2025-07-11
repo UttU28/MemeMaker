@@ -35,7 +35,8 @@ from models import (
     VideoGenerationStatus, VideoGenerationResponse,
     VideoGenerationJob, VideoGenerationJobResponse,
     SignupRequest, LoginRequest, UserResponse, AuthResponse,
-    StarResponse, UserActivity, UserActivityResponse, ActivityStats
+    StarResponse, UserActivity, UserActivityResponse, ActivityStats,
+    MyScriptsResponse
 )
 
 # Import Services
@@ -66,6 +67,7 @@ F5TTS_TIMEOUT = 300
 VIDEO_OUTPUT_DIR = os.path.join(API_DATA_DIR, "video_output")
 DEFAULT_BACKGROUND_VIDEO = "downloads/Minecraft Parkour Gameplay No Copyright_mobile.mp4"
 FONT_PATH = 'C:/Windows/Fonts/impact.ttf'
+TOKENS_TO_GIVE = int(os.getenv('TOKENS_TO_GIVE', '20'))  # Default to 20 tokens if not set
 
 os.makedirs(AUDIO_FILES_DIR, exist_ok=True)
 os.makedirs(GENERATED_AUDIO_DIR, exist_ok=True)
@@ -341,6 +343,7 @@ async def signup(request: SignupRequest):
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
+            tokens=user_data.get('tokens', 0),
             createdAt=convert_datetime_to_string(user_data['createdAt']),
             updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
@@ -391,6 +394,7 @@ async def login(request: LoginRequest):
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
+            tokens=user_data.get('tokens', 0),
             createdAt=convert_datetime_to_string(user_data['createdAt']),
             updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
@@ -421,6 +425,7 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
             email=current_user['email'],
             isVerified=current_user['isVerified'],
             subscription=current_user['subscription'],
+            tokens=current_user.get('tokens', 0),
             createdAt=convert_datetime_to_string(current_user['createdAt']),
             updatedAt=convert_datetime_to_string(current_user['updatedAt'])
         )
@@ -458,6 +463,7 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(secu
             email=user_data['email'],
             isVerified=user_data['isVerified'],
             subscription=user_data['subscription'],
+            tokens=user_data.get('tokens', 0),
             createdAt=convert_datetime_to_string(user_data['createdAt']),
             updatedAt=convert_datetime_to_string(user_data['updatedAt'])
         )
@@ -1468,8 +1474,25 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
     try:
         logger.info(f"🎬 User {currentUser['email']} requesting video generation for script: {scriptId}")
         
-        # Get script from Firebase
+        # Get Firebase service
         firebaseService = getFirebaseService()
+        
+        # Check user token balance FIRST
+        user_tokens = firebaseService.checkTokenBalance(currentUser['id'])
+        if user_tokens is None:
+            logger.error(f"💥 Failed to check token balance for user {currentUser['email']}")
+            raise HTTPException(status_code=500, detail="Failed to check token balance")
+        
+        if user_tokens < 1:
+            logger.warning(f"🪙 User {currentUser['email']} has insufficient tokens for video generation: {user_tokens}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient tokens for video generation. You have {user_tokens} tokens, but need 1 token to generate a video."
+            )
+        
+        logger.info(f"🪙 User {currentUser['email']} has sufficient tokens: {user_tokens} >= 1")
+        
+        # Get script from Firebase
         script = firebaseService.getScript(scriptId)
         
         if not script:
@@ -1671,9 +1694,9 @@ async def get_my_characters(request: Request, current_user: dict = Depends(get_c
         logger.error(f"💥 Error getting user characters: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get user's characters: {str(e)}")
 
-@app.get("/api/my-scripts", response_model=List[ScriptResponse])
+@app.get("/api/my-scripts", response_model=MyScriptsResponse)
 async def getMyScripts(currentUser: dict = Depends(get_current_user)):
-    """Get all scripts created by the current user with embedded video job information"""
+    """Get all scripts created by the current user with embedded video job information and current token count"""
     try:
         logger.info(f"📝 User {currentUser['email']} requesting their own scripts")
         
@@ -1718,7 +1741,12 @@ async def getMyScripts(currentUser: dict = Depends(get_current_user)):
             scriptResponses.append(scriptResponse)
         
         logger.info(f"📊 Retrieved {len(scriptResponses)} scripts for user {currentUser['email']}")
-        return scriptResponses
+        
+        # Return both scripts and current user token count
+        return MyScriptsResponse(
+            scripts=scriptResponses,
+            userTokens=currentUser.get('tokens', 0)
+        )
         
     except Exception as e:
         logger.error(f"💥 Failed to get user scripts for {currentUser['email']}: {str(e)}")

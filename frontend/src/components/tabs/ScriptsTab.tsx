@@ -44,6 +44,8 @@ import {
 } from '@mui/icons-material';
 import { scriptAPI, characterAPI, type Script, type Character, type ScriptRequest, type DialogueLine, type ScriptUpdate, type VideoGenerationJobResponse } from '../../services/api';
 import ConfirmDialog from '../ConfirmDialog';
+import VideoGenerationConfirmDialog from '../VideoGenerationConfirmDialog';
+import { useAuth } from '../../hooks/useAuth';
 
 interface ScriptCardProps {
   script: Script;
@@ -55,6 +57,7 @@ interface ScriptCardProps {
 
 const ScriptCard: React.FC<ScriptCardProps> = ({ script, onDelete, onUpdate, characters, autoEdit = false }) => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDialogue, setShowDialogue] = useState(autoEdit);
@@ -177,17 +180,20 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script, onDelete, onUpdate, cha
         // Close the dialog first
         setShowGenerateVideoDialog(false);
         
+        // Refresh user data to update token count
+        await refreshUser();
+        
         // Navigate to videos page automatically
         navigate('/videos');
         
         console.log('Video generation started successfully:', result.message);
       } else {
         console.error('Video generation failed to start:', result.message);
-        // Show error to user (you can add a toast/alert here)
       }
     } catch (error) {
       console.error('Error generating video:', error);
-      // Show error to user (you can add a toast/alert here)
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      console.error('Failed to generate video:', errorMessage);
     } finally {
       setIsGeneratingVideo(false);
     }
@@ -974,16 +980,13 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script, onDelete, onUpdate, cha
           />
 
           {/* Generate Video Confirmation Dialog */}
-          <ConfirmDialog
+          <VideoGenerationConfirmDialog
             open={showGenerateVideoDialog}
             onClose={handleGenerateVideoCancel}
             onConfirm={handleGenerateVideoConfirm}
-            title="Generate Video"
-            message={`Are you sure you want to generate the video? This will automatically generate audio for all dialogue lines and then create the video. The process may take a few minutes.`}
-            confirmText="Generate Video"
-            cancelText="Cancel"
-            variant="warning"
+            scriptTitle={script.originalPrompt}
             loading={isGeneratingVideo}
+            tokenCost={1}
           />
         </CardContent>
       </Card>
@@ -1241,13 +1244,14 @@ export const ScriptsTab: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const targetScriptId = searchParams.get('edit');
+  const { updateUserTokens } = useAuth();
 
   const fetchScripts = async (showLoader: boolean = true) => {
     try {
       if (showLoader) {
         setLoading(true);
       }
-      const [scriptsData, myCharactersData, myFavoritesData] = await Promise.all([
+      const [scriptsResponse, myCharactersData, myFavoritesData] = await Promise.all([
         scriptAPI.getMyScripts(),
         characterAPI.getMyCharacters(),
         characterAPI.getMyFavorites(),
@@ -1262,8 +1266,11 @@ export const ScriptsTab: React.FC = () => {
         }
       });
       
-      setScripts(scriptsData);
+      setScripts(scriptsResponse.scripts);
       setCharacters(combinedCharacters);
+      
+      // Update user tokens if they changed
+      updateUserTokens(scriptsResponse.userTokens);
       setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load scripts';

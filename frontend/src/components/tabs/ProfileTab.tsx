@@ -4,7 +4,6 @@ import {
   Container,
   Typography,
   Avatar,
-  Chip,
   Paper,
   Divider,
   Fade,
@@ -19,8 +18,6 @@ import {
 import {
   AccountCircle,
   Email,
-  Verified,
-  Star,
   Schedule,
   Timeline,
   Description,
@@ -28,6 +25,8 @@ import {
   VideoFile,
   Refresh,
   PlaylistPlay,
+  YouTube,
+  Launch,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { activityAPI, type UserActivity, type ActivityStats } from '../../services/api';
@@ -119,24 +118,24 @@ export const ProfileTab: React.FC = () => {
       type: 'text' as const
     },
     {
-      icon: <Verified sx={{ color: 'primary.main' }} />,
-      title: 'Account Status',
-      value: user.isVerified ? 'Verified' : 'Unverified',
-      type: 'chip' as const,
-      chipColor: (user.isVerified ? 'success' : 'warning') as 'success' | 'warning'
-    },
-    {
-      icon: <Star sx={{ color: 'primary.main' }} />,
-      title: 'Subscription',
-      value: user.subscription || 'Free',
-      type: 'chip' as const,
-      chipColor: 'primary' as const
+      icon: <PlaylistPlay sx={{ color: 'warning.main' }} />,
+      title: 'Tokens',
+      value: user.tokens || 0,
+      type: 'token' as const,
+      tokenCount: user.tokens || 0
     },
     {
       icon: <Schedule sx={{ color: 'primary.main' }} />,
       title: 'Member Since',
       value: new Date(user.createdAt).toLocaleDateString(),
       type: 'text' as const
+    },
+    {
+      icon: <YouTube sx={{ color: '#ff0000' }} />,
+      title: 'Subscribe My Channel',
+      value: 'ThatInsaneGuy',
+      type: 'youtube' as const,
+      url: 'https://www.youtube.com/@ThatInsaneGuy'
     }
   ];
 
@@ -179,7 +178,7 @@ export const ProfileTab: React.FC = () => {
 
           <Divider sx={{ my: 3, borderColor: 'rgba(148, 163, 184, 0.1)' }} />
 
-          {/* User Info Grid - 2x2 Layout */}
+          {/* User Info Grid - 2x2 Layout (4 items) */}
           <Box
             sx={{
               display: 'grid',
@@ -203,21 +202,33 @@ export const ProfileTab: React.FC = () => {
                   <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
                     {info.title}
                   </Typography>
-                  {info.type === 'chip' ? (
-                    <Chip 
-                      label={info.value} 
-                      color={info.chipColor}
+                  {info.type === 'token' ? (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {info.tokenCount} tokens
+                    </Typography>
+                  ) : info.type === 'youtube' ? (
+                    <Button
+                      variant="contained"
                       size="small"
+                      startIcon={<Launch />}
+                      onClick={() => window.open(info.url, '_blank')}
                       sx={{
+                        px: 2,
+                        py: 0.5,
+                        fontSize: '0.75rem',
                         fontWeight: 600,
-                        ...(info.chipColor === 'primary' && {
-                          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                        }),
-                        '& .MuiChip-label': {
-                          px: 2,
+                        borderRadius: 1.5,
+                        background: 'linear-gradient(135deg, #ff0000 0%, #cc0000 100%)',
+                        color: 'white',
+                        textTransform: 'none',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #cc0000 0%, #990000 100%)',
+                          transform: 'translateY(-1px)',
                         },
                       }}
-                    />
+                    >
+                      Subscribe
+                    </Button>
                   ) : (
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       {info.value}

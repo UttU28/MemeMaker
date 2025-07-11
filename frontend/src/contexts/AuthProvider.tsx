@@ -79,6 +79,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateUserTokens = (newTokenCount: number) => {
+    if (user) {
+      setUser({
+        ...user,
+        tokens: newTokenCount
+      });
+    }
+  };
+
   // Initialize auth state on mount
   useEffect(() => {
     const initAuth = async () => {
@@ -106,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signup,
     logout,
     refreshUser,
+    updateUserTokens,
   };
 
   return (

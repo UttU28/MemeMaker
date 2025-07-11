@@ -49,6 +49,7 @@ export interface User {
   email: string;
   isVerified: boolean;
   subscription: string;
+  tokens: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -214,6 +215,12 @@ export interface ScriptUpdate {
   dialogue: DialogueLine[];
 }
 
+// My Scripts response interface
+export interface MyScriptsResponse {
+  scripts: Script[];
+  userTokens: number;
+}
+
 // Video generation job interfaces
 export interface VideoGenerationStep {
   stepName: string;
@@ -322,8 +329,8 @@ export const scriptAPI = {
     return response.data;
   },
 
-  getMyScripts: async (): Promise<Script[]> => {
-    const response = await api.get<Script[]>('/api/my-scripts');
+  getMyScripts: async (): Promise<MyScriptsResponse> => {
+    const response = await api.get<MyScriptsResponse>('/api/my-scripts');
     return response.data;
   },
 

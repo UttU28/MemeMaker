@@ -10,6 +10,7 @@ export interface AuthContextType {
   signup: (data: SignupRequest) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateUserTokens: (newTokenCount: number) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined); 
