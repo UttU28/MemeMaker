@@ -107,7 +107,7 @@ class F5TTSClient:
             logger.info("📤 F5-TTS connection closed")
 
 async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles: Dict, 
-                                generatedAudioDir: str) -> AudioGenerationResponse:
+                                generatedAudioDir: str, progress_callback=None) -> AudioGenerationResponse:
     """Generate audio files for all dialogue lines in a script"""
     try:
         scripts = scriptsData.get("scripts", {})
@@ -156,12 +156,24 @@ async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles:
                         failedLines += 1
                         processedLines += 1
                         updatedDialogue.append(updatedLine)
+                        
+                        # Call progress callback if provided
+                        if progress_callback:
+                            progress_percent = (processedLines / totalLines) * 100
+                            progress_callback(progress_percent, f"Processed line {processedLines}/{totalLines} (invalid)")
+                        
                         continue
                     
                     if existingAudio and existingAudio.strip() and os.path.exists(existingAudio):
                         completedLines += 1
                         processedLines += 1
                         updatedDialogue.append(updatedLine)
+                        
+                        # Call progress callback if provided
+                        if progress_callback:
+                            progress_percent = (processedLines / totalLines) * 100
+                            progress_callback(progress_percent, f"Processed line {processedLines}/{totalLines} (existing audio)")
+                        
                         continue
                     
                     if existingAudio and existingAudio.strip() and not os.path.exists(existingAudio):
@@ -171,6 +183,12 @@ async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles:
                         failedLines += 1
                         processedLines += 1
                         updatedDialogue.append(updatedLine)
+                        
+                        # Call progress callback if provided
+                        if progress_callback:
+                            progress_percent = (processedLines / totalLines) * 100
+                            progress_callback(progress_percent, f"Processed line {processedLines}/{totalLines} (character not found)")
+                        
                         continue
                     
                     charData = users[speaker]
@@ -180,6 +198,12 @@ async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles:
                         failedLines += 1
                         processedLines += 1
                         updatedDialogue.append(updatedLine)
+                        
+                        # Call progress callback if provided
+                        if progress_callback:
+                            progress_percent = (processedLines / totalLines) * 100
+                            progress_callback(progress_percent, f"Processed line {processedLines}/{totalLines} (missing audio file)")
+                        
                         continue
                     
                     charConfig = charData.get("config", {})
@@ -215,6 +239,11 @@ async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles:
                     processedLines += 1
                     updatedDialogue.append(updatedLine)
                     
+                    # Call progress callback if provided
+                    if progress_callback:
+                        progress_percent = (processedLines / totalLines) * 100
+                        progress_callback(progress_percent, f"Generated audio for line {processedLines}/{totalLines}")
+                    
                 except Exception:
                     failedLines += 1
                     processedLines += 1
@@ -223,6 +252,12 @@ async def generateAudioForScript(scriptId: str, scriptsData: Dict, userProfiles:
                         "text": dialogueLine.get("text", ""),
                         "audioFile": ""
                     })
+                    
+                    # Call progress callback if provided
+                    if progress_callback:
+                        progress_percent = (processedLines / totalLines) * 100
+                        progress_callback(progress_percent, f"Processed line {processedLines}/{totalLines} (failed)")
+                    
                     continue
             
             script["dialogue"] = updatedDialogue

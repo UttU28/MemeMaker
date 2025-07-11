@@ -14,15 +14,18 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { ProfileTab, CharactersTab, ScriptsTab, VideosTab } from './tabs';
 
-export const DashboardLayout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -30,26 +33,17 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
+    navigate(`/${tabId}`);
   };
 
   const handleToggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'profile':
-        return <ProfileTab />;
-      case 'characters':
-        return <CharactersTab />;
-      case 'scripts':
-        return <ScriptsTab />;
-      case 'videos':
-        return <VideosTab />;
-      default:
-        return <ProfileTab />;
-    }
+  // Get active tab from current route
+  const getActiveTab = () => {
+    const path = location.pathname.slice(1); // Remove leading slash
+    return path || 'profile'; // Default to profile if root
   };
 
   if (!isAuthenticated || !user) {
@@ -122,7 +116,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Sidebar */}
       <Sidebar 
-        activeTab={activeTab} 
+        activeTab={getActiveTab()} 
         onTabChange={handleTabChange}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
@@ -150,7 +144,7 @@ export const DashboardLayout: React.FC = () => {
             background: 'transparent',
           }}
         >
-          {renderTabContent()}
+          {children}
         </Box>
       </Box>
     </Box>

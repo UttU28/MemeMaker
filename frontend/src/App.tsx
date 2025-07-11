@@ -5,7 +5,10 @@ import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 import theme from './theme';
 import Dashboard from './components/Dashboard';
-import { DashboardLayout } from './components/DashboardLayout';
+import { ProfilePage } from './pages/ProfilePage';
+import { CharactersPage } from './pages/CharactersPage';
+import { ScriptsPage } from './pages/ScriptsPage';
+import { VideosPage } from './pages/VideosPage';
 import { Auth } from './pages/Auth';
 import { LoadingScreen } from './components/LoadingScreen';
 
@@ -56,7 +59,31 @@ const AppRoutes: React.FC = () => {
           path="/profile" 
           element={
             <ProtectedRoute>
-              <DashboardLayout />
+              <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/characters" 
+          element={
+            <ProtectedRoute>
+              <CharactersPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/scripts" 
+          element={
+            <ProtectedRoute>
+              <ScriptsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/videos" 
+          element={
+            <ProtectedRoute>
+              <VideosPage />
             </ProtectedRoute>
           } 
         />

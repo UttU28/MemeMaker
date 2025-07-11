@@ -33,6 +33,7 @@ from models import (
     ScriptRequest, DialogueLine, ScriptResponse, ScriptUpdate,
     AudioGenerationStatus, AudioGenerationResponse,
     VideoGenerationStatus, VideoGenerationResponse,
+    VideoGenerationJob, VideoGenerationJobResponse,
     SignupRequest, LoginRequest, UserResponse, AuthResponse,
     StarResponse, UserActivity, UserActivityResponse, ActivityStats
 )
@@ -49,6 +50,7 @@ from video_service import VideoGenerator
 from openai_service import getOpenaiClient, generateScriptWithOpenai
 from firebase_service import initializeFirebaseService, getFirebaseService
 from jwt_service import getJwtService
+from background_video_service import get_background_video_service, initialize_background_video_service
 
 load_dotenv()
 
@@ -80,6 +82,13 @@ try:
 except Exception as e:
     print(f"❌ Firebase initialization failed: {str(e)}")
     raise
+
+# Initialize Background Video Service
+try:
+    initialize_background_video_service()
+    print("🎬 Background video service initialized successfully!")
+except Exception as e:
+    print(f"❌ Background video service initialization failed: {str(e)}")
 
 openai_key = os.getenv('OPENAI_API_KEY')
 if openai_key:
@@ -1388,6 +1397,54 @@ async def getAudioGenerationStatus(scriptId: str, currentUser: dict = Depends(ge
         logger.error(f"💥 Failed to get audio status for script {scriptId} for user {currentUser['email']}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get audio status: {str(e)}")
 
+@app.post("/api/scripts/{scriptId}/generate-audio", response_model=AudioGenerationResponse)
+async def generateScriptAudio(scriptId: str, currentUser: dict = Depends(get_current_user)):
+    """Generate audio files for all dialogue lines in a script"""
+    try:
+        logger.info(f"🎵 User {currentUser['email']} requesting audio generation for script: {scriptId}")
+        
+        # Get script from Firebase
+        firebaseService = getFirebaseService()
+        script = firebaseService.getScript(scriptId)
+        
+        if not script:
+            logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
+        
+        dialogueLines = script.get("dialogue", [])
+        
+        if not dialogueLines:
+            logger.warning(f"❌ Script '{scriptId}' has no dialogue lines for user {currentUser['email']}")
+            raise HTTPException(status_code=400, detail="Script has no dialogue lines")
+        
+        # Check ownership for logging
+        isOwner = script.get("createdBy") == currentUser['id']
+        ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
+        
+        logger.info(f"🎤 Starting audio generation for script {scriptId}{ownerInfo} with {len(dialogueLines)} dialogue lines")
+        
+        # Load required data for audio generation
+        scriptsData = firebaseService.getAllScripts()
+        userProfiles = loadUserProfiles(USER_PROFILES_FILE)
+        
+        # Generate audio files
+        result = await generateAudioForScript(
+            scriptId, scriptsData, userProfiles, GENERATED_AUDIO_DIR, None
+        )
+        
+        # Save updated scripts data back to Firebase
+        firebaseService.saveScripts(scriptsData)
+        
+        logger.info(f"✅ Audio generation completed for script {scriptId} for user {currentUser['email']}: {result.message}")
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Audio generation failed for script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Audio generation failed: {str(e)}")
+
 @app.get("/api/f5tts/status")
 async def get_f5tts_status():
     try:
@@ -1406,21 +1463,19 @@ async def get_f5tts_status():
             "timestamp": datetime.now().isoformat()
         }
 
-@app.post("/api/scripts/{scriptId}/generate-video", response_model=VideoGenerationResponse)
+@app.post("/api/scripts/{scriptId}/generate-video", response_model=VideoGenerationJobResponse)
 async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_current_user), backgroundVideo: Optional[str] = None):
     try:
         logger.info(f"🎬 User {currentUser['email']} requesting video generation for script: {scriptId}")
         
         # Get script from Firebase
         firebaseService = getFirebaseService()
-        scriptsData = firebaseService.getAllScripts()
-        scripts = scriptsData.get("scripts", {})
+        script = firebaseService.getScript(scriptId)
         
-        if scriptId not in scripts:
+        if not script:
             logger.warning(f"❌ Script '{scriptId}' not found for user {currentUser['email']}")
             raise HTTPException(status_code=404, detail=f"Script '{scriptId}' not found")
         
-        script = scripts[scriptId]
         dialogueLines = script.get("dialogue", [])
         
         if not dialogueLines:
@@ -1431,60 +1486,18 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
         isOwner = script.get("createdBy") == currentUser['id']
         ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
         
-        logger.info(f"🎥 Processing video generation for script {scriptId}{ownerInfo} with {len(dialogueLines)} dialogue lines")
+        logger.info(f"🎥 Queuing video generation for script {scriptId}{ownerInfo} with {len(dialogueLines)} dialogue lines")
         
-        # Load user profiles (needed for both audio and video generation)
-        userProfiles = loadUserProfiles(USER_PROFILES_FILE)
+        # Queue video generation job
+        backgroundService = get_background_video_service()
+        jobId = await backgroundService.queue_video_generation(
+            scriptId, currentUser['id'], backgroundVideo
+        )
         
-        # Check for missing audio files
-        missingAudio = []
-        for i, line in enumerate(dialogueLines):
-            audioFile = line.get("audioFile", "")
-            if not audioFile or not os.path.exists(audioFile):
-                missingAudio.append(i)
-        
-        # Generate missing audio files if any
-        if missingAudio:
-            logger.info(f"🎤 Generating audio for {len(missingAudio)} missing lines before video generation...")
-            
-            try:
-                audioResult = await generateAudioForScript(
-                    scriptId,
-                    scriptsData,
-                    userProfiles,
-                    GENERATED_AUDIO_DIR
-                )
-                logger.info(f"🎵 Audio generation result: {audioResult.message}")
-                
-                # Save updated scripts data with audio information
-                firebaseService.saveScripts(scriptsData)
-                
-                # Reload script data after audio generation
-                script = scriptsData.get("scripts", {})[scriptId]
-                dialogueLines = script.get("dialogue", [])
-                
-                # Verify all audio files are now available
-                stillMissing = []
-                for i, line in enumerate(dialogueLines):
-                    audioFile = line.get("audioFile", "")
-                    if not audioFile or not os.path.exists(audioFile):
-                        stillMissing.append(f"Line {i+1} ({line.get('speaker', 'unknown')})")
-                
-                if stillMissing:
-                    logger.error(f"💥 Audio generation incomplete for script {scriptId}: {len(stillMissing)} lines still missing")
-                    raise HTTPException(
-                        status_code=500, 
-                        detail=f"Failed to generate audio for {len(stillMissing)} lines. Cannot proceed with video generation. Missing: {', '.join(stillMissing[:3])}{'...' if len(stillMissing) > 3 else ''}"
-                    )
-                
-            except HTTPException as audioError:
-                logger.error(f"❌ Audio generation failed for script {scriptId}: {audioError.detail}")
-                raise HTTPException(
-                    status_code=500, 
-                    detail=f"Audio generation failed before video generation: {audioError.detail}"
-                )
-        else:
-            logger.info(f"✅ All {len(dialogueLines)} audio files already exist for script {scriptId}")
+        # Get the created job
+        job_data = firebaseService.getVideoGenerationJob(jobId)
+        if not job_data:
+            raise HTTPException(status_code=500, detail="Failed to create video generation job")
         
         # Log video generation start activity
         firebaseService.addVideoActivity(
@@ -1494,36 +1507,15 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
             script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId)
         )
         
-        # Proceed with video generation
-        logger.info(f"🎬 Starting video generation for script {scriptId}...")
-        videoGenerator = VideoGenerator()
+        logger.info(f"✅ Video generation job queued for script {scriptId} for user {currentUser['email']} (Job ID: {jobId})")
         
-        result = await videoGenerator.generateVideo(
-            scriptId, 
-            scriptsData, 
-            userProfiles,
-            VIDEO_OUTPUT_DIR,
-            BACKGROUND_DIR, 
-            DEFAULT_BACKGROUND_VIDEO,
-            FONT_PATH,
-            backgroundVideo
+        # Convert to Pydantic model
+        job = VideoGenerationJob(**job_data)
+        
+        return VideoGenerationJobResponse(
+            job=job,
+            message=f"Video generation started successfully! Job ID: {jobId}"
         )
-        
-        # Save updated scripts data with video information
-        firebaseService.saveScripts(scriptsData)
-        
-        # Log video generation completion activity
-        final_video_path = result.finalVideoPath if hasattr(result, 'finalVideoPath') else None
-        firebaseService.addVideoActivity(
-            currentUser['id'], 
-            firebaseService.ActivityType.VIDEO_GENERATION_COMPLETED, 
-            scriptId, 
-            script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId),
-            final_video_path
-        )
-        
-        logger.info(f"✅ Video generation completed for script {scriptId} for user {currentUser['email']}")
-        return result
         
     except HTTPException:
         raise
@@ -1681,7 +1673,7 @@ async def get_my_characters(request: Request, current_user: dict = Depends(get_c
 
 @app.get("/api/my-scripts", response_model=List[ScriptResponse])
 async def getMyScripts(currentUser: dict = Depends(get_current_user)):
-    """Get all scripts created by the current user"""
+    """Get all scripts created by the current user with embedded video job information"""
     try:
         logger.info(f"📝 User {currentUser['email']} requesting their own scripts")
         
@@ -1701,6 +1693,7 @@ async def getMyScripts(currentUser: dict = Depends(get_current_user)):
                 if audioFile and os.path.exists(audioFile):
                     audioCount += 1
             
+            # **NEW**: Add video job information to the script response
             scriptResponse = ScriptResponse(
                 id=scriptData["id"],
                 selectedCharacters=scriptData["selectedCharacters"],
@@ -1712,7 +1705,15 @@ async def getMyScripts(currentUser: dict = Depends(get_current_user)):
                 audioCount=audioCount,
                 finalVideoPath=scriptData.get("finalVideoPath"),
                 videoDuration=scriptData.get("videoDuration"),
-                videoSize=scriptData.get("videoSize")
+                videoSize=scriptData.get("videoSize"),
+                # Video job information embedded directly in script
+                videoJobId=scriptData.get("currentVideoJobId"),
+                videoJobStatus=scriptData.get("videoJobStatus"),
+                videoJobProgress=scriptData.get("videoJobProgress", 0.0),
+                videoJobCurrentStep=scriptData.get("videoJobCurrentStep"),
+                videoJobStartedAt=scriptData.get("videoJobStartedAt"),
+                videoJobCompletedAt=scriptData.get("videoJobCompletedAt"),
+                videoJobErrorMessage=scriptData.get("videoJobErrorMessage")
             )
             scriptResponses.append(scriptResponse)
         
@@ -1949,6 +1950,82 @@ async def clear_my_activities(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"💥 Error clearing activities: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to clear activities: {str(e)}")
+
+@app.get("/api/video-jobs/{jobId}", response_model=VideoGenerationJob)
+async def getVideoGenerationJob(jobId: str, currentUser: dict = Depends(get_current_user)):
+    """Get detailed information about a video generation job"""
+    try:
+        logger.info(f"📋 User {currentUser['email']} requesting video job details: {jobId}")
+        
+        firebaseService = getFirebaseService()
+        job_data = firebaseService.getVideoGenerationJob(jobId)
+        
+        if not job_data:
+            logger.warning(f"❌ Video job '{jobId}' not found for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"Video generation job '{jobId}' not found")
+        
+        # Check if user owns this job
+        if job_data.get('userId') != currentUser['id']:
+            logger.warning(f"🚫 User {currentUser['email']} denied access to video job {jobId}")
+            raise HTTPException(status_code=403, detail="Access denied. You can only view your own video generation jobs.")
+        
+        logger.info(f"✅ Retrieved video job {jobId} for user {currentUser['email']} (Status: {job_data.get('status')})")
+        
+        return VideoGenerationJob(**job_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error getting video job {jobId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get video generation job: {str(e)}")
+
+@app.get("/api/my-video-jobs", response_model=List[VideoGenerationJob])
+async def getMyVideoGenerationJobs(currentUser: dict = Depends(get_current_user), limit: int = 10):
+    """Get all video generation jobs for the current user"""
+    try:
+        logger.info(f"📋 User {currentUser['email']} requesting their video generation jobs (limit: {limit})")
+        
+        firebaseService = getFirebaseService()
+        jobs_data = firebaseService.getUserVideoGenerationJobs(currentUser['id'], limit)
+        
+        jobs = [VideoGenerationJob(**job_data) for job_data in jobs_data]
+        
+        logger.info(f"✅ Retrieved {len(jobs)} video generation jobs for user {currentUser['email']}")
+        return jobs
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting user video jobs for {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get video generation jobs: {str(e)}")
+
+@app.get("/api/scripts/{scriptId}/video-job", response_model=VideoGenerationJob)
+async def getScriptVideoJob(scriptId: str, currentUser: dict = Depends(get_current_user)):
+    """Get the most recent video generation job for a specific script"""
+    try:
+        logger.info(f"🎬 User {currentUser['email']} requesting video job for script: {scriptId}")
+        
+        firebaseService = getFirebaseService()
+        
+        # Get user's video jobs and filter by script
+        jobs_data = firebaseService.getUserVideoGenerationJobs(currentUser['id'], 50)  # Get more to find script job
+        
+        script_jobs = [job for job in jobs_data if job.get('scriptId') == scriptId]
+        
+        if not script_jobs:
+            logger.warning(f"❌ No video job found for script '{scriptId}' for user {currentUser['email']}")
+            raise HTTPException(status_code=404, detail=f"No video generation job found for script '{scriptId}'")
+        
+        # Get the most recent job (first in the list since they're ordered by creation date desc)
+        latest_job = script_jobs[0]
+        
+        logger.info(f"✅ Retrieved video job for script {scriptId} for user {currentUser['email']} (Status: {latest_job.get('status')})")
+        
+        return VideoGenerationJob(**latest_job)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error getting video job for script {scriptId} for user {currentUser['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get video generation job for script: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")

@@ -63,6 +63,14 @@ class ScriptResponse(BaseModel):
     finalVideoPath: Optional[str] = None
     videoDuration: Optional[float] = None
     videoSize: Optional[int] = None
+    # Video job information embedded directly in script
+    videoJobId: Optional[str] = None
+    videoJobStatus: Optional[str] = None  # 'queued', 'in_progress', 'completed', 'failed'
+    videoJobProgress: float = 0.0  # 0-100
+    videoJobCurrentStep: Optional[str] = None
+    videoJobStartedAt: Optional[str] = None
+    videoJobCompletedAt: Optional[str] = None
+    videoJobErrorMessage: Optional[str] = None
 
 
 class ScriptUpdate(BaseModel):
@@ -108,6 +116,42 @@ class VideoGenerationResponse(BaseModel):
     finalVideoPath: Optional[str] = None
     duration: Optional[float] = None
     videoSize: Optional[int] = None 
+
+
+# Video Generation Job Models for Progress Tracking
+
+class VideoGenerationStep(BaseModel):
+    stepName: str
+    status: str  # 'pending', 'in_progress', 'completed', 'failed'
+    progress: float = 0.0  # 0-100
+    message: str = ""
+    startedAt: Optional[str] = None
+    completedAt: Optional[str] = None
+    errorMessage: Optional[str] = None
+
+
+class VideoGenerationJob(BaseModel):
+    jobId: str
+    scriptId: str
+    userId: str
+    status: str  # 'queued', 'in_progress', 'completed', 'failed'
+    overallProgress: float = 0.0  # 0-100
+    currentStep: str = ""
+    steps: List[VideoGenerationStep] = []
+    totalSteps: int = 0
+    completedSteps: int = 0
+    createdAt: str
+    startedAt: Optional[str] = None
+    completedAt: Optional[str] = None
+    finalVideoPath: Optional[str] = None
+    videoDuration: Optional[float] = None
+    videoSize: Optional[int] = None
+    errorMessage: Optional[str] = None
+
+
+class VideoGenerationJobResponse(BaseModel):
+    job: VideoGenerationJob
+    message: str
 
 
 # Authentication Models

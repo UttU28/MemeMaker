@@ -87,13 +87,13 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, characterName }) 
   }
 
   return (
-    <Box sx={{ position: 'relative', mb: 2 }}>
+    <Box sx={{ position: 'relative' }}>
       {/* Main Image */}
       <Box
         sx={{
           position: 'relative',
           width: '100%',
-          height: 200,
+          height: 240,
           borderRadius: 2,
           overflow: 'hidden',
           mb: 1,
@@ -200,13 +200,17 @@ interface CharacterCardProps {
   character: Character;
   onStarToggle: (characterId: string, isStarred: boolean) => Promise<void>;
   onDelete: (characterId: string) => Promise<void>;
+  onUpdate: (characterId: string, updatedData: Partial<Character>) => void;
+  activeTab: number;
+  isEditing: boolean;
+  onEditStart: (characterId: string) => void;
+  onEditClose: (characterId: string) => void;
 }
 
-const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, onDelete }) => {
+const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, onDelete, onUpdate, activeTab, isEditing, onEditStart, onEditClose }) => {
   const [isStarring, setIsStarring] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editValues, setEditValues] = useState({
     speed: character.config.speed,
@@ -244,11 +248,11 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
   };
 
   const handleEditClick = () => {
-    setIsEditing(true);
+    onEditStart(character.id);
   };
 
   const handleEditCancel = () => {
-    setIsEditing(false);
+    onEditClose(character.id);
     setEditValues({
       speed: character.config.speed,
       nfeSteps: character.config.nfeSteps,
@@ -260,6 +264,17 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
     setEditValues(prev => ({ ...prev, [field]: value }));
   };
 
+  // Reset edit values when editing state changes
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValues({
+        speed: character.config.speed,
+        nfeSteps: character.config.nfeSteps,
+        crossFadeDuration: character.config.crossFadeDuration,
+      });
+    }
+  }, [isEditing, character.config]);
+
   const handleUpdateClick = async () => {
     setIsUpdating(true);
     try {
@@ -270,10 +285,17 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
       
       await characterAPI.updateCharacter(character.id, formData);
       
-      // Update the character in the parent component
-      window.location.reload(); // Simple solution - refresh to get updated data
+      // Update the character data dynamically
+      onUpdate(character.id, {
+        config: {
+          ...character.config,
+          speed: editValues.speed,
+          nfeSteps: editValues.nfeSteps,
+          crossFadeDuration: editValues.crossFadeDuration,
+        }
+      });
       
-      setIsEditing(false);
+      onEditClose(character.id);
     } catch (error) {
       console.error('Error updating character:', error);
     } finally {
@@ -286,8 +308,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
       <Card
         elevation={0}
         sx={{
-          height: '100%',
-          minHeight: 480,
+          minHeight: 360,
           borderRadius: 3,
           background: 'rgba(30, 41, 59, 0.6)',
           backdropFilter: 'blur(20px)',
@@ -298,34 +319,107 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
           },
         }}
       >
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           {/* Image Carousel */}
           <ImageCarousel images={character.images} characterName={character.displayName} />
 
-          {/* Header with Name and Star */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          {/* Header with Name and Star/Actions */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, mt: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
               {character.displayName}
             </Typography>
-            <Tooltip title={character.isStarred ? 'Remove from favorites' : 'Add to favorites'}>
-              <IconButton
-                onClick={handleStarToggle}
-                disabled={isStarring}
-                sx={{
-                  color: character.isStarred ? '#f59e0b' : 'text.secondary',
-                  '&:hover': {
-                    color: '#f59e0b',
-                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                  },
-                }}
-              >
-                {character.isStarred ? <StarIcon /> : <StarBorderIcon />}
-              </IconButton>
-            </Tooltip>
+            
+            {/* Show Edit/Delete for owned characters in My Characters tab, Star for non-owned characters */}
+            {character.isOwner && activeTab === 0 ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {!isEditing ? (
+                  <>
+                    <Tooltip title="Edit character">
+                      <IconButton
+                        onClick={handleEditClick}
+                        size="small"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                          },
+                        }}
+                      >
+                        <SettingsIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete character">
+                      <IconButton
+                        onClick={handleDeleteClick}
+                        disabled={isDeleting}
+                        size="small"
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          },
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <>
+                    <Tooltip title="Save changes">
+                      <IconButton
+                        onClick={handleUpdateClick}
+                        disabled={isUpdating}
+                        size="small"
+                        sx={{
+                          color: '#22c55e',
+                          '&:hover': {
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          },
+                        }}
+                      >
+                        <CheckIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Cancel editing">
+                      <IconButton
+                        onClick={handleEditCancel}
+                        disabled={isUpdating}
+                        size="small"
+                        sx={{
+                          color: 'text.secondary',
+                          '&:hover': {
+                            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                          },
+                        }}
+                      >
+                        <CancelIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )}
+              </Box>
+            ) : !character.isOwner ? (
+              <Tooltip title={character.isStarred ? 'Remove from favorites' : 'Add to favorites'}>
+                <IconButton
+                  onClick={handleStarToggle}
+                  disabled={isStarring}
+                  sx={{
+                    color: character.isStarred ? '#f59e0b' : 'text.secondary',
+                    '&:hover': {
+                      color: '#f59e0b',
+                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    },
+                  }}
+                >
+                  {character.isStarred ? <StarIcon /> : <StarBorderIcon />}
+                </IconButton>
+              </Tooltip>
+            ) : null}
           </Box>
 
           {/* Owner and Stats */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {character.isOwner ? (
               <Chip
                 size="small"
@@ -385,171 +479,111 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
           </Box>
 
           {/* Character Info */}
-          <Stack spacing={1.5}>
-            {isEditing ? (
-              <Box sx={{ 
-                p: 2, 
-                borderRadius: 2, 
-                background: 'rgba(99, 102, 241, 0.1)', 
-                border: '1px solid rgba(99, 102, 241, 0.2)' 
-              }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
-                  Edit Settings
-                </Typography>
-                
-                {/* Speed Slider */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                    Speed: {editValues.speed}x
-                  </Typography>
-                  <Slider
-                    value={editValues.speed}
-                    onChange={(_, value) => handleEditValueChange('speed', value as number)}
-                    min={0.3}
-                    max={2}
-                    step={0.1}
-                    sx={{
-                      '& .MuiSlider-thumb': {
-                        backgroundColor: 'primary.main',
-                      },
-                      '& .MuiSlider-track': {
-                        backgroundColor: 'primary.main',
-                      },
-                    }}
-                  />
-                </Box>
-
-                {/* NFE Steps Slider */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                    NFE Steps: {editValues.nfeSteps}
-                  </Typography>
-                  <Slider
-                    value={editValues.nfeSteps}
-                    onChange={(_, value) => handleEditValueChange('nfeSteps', value as number)}
-                    min={4}
-                    max={64}
-                    step={1}
-                    sx={{
-                      '& .MuiSlider-thumb': {
-                        backgroundColor: 'primary.main',
-                      },
-                      '& .MuiSlider-track': {
-                        backgroundColor: 'primary.main',
-                      },
-                    }}
-                  />
-                </Box>
-
-                {/* Cross Fade Duration Slider */}
-                <Box>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                    Cross Fade Duration: {editValues.crossFadeDuration}s
-                  </Typography>
-                  <Slider
-                    value={editValues.crossFadeDuration}
-                    onChange={(_, value) => handleEditValueChange('crossFadeDuration', value as number)}
-                    min={0}
-                    max={1}
-                    step={0.05}
-                    sx={{
-                      '& .MuiSlider-thumb': {
-                        backgroundColor: 'primary.main',
-                      },
-                      '& .MuiSlider-track': {
-                        backgroundColor: 'primary.main',
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-            ) : (
+          {isEditing && (
+            <Box sx={{ 
+              p: 1, 
+              borderRadius: 1.5, 
+              background: 'rgba(99, 102, 241, 0.08)', 
+              border: '1px solid rgba(99, 102, 241, 0.15)',
+              mt: 2
+            }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem' }}>
+                Edit Settings
+              </Typography>
+              
+              {/* Speed Slider */}
               <Box>
-                {/* Additional character info can go here */}
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.2, fontSize: '0.75rem' }}>
+                  Speed: {editValues.speed}x
+                </Typography>
+                <Slider
+                  value={editValues.speed}
+                  onChange={(_, value) => handleEditValueChange('speed', value as number)}
+                  min={0.3}
+                  max={2}
+                  step={0.1}
+                  size="small"
+                  sx={{
+                    height: 4,
+                    '& .MuiSlider-thumb': {
+                      backgroundColor: 'primary.main',
+                      width: 16,
+                      height: 16,
+                    },
+                    '& .MuiSlider-track': {
+                      backgroundColor: 'primary.main',
+                      height: 4,
+                    },
+                    '& .MuiSlider-rail': {
+                      height: 4,
+                    },
+                  }}
+                />
               </Box>
-            )}
-          </Stack>
 
-          {/* Action Buttons */}
-          <Stack direction="row" spacing={1} sx={{ mt: 3 }}>
-            {isEditing ? (
-              <>
-                <Button
-                  variant="contained"
+              {/* NFE Steps Slider */}
+              <Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.2, fontSize: '0.75rem' }}>
+                  NFE Steps: {editValues.nfeSteps}
+                </Typography>
+                <Slider
+                  value={editValues.nfeSteps}
+                  onChange={(_, value) => handleEditValueChange('nfeSteps', value as number)}
+                  min={4}
+                  max={64}
+                  step={1}
                   size="small"
-                  startIcon={<CheckIcon />}
-                  disabled={isUpdating}
-                  onClick={handleUpdateClick}
                   sx={{
-                    flex: 1,
-                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                    height: 4,
+                    '& .MuiSlider-thumb': {
+                      backgroundColor: 'primary.main',
+                      width: 16,
+                      height: 16,
+                    },
+                    '& .MuiSlider-track': {
+                      backgroundColor: 'primary.main',
+                      height: 4,
+                    },
+                    '& .MuiSlider-rail': {
+                      height: 4,
                     },
                   }}
-                >
-                  {isUpdating ? 'Updating...' : 'Update'}
-                </Button>
-                <Button
-                  variant="outlined"
+                />
+              </Box>
+
+              {/* Cross Fade Duration Slider */}
+              <Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.2, fontSize: '0.75rem' }}>
+                  Cross Fade Duration: {editValues.crossFadeDuration}s
+                </Typography>
+                <Slider
+                  value={editValues.crossFadeDuration}
+                  onChange={(_, value) => handleEditValueChange('crossFadeDuration', value as number)}
+                  min={0}
+                  max={1}
+                  step={0.05}
                   size="small"
-                  startIcon={<CancelIcon />}
-                  disabled={isUpdating}
-                  onClick={handleEditCancel}
                   sx={{
-                    borderColor: 'text.secondary',
-                    color: 'text.secondary',
-                    '&:hover': {
-                      backgroundColor: 'rgba(148, 163, 184, 0.1)',
-                      borderColor: 'text.primary',
-                      color: 'text.primary',
+                    height: 4,
+                    '& .MuiSlider-thumb': {
+                      backgroundColor: 'primary.main',
+                      width: 16,
+                      height: 16,
+                    },
+                    '& .MuiSlider-track': {
+                      backgroundColor: 'primary.main',
+                      height: 4,
+                    },
+                    '& .MuiSlider-rail': {
+                      height: 4,
                     },
                   }}
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SettingsIcon />}
-                  disabled={!character.isOwner}
-                  onClick={character.isOwner ? handleEditClick : undefined}
-                  sx={{
-                    flex: 1,
-                    borderColor: character.isOwner ? 'primary.main' : 'text.disabled',
-                    color: character.isOwner ? 'primary.main' : 'text.disabled',
-                    '&:hover': {
-                      backgroundColor: character.isOwner ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                    },
-                  }}
-                >
-                  {character.isOwner ? 'Edit' : 'View Only'}
-                </Button>
-                {character.isOwner && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<DeleteIcon />}
-                    disabled={isDeleting}
-                    onClick={handleDeleteClick}
-                    sx={{
-                      borderColor: 'error.main',
-                      color: 'error.main',
-                      '&:hover': {
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        borderColor: 'error.dark',
-                      },
-                    }}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </Button>
-                )}
-              </>
-            )}
-          </Stack>
+                />
+              </Box>
+            </Box>
+          )}
+
+
 
           {/* Delete Confirmation Dialog */}
           <ConfirmDialog
@@ -1266,6 +1300,7 @@ export const CharactersTab: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingCharacterId, setEditingCharacterId] = useState<string | null>(null);
 
   const fetchAllCharacters = async () => {
     try {
@@ -1316,6 +1351,8 @@ export const CharactersTab: React.FC = () => {
 
   const handleStarToggle = async (characterId: string, isCurrentlyStarred: boolean) => {
     try {
+      setEditingCharacterId(null); // Close any open editing when starring/unstarring
+      
       if (isCurrentlyStarred) {
         await characterAPI.unstarCharacter(characterId);
       } else {
@@ -1341,6 +1378,8 @@ export const CharactersTab: React.FC = () => {
 
   const handleDelete = async (characterId: string) => {
     try {
+      setEditingCharacterId(null); // Close any open editing when deleting
+      
       await characterAPI.deleteCharacter(characterId);
       
       // Remove the character from all state arrays
@@ -1356,7 +1395,29 @@ export const CharactersTab: React.FC = () => {
   };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setEditingCharacterId(null); // Close any open editing when changing tabs
     setActiveTab(newValue);
+  };
+
+  const handleEditStart = (characterId: string) => {
+    setEditingCharacterId(characterId);
+  };
+
+  const handleEditClose = (characterId: string) => {
+    if (editingCharacterId === characterId) {
+      setEditingCharacterId(null);
+    }
+  };
+
+  const handleUpdate = (characterId: string, updatedData: Partial<Character>) => {
+    // Update the character in all relevant state arrays
+    const updateCharacter = (char: Character) => char.id === characterId 
+      ? { ...char, ...updatedData }
+      : char;
+
+    setAllCharacters(prev => prev.map(updateCharacter));
+    setMyCharacters(prev => prev.map(updateCharacter));
+    setMyFavorites(prev => prev.map(updateCharacter));
   };
 
   // Get the current characters to display based on active tab
@@ -1377,6 +1438,7 @@ export const CharactersTab: React.FC = () => {
   const currentCharacters = getCurrentCharacters();
 
   const handleCreateCharacterClick = () => {
+    setEditingCharacterId(null); // Close any open editing when creating a character
     setShowCreateForm(true);
   };
 
@@ -1430,17 +1492,51 @@ export const CharactersTab: React.FC = () => {
         </Box>
         
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 3 }}>
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <Card sx={{ height: 400 }} key={idx}>
-              <CardContent sx={{ p: 3 }}>
-                <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2, mb: 2 }} />
-                <Skeleton variant="text" height={32} sx={{ mb: 1 }} />
-                <Skeleton variant="text" height={24} sx={{ mb: 2 }} />
-                <Stack spacing={1}>
-                  <Skeleton variant="text" height={20} />
-                  <Skeleton variant="text" height={20} />
-                  <Skeleton variant="text" height={20} />
-                </Stack>
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <Card
+              key={idx}
+              elevation={0}
+              sx={{
+                minHeight: 360,
+                borderRadius: 3,
+                background: 'rgba(30, 41, 59, 0.6)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(148, 163, 184, 0.1)',
+              }}
+            >
+              <CardContent sx={{ p: 2 }}>
+                {/* Image Carousel Skeleton */}
+                <Box sx={{ position: 'relative', mb: 2 }}>
+                  <Skeleton 
+                    variant="rectangular" 
+                    width="100%" 
+                    height={240} 
+                    sx={{ borderRadius: 2, mb: 1 }} 
+                  />
+                  {/* Dot indicators placeholder */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, minHeight: 32 }}>
+                    <Skeleton variant="circular" width={12} height={12} />
+                    <Skeleton variant="circular" width={12} height={12} />
+                    <Skeleton variant="circular" width={12} height={12} />
+                  </Box>
+                </Box>
+
+                {/* Header with Name and Action Buttons */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, mt: 1 }}>
+                  <Skeleton variant="text" width="70%" height={24} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Skeleton variant="circular" width={32} height={32} />
+                    <Skeleton variant="circular" width={32} height={32} />
+                  </Box>
+                </Box>
+
+                {/* Owner and Stats Chips */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Skeleton variant="rounded" width={50} height={24} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" width={40} height={24} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" width={35} height={24} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" width={30} height={24} sx={{ borderRadius: 2 }} />
+                </Box>
               </CardContent>
             </Card>
           ))}
@@ -1686,13 +1782,18 @@ export const CharactersTab: React.FC = () => {
           </Box>
 
           {/* Characters Grid */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 3 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 3, alignItems: 'start' }}>
             {sortedCharacters.map((character) => (
               <CharacterCard 
                 key={character.id}
                 character={character} 
                 onStarToggle={handleStarToggle}
                 onDelete={handleDelete}
+                onUpdate={handleUpdate}
+                activeTab={activeTab}
+                isEditing={editingCharacterId === character.id}
+                onEditStart={handleEditStart}
+                onEditClose={handleEditClose}
               />
             ))}
           </Box>

@@ -1063,20 +1063,219 @@ class FirebaseService:
         return self.addUserActivity(userId, activityType, message, {'characterId': characterId})
 
     def addVideoActivity(self, userId: str, activityType: str, scriptId: str, scriptTitle: str = None, videoPath: str = None):
-        """Helper method to add video-related activities"""
-        script_name = scriptTitle or scriptId
-        
-        messages = {
-            self.ActivityType.VIDEO_GENERATION_STARTED: f"Started video generation for script '{script_name}'",
-            self.ActivityType.VIDEO_GENERATION_COMPLETED: f"Completed video generation for script '{script_name}'"
-        }
-        
-        message = messages.get(activityType, f"Video activity: {activityType}")
-        additional_data = {'scriptId': scriptId}
-        if videoPath:
-            additional_data['videoPath'] = videoPath
-        
-        return self.addUserActivity(userId, activityType, message, additional_data)
+        """Add video-related activity"""
+        try:
+            script_name = scriptTitle or scriptId
+            
+            # Create different messages based on activity type
+            if activityType == self.ActivityType.VIDEO_GENERATION_STARTED:
+                message = f"Started video generation for '{script_name}'"
+            elif activityType == self.ActivityType.VIDEO_GENERATION_COMPLETED:
+                message = f"Completed video generation for '{script_name}'"
+            else:
+                # Fallback for any other video activity types
+                message = f"Video activity for '{script_name}'"
+            
+            additionalData = {
+                'scriptId': scriptId,
+                'videoPath': videoPath
+            }
+            
+            return self.addUserActivity(userId, activityType, message, additionalData)
+            
+        except Exception as e:
+            logger.error(f"💥 Error adding video activity: {str(e)}")
+            return False
+
+    # Video Generation Job Management
+
+    def createVideoGenerationJob(self, jobId: str, scriptId: str, userId: str, totalSteps: int, steps: List[Dict[str, Any]]) -> bool:
+        """Create a new video generation job with progress tracking"""
+        try:
+            jobData = {
+                'jobId': jobId,
+                'scriptId': scriptId,
+                'userId': userId,
+                'status': 'queued',
+                'overallProgress': 0.0,
+                'currentStep': steps[0]['stepName'] if steps else '',
+                'steps': steps,
+                'totalSteps': totalSteps,
+                'completedSteps': 0,
+                'createdAt': datetime.now().isoformat(),
+                'startedAt': None,
+                'completedAt': None,
+                'finalVideoPath': None,
+                'videoDuration': None,
+                'videoSize': None,
+                'errorMessage': None
+            }
+            
+            jobRef = self.db.collection('video_generation_jobs').document(jobId)
+            jobRef.set(jobData)
+            
+            logger.info(f"✅ Created video generation job: {jobId}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error creating video generation job: {str(e)}")
+            return False
+
+    def getVideoGenerationJob(self, jobId: str) -> Optional[Dict[str, Any]]:
+        """Get video generation job by ID"""
+        try:
+            jobRef = self.db.collection('video_generation_jobs').document(jobId)
+            doc = jobRef.get()
+            
+            if doc.exists:
+                return doc.to_dict()
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting video generation job {jobId}: {str(e)}")
+            return None
+
+    def updateVideoGenerationJobProgress(self, jobId: str, stepName: str, stepStatus: str, stepProgress: float, stepMessage: str = "", overallProgress: float = None, currentStep: str = None) -> bool:
+        """Update progress for a specific step in video generation job"""
+        try:
+            jobRef = self.db.collection('video_generation_jobs').document(jobId)
+            
+            # Get current job data
+            doc = jobRef.get()
+            if not doc.exists:
+                return False
+            
+            jobData = doc.to_dict()
+            steps = jobData.get('steps', [])
+            
+            # Update the specific step
+            for i, step in enumerate(steps):
+                if step['stepName'] == stepName:
+                    steps[i]['status'] = stepStatus
+                    steps[i]['progress'] = stepProgress
+                    steps[i]['message'] = stepMessage
+                    
+                    if stepStatus == 'in_progress' and not steps[i].get('startedAt'):
+                        steps[i]['startedAt'] = datetime.now().isoformat()
+                    elif stepStatus in ['completed', 'failed']:
+                        steps[i]['completedAt'] = datetime.now().isoformat()
+                        if stepStatus == 'failed':
+                            steps[i]['errorMessage'] = stepMessage
+                    break
+            
+            # Calculate completed steps
+            completedSteps = len([s for s in steps if s['status'] == 'completed'])
+            
+            # Update job data
+            updateData = {
+                'steps': steps,
+                'completedSteps': completedSteps,
+                'updatedAt': datetime.now().isoformat()
+            }
+            
+            if overallProgress is not None:
+                updateData['overallProgress'] = overallProgress
+            
+            if currentStep is not None:
+                updateData['currentStep'] = currentStep
+            
+            # Update job status if needed
+            if stepStatus == 'in_progress' and jobData.get('status') == 'queued':
+                updateData['status'] = 'in_progress'
+                updateData['startedAt'] = datetime.now().isoformat()
+            
+            jobRef.update(updateData)
+            
+            logger.info(f"✅ Updated video job {jobId} step '{stepName}': {stepStatus} ({stepProgress}%)")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error updating video job progress: {str(e)}")
+            return False
+
+    def completeVideoGenerationJob(self, jobId: str, finalVideoPath: str, videoDuration: float, videoSize: int) -> bool:
+        """Mark video generation job as completed"""
+        try:
+            updateData = {
+                'status': 'completed',
+                'overallProgress': 100.0,
+                'completedAt': datetime.now().isoformat(),
+                'finalVideoPath': finalVideoPath,
+                'videoDuration': videoDuration,
+                'videoSize': videoSize,
+                'updatedAt': datetime.now().isoformat()
+            }
+            
+            jobRef = self.db.collection('video_generation_jobs').document(jobId)
+            jobRef.update(updateData)
+            
+            logger.info(f"✅ Completed video generation job: {jobId}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error completing video generation job: {str(e)}")
+            return False
+
+    def failVideoGenerationJob(self, jobId: str, errorMessage: str) -> bool:
+        """Mark video generation job as failed"""
+        try:
+            updateData = {
+                'status': 'failed',
+                'completedAt': datetime.now().isoformat(),
+                'errorMessage': errorMessage,
+                'updatedAt': datetime.now().isoformat()
+            }
+            
+            jobRef = self.db.collection('video_generation_jobs').document(jobId)
+            jobRef.update(updateData)
+            
+            logger.error(f"❌ Failed video generation job {jobId}: {errorMessage}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error marking video job as failed: {str(e)}")
+            return False
+
+    def getUserVideoGenerationJobs(self, userId: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get video generation jobs for a specific user"""
+        try:
+            # Simplified query without ordering to avoid index requirement
+            jobsRef = self.db.collection('video_generation_jobs').where('userId', '==', userId).limit(limit)
+            docs = jobsRef.stream()
+            
+            jobs = []
+            for doc in docs:
+                jobData = doc.to_dict()
+                jobs.append(jobData)
+            
+            # Sort by createdAt in Python instead of Firebase
+            jobs.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+            
+            logger.info(f"📋 Retrieved {len(jobs)} video generation jobs for user {userId}")
+            return jobs
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting user video generation jobs: {str(e)}")
+            return []
+
+    def getActiveVideoGenerationJobs(self) -> List[Dict[str, Any]]:
+        """Get all active (queued or in_progress) video generation jobs"""
+        try:
+            jobsRef = self.db.collection('video_generation_jobs').where('status', 'in', ['queued', 'in_progress']).order_by('createdAt')
+            docs = jobsRef.stream()
+            
+            jobs = []
+            for doc in docs:
+                jobData = doc.to_dict()
+                jobs.append(jobData)
+            
+            logger.info(f"📋 Retrieved {len(jobs)} active video generation jobs")
+            return jobs
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting active video generation jobs: {str(e)}")
+            return []
 
 firebaseService = None
 
