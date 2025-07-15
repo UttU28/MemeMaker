@@ -9,6 +9,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { CharactersPage } from './pages/CharactersPage';
 import { ScriptsPage } from './pages/ScriptsPage';
 import { VideosPage } from './pages/VideosPage';
+import { AboutUsPage } from './pages/AboutUsPage';
 import { Auth } from './pages/Auth';
 import { LoadingScreen } from './components/LoadingScreen';
 
@@ -84,6 +85,14 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute>
               <VideosPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/about" 
+          element={
+            <ProtectedRoute>
+              <AboutUsPage />
             </ProtectedRoute>
           } 
         />

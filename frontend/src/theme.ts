@@ -104,6 +104,41 @@ const theme = createTheme({
           `,
           fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
         },
+        // Global scrollbar styling
+        '*': {
+          // Webkit scrollbar styles (Chrome, Safari, Edge)
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(15, 23, 42, 0.5)',
+            borderRadius: '8px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.6) 0%, rgba(139, 92, 246, 0.6) 100%)',
+            borderRadius: '8px',
+            border: '2px solid rgba(15, 23, 42, 0.3)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)',
+            border: '2px solid rgba(99, 102, 241, 0.2)',
+            transform: 'scale(1.1)',
+          },
+          '&::-webkit-scrollbar-thumb:active': {
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(139, 92, 246, 1) 100%)',
+          },
+          '&::-webkit-scrollbar-corner': {
+            background: 'rgba(15, 23, 42, 0.5)',
+          },
+        },
+        // Firefox scrollbar styles
+        html: {
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(99, 102, 241, 0.6) rgba(15, 23, 42, 0.5)',
+        },
       },
     },
     MuiAppBar: {

@@ -18,6 +18,7 @@ import {
   Description as ScriptIcon,
   VideoLibrary as VideoIcon,
   ChevronLeft as ChevronLeftIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
 
 interface SidebarProps {
@@ -27,8 +28,9 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-const SIDEBAR_WIDTH = 280;
-const SIDEBAR_COLLAPSED_WIDTH = 73;
+// Consistent width constants (same as DashboardLayout)
+export const SIDEBAR_WIDTH = 280;
+export const SIDEBAR_COLLAPSED_WIDTH = 73;
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isCollapsed, onToggleCollapse }) => {
 
@@ -55,7 +57,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
     },
   ];
 
-
+  const aboutUsItem = {
+    id: 'about',
+    label: 'About Us',
+    icon: <InfoIcon />,
+  };
 
   const sidebarContent = (
     <Box
@@ -119,29 +125,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
               placement="right"
               arrow
             >
-                              <ListItemButton
-                  selected={activeTab === item.id}
-                  onClick={() => onTabChange(item.id)}
-                  sx={{
-                    borderRadius: 2,
-                    minHeight: 48,
-                    px: isCollapsed ? 1.5 : 2,
-                    py: 1.5,
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+              <ListItemButton
+                selected={activeTab === item.id}
+                onClick={() => onTabChange(item.id)}
+                sx={{
+                  borderRadius: 2,
+                  minHeight: 48,
+                  px: isCollapsed ? 1.5 : 2,
+                  py: 1.5,
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                  '&:hover': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderLeft: isCollapsed ? 'none' : '3px solid #6366f1',
+                    border: isCollapsed ? '2px solid #6366f1' : 'none',
                     '&:hover': {
-                      backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                      transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
+                      backgroundColor: 'rgba(99, 102, 241, 0.25)',
                     },
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                      borderLeft: isCollapsed ? 'none' : '3px solid #6366f1',
-                      border: isCollapsed ? '2px solid #6366f1' : 'none',
-                      '&:hover': {
-                        backgroundColor: 'rgba(99, 102, 241, 0.25)',
-                      },
-                    },
-                  }}
+                  },
+                }}
               >
                 <ListItemIcon
                   sx={{
@@ -183,23 +189,75 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
         ))}
       </List>
 
-      {/* Sidebar Footer */}
-      <Box
-        sx={{
-          opacity: isCollapsed ? 0 : 1,
-          transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          borderTop: '1px solid rgba(148, 163, 184, 0.1)',
-          overflow: 'hidden',
-          height: isCollapsed ? 0 : 'auto',
-        }}
-      >
-        {!isCollapsed && (
-          <Box sx={{ p: 2 }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Meme Maker Dashboard
-            </Typography>
-          </Box>
-        )}
+      {/* About Us Section - Bottom */}
+      <Box sx={{ px: 1, pb: 2 }}>
+        <ListItem disablePadding sx={{ mb: 1 }}>
+          <Tooltip
+            title={isCollapsed ? aboutUsItem.label : ''}
+            placement="right"
+            arrow
+          >
+            <ListItemButton
+              selected={activeTab === aboutUsItem.id}
+              onClick={() => onTabChange(aboutUsItem.id)}
+              sx={{
+                borderRadius: 2,
+                minHeight: 48,
+                px: isCollapsed ? 1.5 : 2,
+                py: 1.5,
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                '&:hover': {
+                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                  transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                  borderLeft: isCollapsed ? 'none' : '3px solid #6366f1',
+                  border: isCollapsed ? '2px solid #6366f1' : 'none',
+                  '&:hover': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.25)',
+                  },
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: isCollapsed ? 'auto' : 40,
+                  color: activeTab === aboutUsItem.id ? 'primary.main' : 'text.secondary',
+                  justifyContent: 'center',
+                  mr: isCollapsed ? 0 : 2,
+                }}
+              >
+                {aboutUsItem.icon}
+              </ListItemIcon>
+              <Box
+                sx={{
+                  opacity: isCollapsed ? 0 : 1,
+                  transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  overflow: 'hidden',
+                  width: isCollapsed ? 0 : 'auto',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {!isCollapsed && (
+                  <ListItemText
+                    primary={aboutUsItem.label}
+                    sx={{
+                      margin: 0,
+                      '& .MuiListItemText-primary': {
+                        fontWeight: activeTab === aboutUsItem.id ? 600 : 500,
+                        color: activeTab === aboutUsItem.id ? 'primary.main' : 'text.primary',
+                        fontSize: '0.9rem',
+                        lineHeight: 1.2,
+                      },
+                    }}
+                  />
+                )}
+              </Box>
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
       </Box>
     </Box>
   );
@@ -219,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
           top: 0,
           left: 0,
           zIndex: (theme) => theme.zIndex.drawer,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           border: 'none',
           background: 'transparent',
           overflow: 'hidden',

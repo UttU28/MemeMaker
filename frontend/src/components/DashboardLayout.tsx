@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   AppBar,
@@ -23,11 +23,33 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+// localStorage key for sidebar state
+const SIDEBAR_STORAGE_KEY = 'meme-maker-sidebar-collapsed';
+
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // Initialize sidebar state from localStorage
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.warn('Failed to load sidebar state from localStorage:', error);
+      return false;
+    }
+  });
+
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(isSidebarCollapsed));
+    } catch (error) {
+      console.warn('Failed to save sidebar state to localStorage:', error);
+    }
+  }, [isSidebarCollapsed]);
 
   const handleLogout = () => {
     logout();
@@ -55,8 +77,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   return (
     <Box sx={{ 
       display: 'flex', 
-      height: '100vh', // Fixed viewport height
-      overflow: 'hidden', // Prevent scrolling on main container
+      height: '100vh',
+      overflow: 'hidden',
+      position: 'relative', // Added for better positioning
     }}>
       {/* App Bar */}
       <AppBar 
@@ -67,6 +90,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           backgroundColor: 'rgba(15, 23, 42, 0.8)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
+          left: 0,
+          right: 0,
         }}
       >
         <Toolbar>
@@ -146,21 +171,32 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         component="main"
         sx={{
           flexGrow: 1,
-          height: '100vh', // Fixed viewport height
+          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden', // Prevent scrolling on main container
-          ml: isSidebarCollapsed ? '73px' : '280px', // Account for sidebar width
-          transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          overflow: 'hidden',
+          // Remove margin-left approach - let the permanent drawer handle layout
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          boxSizing: 'border-box',
+          minWidth: 0, // Prevent flex item from growing beyond container
         }}
       >
         {/* Content Area - Scrollable */}
         <Box
           sx={{
             flexGrow: 1,
-            pt: 8, // Account for AppBar height
-            overflow: 'auto', // Make this area scrollable
+            pt: 8, // Account for AppBar height (64px)
+            overflow: 'auto',
             background: 'transparent',
+            width: '100%',
+            height: '100%',
+            // Ensure proper padding and spacing
+            px: 0,
+            position: 'relative',
+            boxSizing: 'border-box',
+            // Prevent content from shifting during transitions
+            minWidth: 0,
           }}
         >
           {children}
