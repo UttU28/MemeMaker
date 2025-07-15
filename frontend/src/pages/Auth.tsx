@@ -181,7 +181,7 @@ export const Auth: React.FC = () => {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                Meme Maker
+                MemeVoiceClone-inator
               </Typography>
 
               <Tabs

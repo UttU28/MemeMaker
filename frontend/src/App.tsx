@@ -29,7 +29,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingScreen message="Loading Meme Maker..." />;
+    return <LoadingScreen message="Loading MemeVoiceClone-inator..." />;
   }
 
   return isAuthenticated ? <Navigate to="/profile" replace /> : <>{children}</>;

@@ -127,7 +127,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Meme Maker
+              MemeVoiceClone-inator
             </Typography>
             <Typography 
               variant="body1" 

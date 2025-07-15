@@ -16,7 +16,6 @@ import {
   Tooltip,
 } from '@mui/material';
 import {
-  AccountCircle,
   Email,
   Schedule,
   Timeline,
@@ -27,6 +26,9 @@ import {
   PlaylistPlay,
   YouTube,
   Launch,
+  PersonAdd as PersonAddIcon,
+  Create as CreateIcon,
+  VideoLibrary as VideoLibraryIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { activityAPI, type UserActivity, type ActivityStats } from '../../services/api';
@@ -156,16 +158,18 @@ export const ProfileTab: React.FC = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Avatar 
+              src="/perry-platypus.png"
+              alt="Perry the Platypus"
               sx={{ 
                 width: 80, 
                 height: 80, 
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: '#0f172a',
                 mr: 3,
                 boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.3)',
+                border: '3px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '16px',
               }}
-            >
-              <AccountCircle sx={{ fontSize: 50 }} />
-            </Avatar>
+            />
             <Box>
               <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>
                 Welcome back, {user.name}!
@@ -236,6 +240,128 @@ export const ProfileTab: React.FC = () => {
                   )}
                 </Box>
               </Box>
+            ))}
+          </Box>
+        </Paper>
+      </Fade>
+
+      {/* How to Use Section */}
+      <Fade in timeout={900}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 4, 
+            mb: 4,
+            borderRadius: 3,
+            background: 'rgba(30, 41, 59, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(148, 163, 184, 0.1)',
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            component="h2" 
+            sx={{ 
+              textAlign: 'center', 
+              mb: 4,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            How to Use Our Platform
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
+            gap: 3 
+          }}>
+            {[
+              {
+                icon: <PersonAddIcon sx={{ fontSize: 32 }} />,
+                title: 'Create Characters',
+                description: 'Upload voice samples and create AI characters, or star existing ones from the community',
+                color: '#6366f1',
+                number: '1',
+              },
+              {
+                icon: <CreateIcon sx={{ fontSize: 32 }} />,
+                title: 'Generate Scripts',
+                description: 'Use AI to create natural dialogue scripts between your selected characters',
+                color: '#f59e0b',
+                number: '2',
+              },
+              {
+                icon: <VideoLibraryIcon sx={{ fontSize: 32 }} />,
+                title: 'Generate Videos',
+                description: 'Creates audio using F5-TTS technology and generates meme-worthy videos with Minecraft backgrounds',
+                color: '#8b5cf6',
+                number: '3',
+              },
+            ].map((step, index) => (
+              <Fade in timeout={1000 + index * 200} key={index}>
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    height: '100%',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    background: 'rgba(30, 41, 59, 0.4)',
+                    border: '1px solid rgba(148, 163, 184, 0.1)',
+                    borderRadius: 2,
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    }
+                  }}
+                >
+                  <Box sx={{ position: 'relative', mb: 2 }}>
+                    <Avatar 
+                      sx={{ 
+                        mx: 'auto',
+                        width: 56, 
+                        height: 56,
+                        background: `linear-gradient(135deg, ${step.color} 0%, ${step.color}CC 100%)`,
+                        mb: 1,
+                      }}
+                    >
+                      {step.icon}
+                    </Avatar>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: step.color,
+                        position: 'absolute',
+                        top: -10,
+                        right: 'calc(50% - 40px)',
+                        background: 'rgba(30, 41, 59, 0.9)',
+                        borderRadius: '50%',
+                        width: 24,
+                        height: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        border: `2px solid ${step.color}`,
+                      }}
+                    >
+                      {step.number}
+                    </Typography>
+                  </Box>
+                  <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>
+                    {step.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                    {step.description}
+                  </Typography>
+                </Paper>
+              </Fade>
             ))}
           </Box>
         </Paper>

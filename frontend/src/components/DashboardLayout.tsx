@@ -10,7 +10,6 @@ import {
   Chip,
 } from '@mui/material';
 import {
-  AccountCircle,
   ExitToApp,
   Menu as MenuIcon,
   PlaylistPlay,
@@ -24,7 +23,7 @@ interface DashboardLayoutProps {
 }
 
 // localStorage key for sidebar state
-const SIDEBAR_STORAGE_KEY = 'meme-maker-sidebar-collapsed';
+const SIDEBAR_STORAGE_KEY = 'memevoiceclone-inator-sidebar-collapsed';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Initialize sidebar state from localStorage
@@ -111,17 +110,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <Avatar
+              src="/doofenshmirtz-flipped.png"
+              alt="Dr. Doofenshmirtz"
               sx={{
                 mr: 2,
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: '#1e293b',
                 width: 40,
                 height: 40,
+                border: '2px solid rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 0 10px rgba(99, 102, 241, 0.3)',
               }}
-            >
-              <AccountCircle />
-            </Avatar>
+            />
             <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
-              Meme Maker
+              MemeVoiceClone-inator
             </Typography>
           </Box>
           

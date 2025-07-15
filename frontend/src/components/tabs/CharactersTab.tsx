@@ -41,6 +41,12 @@ import {
   AudioFile as AudioIcon,
   Check as CheckIcon,
   Cancel as CancelIcon,
+  Mic as MicIcon,
+  Timer as TimerIcon,
+  HighQuality as HighQualityIcon,
+  AudioFile as AudioFormatIcon,
+  PhotoLibrary as PhotoLibraryIcon,
+  AutoFixHigh as AutoFixHighIcon,
 } from '@mui/icons-material';
 import { characterAPI, type Character, API_BASE_URL } from '../../services/api';
 import ConfirmDialog from '../ConfirmDialog';
@@ -649,6 +655,13 @@ const CreateCharacterForm: React.FC<{
       return;
     }
 
+    // Validate that all files are PNG
+    const nonPngFiles = files.filter(file => file.type !== 'image/png');
+    if (nonPngFiles.length > 0) {
+      setError('Only PNG format is accepted for transparency support');
+      return;
+    }
+
     const newImages: ImagePreview[] = files.map(file => ({
       file,
       preview: URL.createObjectURL(file),
@@ -832,6 +845,68 @@ const CreateCharacterForm: React.FC<{
                     Character Images
                   </Typography>
                   
+                                     {/* Image Helper Text */}
+                   <Alert 
+                     severity="info" 
+                     sx={{ 
+                       mb: 2, 
+                       background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                       border: '1px solid rgba(99, 102, 241, 0.3)',
+                       borderRadius: '12px',
+                       '& .MuiAlert-icon': { color: 'primary.main' },
+                       '& .MuiAlert-message': { color: 'text.primary' }
+                     }}
+                   >
+                     <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                       <ImageIcon sx={{ fontSize: 18 }} />
+                       Image Guidelines:
+                     </Typography>
+                     <Box sx={{ pl: 1 }}>
+                       <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <PhotoLibraryIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                         </Box>
+                         Use clear <strong>PNG images</strong> with transparent backgrounds
+                       </Typography>
+                       <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <AutoFixHighIcon sx={{ fontSize: 14, color: '#8b5cf6' }} />
+                         </Box>
+                         For best results, use <strong>remove.bg</strong> to remove backgrounds
+                       </Typography>
+                       <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <CheckIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                         </Box>
+                         Only <strong>PNG format</strong> is accepted for transparency support
+                       </Typography>
+                     </Box>
+                   </Alert>
+                  
                   <Box
                     component="label"
                     sx={{
@@ -872,12 +947,12 @@ const CreateCharacterForm: React.FC<{
                         Upload Image ({formData.imageFiles.length}/1)
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        PNG, JPG, JPEG, WEBP • Multiple files allowed
+                        PNG format only • Multiple files allowed
                       </Typography>
                     </Box>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png"
                       multiple
                       onChange={handleImageUpload}
                       disabled={loading || formData.imageFiles.length >= 4}
@@ -956,6 +1031,68 @@ const CreateCharacterForm: React.FC<{
                     Audio File
                   </Typography>
                   
+                                     {/* Audio Helper Text */}
+                   <Alert 
+                     severity="info" 
+                     sx={{ 
+                       mb: 2, 
+                       background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                       border: '1px solid rgba(99, 102, 241, 0.3)',
+                       borderRadius: '12px',
+                       '& .MuiAlert-icon': { color: 'primary.main' },
+                       '& .MuiAlert-message': { color: 'text.primary' }
+                     }}
+                   >
+                     <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                       <MicIcon sx={{ fontSize: 18 }} />
+                       Audio Guidelines:
+                     </Typography>
+                     <Box sx={{ pl: 1 }}>
+                       <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <TimerIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                         </Box>
+                         Use <strong>clear English speech</strong> around <strong>30 seconds</strong> duration
+                       </Typography>
+                       <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <HighQualityIcon sx={{ fontSize: 14, color: '#8b5cf6' }} />
+                         </Box>
+                         High-quality audio with minimal background noise
+                       </Typography>
+                       <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                         <Box sx={{ 
+                           width: 24, 
+                           height: 24, 
+                           borderRadius: '50%', 
+                           backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center'
+                         }}>
+                           <AudioFormatIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                         </Box>
+                         Supported formats: WAV, MP3, M4A, FLAC, OGG (Max: 50MB)
+                       </Typography>
+                     </Box>
+                   </Alert>
+
                   {!formData.audioFile ? (
                     <Box
                       component="label"
