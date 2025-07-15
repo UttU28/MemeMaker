@@ -230,3 +230,22 @@ class ActivityStats(BaseModel):
 class MyScriptsResponse(BaseModel):
     scripts: List[ScriptResponse]
     userTokens: int
+
+
+# User Feedback Models
+class UserFeedbackRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000, description="User feedback message")
+
+
+class UserFeedback(BaseModel):
+    userName: str
+    userEmail: str
+    message: str
+    timestamp: str
+    isRead: bool = False
+
+
+class UserFeedbackResponse(BaseModel):
+    success: bool
+    message: str
+    feedbackId: Optional[str] = None

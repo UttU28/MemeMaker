@@ -51,8 +51,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   }, [isSidebarCollapsed]);
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    logout(() => {
+      navigate('/');
+    });
   };
 
   const handleTabChange = (tabId: string) => {

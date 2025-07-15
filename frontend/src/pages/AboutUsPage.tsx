@@ -4,27 +4,85 @@ import {
   Typography,
   Container,
   Paper,
-  Avatar,
   Button,
   Fade,
-  Zoom,
   TextField,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import {
-  YouTube as YouTubeIcon,
-  Whatshot as WhatshotIcon,
   Send as SendIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { DashboardLayout } from '../components/DashboardLayout';
+import { feedbackAPI } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
+import { ProjectShowcase } from '../components/ProjectShowcase';
+
 
 export const AboutUsPage: React.FC = () => {
   const [userMessage, setUserMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
+  
+  const { user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('User message:', userMessage);
-    // Clear the input after submission
-    setUserMessage('');
+    
+    if (!userMessage.trim()) return;
+    
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
+    
+    try {
+      console.log('Submitting user feedback:', {
+        user: user?.name,
+        email: user?.email,
+        message: userMessage
+      });
+      
+      const response = await feedbackAPI.submitFeedback(userMessage.trim());
+      
+      console.log('Feedback submission response:', response);
+      
+      if (response.success) {
+        setSubmitStatus({
+          type: 'success',
+          message: response.message
+        });
+        setUserMessage(''); // Clear the input after successful submission
+      } else {
+        setSubmitStatus({
+          type: 'error',
+          message: response.message || 'Failed to submit feedback'
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      
+      let errorMessage = 'Failed to submit feedback. Please try again.';
+      
+      if (error && typeof error === 'object') {
+        if ('response' in error && error.response && typeof error.response === 'object' && 
+            'data' in error.response && error.response.data && typeof error.response.data === 'object' &&
+            'detail' in error.response.data) {
+          errorMessage = String(error.response.data.detail);
+        } else if ('message' in error && typeof error.message === 'string') {
+          errorMessage = error.message;
+        }
+      }
+      
+      setSubmitStatus({
+        type: 'error',
+        message: errorMessage
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -33,61 +91,30 @@ export const AboutUsPage: React.FC = () => {
         <Fade in timeout={800}>
           <Box>
             {/* Header Section */}
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Box sx={{ mb: 6 }}>
               <Typography 
-                variant="h3" 
+                variant="h4" 
                 component="h1" 
                 sx={{ 
-                  mb: 2,
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  fontWeight: 800,
+                  mb: 1,
+                  color: 'white',
+                  fontWeight: 700,
                 }}
               >
                 About Us
               </Typography>
+              <Typography 
+                variant="body1" 
+                color="text.secondary" 
+                sx={{ 
+                  mb: 0,
+                  opacity: 0.8,
+                }}
+              >
+                Learn about the platform and connect with the creator
+              </Typography>
             </Box>
 
-            {/* Platform Overview */}
-            <Box sx={{ 
-              display: 'flex',
-              justifyContent: 'center',
-              mb: 6 
-            }}>
-              <Zoom in timeout={600}>
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    p: 4, 
-                    textAlign: 'center',
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                  }}
-                >
-                <Typography 
-                  variant="h4" 
-                  component="h2" 
-                  sx={{ 
-                    mb: 4,
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                    Why We Built This
-                </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    This platform was built for fun! I saw all the memes getting viral and wanted in on the action. After creating the entire pipeline, I got bored... so now I'm showcasing it for everyone to use and create their own viral content! A revolutionary platform that lets you create viral memes in just 2 simple steps! Choose from AI-powered characters, generate engaging scripts automatically, and watch your content go viral. Get massive reach without any technical skills or expensive equipment.
-                  </Typography>
-                </Paper>
-              </Zoom>
-            </Box>
 
             {/* Let's Connect Section */}
             <Paper elevation={0} sx={{ p: 4, mb: 6 }}>
@@ -174,8 +201,8 @@ export const AboutUsPage: React.FC = () => {
                     <Button
                       type="submit"
                       variant="contained"
-                      disabled={!userMessage.trim()}
-                      startIcon={<SendIcon />}
+                      disabled={!userMessage.trim() || isSubmitting}
+                      startIcon={isSubmitting ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
                       sx={{
                         background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                         color: 'white',
@@ -193,64 +220,27 @@ export const AboutUsPage: React.FC = () => {
                         },
                       }}
                     >
-                      Send
+                      {isSubmitting ? 'Sending...' : 'Send'}
                     </Button>
                   </Box>
+                  {submitStatus.type && (
+                    <Alert
+                      severity={submitStatus.type}
+                      sx={{ mt: 2 }}
+                      icon={submitStatus.type === 'success' ? <CheckCircleIcon /> : undefined}
+                    >
+                      {submitStatus.message}
+                    </Alert>
+                  )}
                 </Box>
               </Box>
             </Paper>
 
-            {/* Creator Section */}
-            <Paper elevation={0} sx={{ p: 4 }}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: 700 }}>
-                    Meet the Creator
-                </Typography>
-                  <Avatar 
-                    src="https://yt3.googleusercontent.com/ytc/AIdro_l3n-1vpu1cTeDkAfINff0TgzedVxRQf25JSS8ebcVYEk4=s160-c-k-c0x00ffffff-no-rj"
-                    sx={{ 
-                      mx: 'auto',
-                      mb: 2,
-                      width: 80,
-                      height: 80,
-                      boxShadow: '0 10px 30px rgba(255, 0, 0, 0.3)',
-                    }}
-                  >
-                    <YouTubeIcon sx={{ fontSize: 40 }} />
-                  </Avatar>
-                  <Typography variant="h6" component="h3" sx={{ mb: 1, color: 'primary.main' }}>
-                    That Insane Guy
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Content Creator & AI Developer
-                  </Typography>
-                </Box>
+            {/* Why I Built This Section */}
+            <Box sx={{ mt: 4 }}>
+              <ProjectShowcase />
+            </Box>
 
-                <Button
-                  variant="contained"
-                  startIcon={<YouTubeIcon />}
-                  href="https://www.youtube.com/@ThatInsaneGuy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    background: 'linear-gradient(135deg, #FF0000 0%, #CC0000 100%)',
-                    color: 'white',
-                    fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
-                    fontSize: '1rem',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #CC0000 0%, #990000 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 10px 20px rgba(255,0,0,0.3)',
-                    },
-                  }}
-                >
-                  Subscribe to our YouTube Channel
-                </Button>
-              </Box>
-            </Paper>
           </Box>
         </Fade>
       </Container>

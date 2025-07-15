@@ -8,7 +8,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
   signup: (data: SignupRequest) => Promise<void>;
-  logout: () => void;
+  logout: (callback?: () => void) => void;
   refreshUser: () => Promise<void>;
   updateUserTokens: (newTokenCount: number) => void;
 }

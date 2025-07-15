@@ -64,9 +64,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = (callback?: () => void) => {
     setUser(null);
     clearToken();
+    // Use setTimeout to ensure state updates are processed before callback
+    if (callback) {
+      setTimeout(callback, 0);
+    }
   };
 
   const refreshUser = async () => {

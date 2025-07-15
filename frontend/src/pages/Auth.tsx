@@ -21,6 +21,7 @@ import {
   Person as PersonIcon,
   Visibility,
   VisibilityOff,
+  ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -169,20 +170,56 @@ export const Auth: React.FC = () => {
             }}
           >
             <Box sx={{ p: 4 }}>
-              <Typography
-                variant="h3"
-                align="center"
-                sx={{
-                  mb: 3,
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                MemeVoiceClone-inator
-              </Typography>
+              {/* App Title with Icon-only Home Button */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/')}
+                  sx={{
+                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    color: 'rgba(99, 102, 241, 0.9)',
+                    minWidth: 'auto',
+                    width: 48,
+                    height: 48,
+                    borderRadius: 3,
+                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.15)',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)',
+                      border: '1px solid rgba(99, 102, 241, 0.6)',
+                      color: '#6366f1',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(99, 102, 241, 0.25)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0px)',
+                    },
+                  }}
+                >
+                  <ArrowBackIcon />
+                </Button>
+
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    textAlign: 'center',
+                    flex: 1,
+                    mx: 2,
+                  }}
+                >
+                  MemeVoiceClone-inator
+                </Typography>
+
+                {/* Invisible spacer for balance */}
+                <Box sx={{ width: 48, height: 48 }} />
+              </Box>
 
               <Tabs
                 value={activeTab}

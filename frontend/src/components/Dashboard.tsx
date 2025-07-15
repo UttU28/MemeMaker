@@ -3,58 +3,26 @@ import {
   Box,
   Typography,
   Container,
-  Card,
-  CardContent,
   AppBar,
   Toolbar,
   Button,
-  Stack,
   Avatar,
   Fade,
-  Zoom,
   Paper,
   Slide,
   Grow,
 } from '@mui/material';
 import {
-  People as PeopleIcon,
-  Description as ScriptIcon,
-  VideoLibrary as VideoIcon,
   PlayArrow,
-  Mic,
   PlayCircle,
   VolumeUp,
   VolumeOff,
   Favorite,
   ChatBubble,
   Send,
-  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-
-const steps = [
-  {
-    step: "1",
-    icon: <PeopleIcon sx={{ fontSize: 40 }} />,
-    title: 'Create Characters',
-    description: 'Upload audio samples and character images to create AI-powered voice clones using F5-TTS technology.',
-    color: '#6366f1',
-  },
-  {
-    step: "2", 
-    icon: <ScriptIcon sx={{ fontSize: 40 }} />,
-    title: 'Generate Scripts',
-    description: 'Create engaging dialogues and scripts for your characters to bring your meme ideas to life.',
-    color: '#f59e0b',
-  },
-  {
-    step: "3",
-    icon: <VideoIcon sx={{ fontSize: 40 }} />,
-    title: 'Generate Videos',
-    description: 'Combine voice clones, scripts, and visuals into viral meme videos ready to share.',
-    color: '#10b981',
-  },
-];
+import { ProjectShowcase } from './ProjectShowcase';
 
 const Dashboard: React.FC = () => {
   const [playingVideo1, setPlayingVideo1] = useState(false);
@@ -133,40 +101,87 @@ const Dashboard: React.FC = () => {
 
         {/* Showcase Section */}
         <Fade in timeout={1200}>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
+          <Box sx={{ mb: 10, textAlign: 'center' }}>
             <Box
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                gap: 4,
-                maxWidth: 900,
+                gap: 8,
+                maxWidth: 1100,
                 mx: 'auto',
+                position: 'relative',
+                px: 2,
               }}
             >
               {/* Video Player 1 */}
               <Grow in timeout={1500}>
-                <Box>
-                  {/* Sample Script for Video 1 */}
-                  <Paper
-                    elevation={0}
+                <Box sx={{ position: 'relative' }}>
+                  {/* Floating Script Bubble */}
+                  <Box
                     sx={{
-                      mb: 2,
-                      p: 2,
-                      background: 'rgba(30, 41, 59, 0.4)',
-                      border: '1px solid rgba(148, 163, 184, 0.2)',
-                      borderRadius: 2,
+                      position: 'absolute',
+                      top: -20,
+                      left: -10,
+                      zIndex: 10,
+                      background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%)',
+                      backdropFilter: 'blur(20px)',
+                      borderRadius: 3,
+                      px: 3,
+                      py: 2,
+                      maxWidth: 280,
+                      border: '1px solid rgba(148, 163, 184, 0.3)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+                      transform: 'rotate(-2deg)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(0deg) translateY(-5px)',
+                        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.4)',
+                      },
                     }}
                   >
-                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.6 }}>
+                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.4, fontSize: '0.85rem' }}>
                       <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Input Script:
+                        Script:
                       </Box>
                       {' '}
-                      <Box component="span" sx={{ fontStyle: 'italic' }}>
-                        "Peter and Stewie on how to create an app, give roadmap and monetize it"
+                      <Box component="span" sx={{ fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.9)' }}>
+                        "How to create an app, give roadmap and monetize it"
                       </Box>
                     </Typography>
-                  </Paper>
+                  </Box>
+
+                  {/* Floating Characters Bubble */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: -15,
+                      right: -15,
+                      zIndex: 10,
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%)',
+                      backdropFilter: 'blur(20px)',
+                      borderRadius: 3,
+                      px: 3,
+                      py: 2,
+                      border: '1px solid rgba(99, 102, 241, 0.5)',
+                      boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)',
+                      transform: 'rotate(2deg)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(0deg) translateY(-5px)',
+                        boxShadow: '0 15px 40px rgba(99, 102, 241, 0.4)',
+                      },
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.4, fontSize: '0.85rem' }}>
+                      <Box component="span" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
+                        Characters:
+                      </Box>
+                      {' '}
+                      <Box component="span" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                        Peter Griffin, Stewie Griffin
+                      </Box>
+                    </Typography>
+                  </Box>
                   
                 <Paper
                   elevation={0}
@@ -471,28 +486,73 @@ const Dashboard: React.FC = () => {
 
               {/* Video Player 2 */}
               <Slide direction="left" in timeout={1800}>
-                <Box>
-                  {/* Sample Script for Video 2 */}
-                  <Paper
-                    elevation={0}
+                <Box sx={{ position: 'relative' }}>
+                  {/* Floating Script Bubble */}
+                  <Box
                     sx={{
-                      mb: 2,
-                      p: 2,
-                      background: 'rgba(30, 41, 59, 0.4)',
-                      border: '1px solid rgba(148, 163, 184, 0.2)',
-                      borderRadius: 2,
+                      position: 'absolute',
+                      top: -20,
+                      left: -10,
+                      zIndex: 10,
+                      background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%)',
+                      backdropFilter: 'blur(20px)',
+                      borderRadius: 3,
+                      px: 3,
+                      py: 2,
+                      maxWidth: 280,
+                      border: '1px solid rgba(148, 163, 184, 0.3)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+                      transform: 'rotate(-2deg)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(0deg) translateY(-5px)',
+                        boxShadow: '0 15px 40px rgba(0, 0, 0, 0.4)',
+                      },
                     }}
                   >
-                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.6 }}>
+                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.4, fontSize: '0.85rem' }}>
                       <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Input Script:
+                        Script:
                       </Box>
                       {' '}
-                      <Box component="span" sx={{ fontStyle: 'italic' }}>
-                        "Rick and Morty discussing how Tesla Autopilot car works"
+                      <Box component="span" sx={{ fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.9)' }}>
+                        "How does Tesla Autopilot car works?"
                       </Box>
                     </Typography>
-                </Paper>
+                  </Box>
+
+                  {/* Floating Characters Bubble */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: -15,
+                      right: -15,
+                      zIndex: 10,
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%)',
+                      backdropFilter: 'blur(20px)',
+                      borderRadius: 3,
+                      px: 3,
+                      py: 2,
+                      border: '1px solid rgba(16, 185, 129, 0.5)',
+                      boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)',
+                      transform: 'rotate(2deg)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(0deg) translateY(-5px)',
+                        boxShadow: '0 15px 40px rgba(16, 185, 129, 0.4)',
+                      },
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: 'white', lineHeight: 1.4, fontSize: '0.85rem' }}>
+                      <Box component="span" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
+                        Characters:
+                      </Box>
+                      {' '}
+                      <Box component="span" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                        Rick Sanchez, Morty Smith
+                      </Box>
+                    </Typography>
+                  </Box>
 
                   <Paper
                     elevation={0}
@@ -797,189 +857,37 @@ const Dashboard: React.FC = () => {
             </Box>
             
             {/* Start Creating Button */}
-            <Box sx={{ textAlign: 'center', mt: 6 }}>
+            <Box sx={{ textAlign: 'center', mt: 8 }}>
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<PlayArrow />}
                 onClick={handleStartCreating}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1.1rem',
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.2rem',
                   fontWeight: 600,
+                  borderRadius: 4,
                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)',
+                  transition: 'all 0.3s ease',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                    transform: 'translateY(-2px)',
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 15px 40px rgba(99, 102, 241, 0.4)',
                   },
                 }}
               >
                 Start Creating
               </Button>
               
-              {/* Demo Project Notice */}
-              <Box sx={{ mt: 4, maxWidth: 800, mx: 'auto' }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 500,
-                    mb: 2,
-                    fontSize: '1.1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <WarningIcon sx={{ color: '#f59e0b', fontSize: '1.3rem' }} />
-                  Demo Project Showcase
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: 'text.secondary',
-                    lineHeight: 1.7,
-                    fontSize: '1rem',
-                    maxWidth: 900,
-                    mx: 'auto',
-                  }}
-                >
-                  This is a demonstration of my technical skills in building a complete meme creation pipeline. 
-                  The project showcases automated content generation, voice cloning integration with F5-TTS, 
-                  video processing workflows, and scalable architecture for daily meme production and social media distribution. 
-                  Built as a proof-of-concept to demonstrate full-stack development capabilities, 
-                  AI integration, and content automation systems.
-                </Typography>
-                <Typography
-                  variant="body2"
-                      sx={{
-                    color: 'text.disabled',
-                    mt: 2,
-                    fontStyle: 'italic',
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  Created to explore the intersection of AI, automation, and viral content creation.
-                </Typography>
-              </Box>
             </Box>
           </Box>
         </Fade>
 
-        {/* How to Use Our Platform */}
-        <Box sx={{ mb: 8 }}>
-          <Typography
-            variant="h3"
-            component="h2"
-            sx={{
-              textAlign: 'center',
-              mb: 2,
-              background: 'linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            How to Use Our Platform
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              textAlign: 'center',
-              mb: 6,
-              color: 'text.secondary',
-              maxWidth: 500,
-              mx: 'auto',
-            }}
-          >
-            Simple 3-step process to create viral voice cloning memes
-          </Typography>
-
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 3,
-            }}
-          >
-            {steps.map((step, index) => (
-              <Zoom in timeout={500 + index * 200} key={index}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    background: 'rgba(30, 41, 59, 0.6)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(148, 163, 184, 0.1)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      border: '1px solid rgba(99, 102, 241, 0.3)',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                    },
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '4px',
-                      background: `linear-gradient(135deg, ${step.color} 0%, ${step.color}CC 100%)`,
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 4, height: '100%', textAlign: 'center' }}>
-                    <Box sx={{ position: 'relative', mb: 3 }}>
-                      <Avatar 
-                      sx={{
-                          mx: 'auto',
-                          width: 64, 
-                          height: 64,
-                          background: `linear-gradient(135deg, ${step.color} 0%, ${step.color}CC 100%)`,
-                          mb: 2,
-                        }}
-                      >
-                        {step.icon}
-                      </Avatar>
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -8,
-                          right: 'calc(50% - 40px)',
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          background: step.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        {step.step}
-                      </Box>
-                    </Box>
-                    <Typography variant="h5" component="h3" sx={{ mb: 2, fontWeight: 600 }}>
-                      {step.title}
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
-                      {step.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Zoom>
-            ))}
-          </Box>
-        </Box>
+        {/* Why I Built This */}
+        <ProjectShowcase />
 
       </Container>
     </Box>

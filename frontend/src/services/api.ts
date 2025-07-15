@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
-      window.location.href = '/auth';
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }
@@ -379,6 +379,14 @@ export const scriptAPI = {
 
   getScriptVideoJob: async (scriptId: string): Promise<VideoGenerationJob> => {
     const response = await api.get<VideoGenerationJob>(`/api/scripts/${scriptId}/video-job`);
+    return response.data;
+  },
+};
+
+// Feedback API
+export const feedbackAPI = {
+  submitFeedback: async (message: string): Promise<{ success: boolean; message: string; feedbackId?: string }> => {
+    const response = await api.post('/api/feedback', { message });
     return response.data;
   },
 };

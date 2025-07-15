@@ -1078,19 +1078,102 @@ class FirebaseService:
             return []
 
     def clearUserActivities(self, userId: str) -> bool:
-        """Clear all activities for a user (admin function)"""
+        """Clear all activities for a specific user"""
         try:
-            userRef = self.db.collection('users').document(userId)
-            userRef.update({
-                'activities': [],
-                'updatedAt': datetime.now()
-            })
+            # Query all activities for the user
+            activitiesRef = self.db.collection('user_activities').where('userId', '==', userId)
+            docs = activitiesRef.stream()
             
-            logger.info(f"🗑️ Cleared all activities for user {userId}")
+            # Delete all found activities
+            batch = self.db.batch()
+            deleted_count = 0
+            
+            for doc in docs:
+                batch.delete(doc.reference)
+                deleted_count += 1
+            
+            batch.commit()
+            logger.info(f"✅ Cleared {deleted_count} activities for user {userId}")
             return True
             
         except Exception as e:
             logger.error(f"💥 Error clearing activities for user {userId}: {str(e)}")
+            return False
+    
+    # ============================================================================
+    # USER FEEDBACK METHODS
+    # ============================================================================
+    
+    def submitUserFeedback(self, userId: str, userName: str, userEmail: str, message: str) -> tuple[bool, str, Optional[str]]:
+        """Submit user feedback/suggestion to database"""
+        try:
+            currentTime = datetime.now()
+            
+            feedbackData = {
+                'userId': userId,
+                'userName': userName,
+                'userEmail': userEmail,
+                'message': message.strip(),
+                'timestamp': currentTime,
+                'isRead': False,
+                'createdAt': currentTime,
+                'updatedAt': currentTime
+            }
+            
+            # Save to Firestore with auto-generated document ID
+            feedbackRef = self.db.collection('user_feedback').document()
+            feedbackRef.set(feedbackData)
+            
+            # Get the auto-generated document ID
+            feedbackId = feedbackRef.id
+            
+            logger.info(f"✅ User feedback submitted: {feedbackId} from {userEmail}")
+            
+            return True, "Feedback submitted successfully", feedbackId
+            
+        except Exception as e:
+            logger.error(f"💥 Error submitting user feedback: {str(e)}")
+            return False, f"Failed to submit feedback: {str(e)}", None
+    
+    def getAllUserFeedback(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get all user feedback for admin review (ordered by timestamp desc)"""
+        try:
+            feedbackRef = self.db.collection('user_feedback').order_by('timestamp', direction=firestore.Query.DESCENDING)
+            
+            if limit:
+                feedbackRef = feedbackRef.limit(limit)
+            
+            docs = feedbackRef.stream()
+            feedback_list = []
+            
+            for doc in docs:
+                feedback_data = doc.to_dict()
+                # Add the document ID to the feedback data
+                feedback_data['id'] = doc.id
+                feedback_list.append(feedback_data)
+            
+            logger.info(f"📋 Retrieved {len(feedback_list)} user feedback entries")
+            return feedback_list
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting user feedback: {str(e)}")
+            return []
+    
+    def markFeedbackAsRead(self, feedbackId: str) -> bool:
+        """Mark a feedback message as read"""
+        try:
+            feedbackRef = self.db.collection('user_feedback').document(feedbackId)
+            feedbackRef.update({
+                'isRead': True,
+                'readAt': datetime.now(),
+                'updatedAt': datetime.now()
+            })
+            
+            logger.info(f"✅ Marked feedback as read: {feedbackId}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"💥 Error marking feedback as read {feedbackId}: {str(e)}")
             return False
 
     def addScriptActivity(self, userId: str, activityType: str, scriptId: str, scriptTitle: str = None):

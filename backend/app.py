@@ -36,7 +36,7 @@ from models import (
     VideoGenerationJob, VideoGenerationJobResponse,
     SignupRequest, LoginRequest, UserResponse, AuthResponse,
     StarResponse, UserActivity, UserActivityResponse, ActivityStats,
-    MyScriptsResponse
+    MyScriptsResponse, UserFeedbackRequest, UserFeedbackResponse, UserFeedback
 )
 
 # Import Services
@@ -1068,7 +1068,15 @@ async def listScripts(currentUser: dict = Depends(get_current_user)):
                 audioCount=audioCount,
                 finalVideoPath=scriptData.get("finalVideoPath"),
                 videoDuration=scriptData.get("videoDuration"),
-                videoSize=scriptData.get("videoSize")
+                videoSize=scriptData.get("videoSize"),
+                # Video job information embedded directly in script
+                videoJobId=scriptData.get("currentVideoJobId"),
+                videoJobStatus=scriptData.get("videoJobStatus"),
+                videoJobProgress=scriptData.get("videoJobProgress", 0.0),
+                videoJobCurrentStep=scriptData.get("videoJobCurrentStep"),
+                videoJobStartedAt=scriptData.get("videoJobStartedAt"),
+                videoJobCompletedAt=scriptData.get("videoJobCompletedAt"),
+                videoJobErrorMessage=scriptData.get("videoJobErrorMessage")
             )
             scriptResponses.append(scriptResponse)
             otherScriptCount += 1
@@ -2054,6 +2062,110 @@ async def getScriptVideoJob(scriptId: str, currentUser: dict = Depends(get_curre
     except Exception as e:
         logger.error(f"💥 Error getting video job for script {scriptId} for user {currentUser['email']}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get video generation job for script: {str(e)}")
+
+# User Feedback Endpoints
+
+@app.post("/api/feedback", response_model=UserFeedbackResponse)
+async def submit_user_feedback(request: UserFeedbackRequest, current_user: dict = Depends(get_current_user)):
+    """Submit user feedback/suggestion to the admin"""
+    try:
+        logger.info(f"💬 User {current_user['email']} submitting feedback")
+        
+        firebase_service = getFirebaseService()
+        
+        # Submit feedback to database
+        success, message, feedback_id = firebase_service.submitUserFeedback(
+            current_user['id'],
+            current_user['name'],
+            current_user['email'],
+            request.message
+        )
+        
+        if not success:
+            logger.error(f"💥 Failed to submit feedback: {message}")
+            raise HTTPException(status_code=500, detail=message)
+        
+        logger.info(f"✅ Feedback submitted successfully: {feedback_id}")
+        
+        return UserFeedbackResponse(
+            success=True,
+            message="Thank you for your feedback! I'll read it soon, Bitch! JK love you!",
+            feedbackId=feedback_id
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error submitting feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to submit feedback: {str(e)}")
+
+@app.get("/api/admin/feedback", response_model=List[UserFeedback])
+async def get_all_user_feedback(current_user: dict = Depends(get_current_user), limit: int = 50):
+    """Get all user feedback for admin review (TODO: Add proper admin role check)"""
+    try:
+        logger.info(f"👨‍💼 User {current_user['email']} requesting all feedback")
+        
+        # TODO: Add proper admin role check here
+        # For now, any authenticated user can access this
+        # In production, you should check if user has admin role
+        
+        firebase_service = getFirebaseService()
+        feedback_list = firebase_service.getAllUserFeedback(limit)
+        
+        # Convert to Pydantic models
+        feedback_responses = []
+        for feedback_data in feedback_list:
+            # Convert timestamp to string if it's a datetime object
+            timestamp = feedback_data.get('timestamp', '')
+            if hasattr(timestamp, 'isoformat'):
+                timestamp = timestamp.isoformat()
+            elif hasattr(timestamp, 'timestamp'):
+                timestamp = datetime.fromtimestamp(timestamp.timestamp()).isoformat()
+            else:
+                timestamp = str(timestamp)
+            
+            feedback = UserFeedback(
+                userName=feedback_data.get('userName', ''),
+                userEmail=feedback_data.get('userEmail', ''),
+                message=feedback_data.get('message', ''),
+                timestamp=timestamp,
+                isRead=feedback_data.get('isRead', False)
+            )
+            feedback_responses.append(feedback)
+        
+        logger.info(f"📋 Retrieved {len(feedback_responses)} feedback entries for admin")
+        return feedback_responses
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting admin feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get feedback: {str(e)}")
+
+@app.put("/api/admin/feedback/{feedback_id}/mark-read")
+async def mark_feedback_as_read(feedback_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a feedback message as read (TODO: Add proper admin role check)"""
+    try:
+        logger.info(f"👨‍💼 User {current_user['email']} marking feedback {feedback_id} as read")
+        
+        # TODO: Add proper admin role check here
+        
+        firebase_service = getFirebaseService()
+        success = firebase_service.markFeedbackAsRead(feedback_id)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to mark feedback as read")
+        
+        logger.info(f"✅ Marked feedback {feedback_id} as read")
+        
+        return {
+            "success": True,
+            "message": "Feedback marked as read"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"💥 Error marking feedback as read: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to mark feedback as read: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")
