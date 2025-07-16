@@ -7,6 +7,9 @@ from pathlib import Path
 import yt_dlp
 import json
 
+# Set to True to delete original and mobile videos after processing
+delete = True
+
 
 def downloadYoutubeVideo(url, outputPath="downloads"):
     Path(outputPath).mkdir(exist_ok=True)
@@ -183,7 +186,7 @@ def getNextBackgroundNumber(backgroundDir):
     return max(backgroundNumbers) + 1
 
 
-def splitVideoIntoSegments(inputFile, backgroundDir="data/background"):
+def splitVideoIntoSegments(inputFile, backgroundDir="apiData/background"):
     if not inputFile or not os.path.exists(inputFile):
         print("❌ Input file not found for splitting")
         return
@@ -274,6 +277,37 @@ def main():
         
         if os.path.exists(mobileFile):
             splitVideoIntoSegments(mobileFile)
+            
+            # Delete original and mobile files if delete flag is True
+            if delete:
+                print("🗑️ Cleaning up video files...")
+                
+                # Delete original downloaded file
+                if os.path.exists(downloadedFile):
+                    try:
+                        os.remove(downloadedFile)
+                        print(f"✅ Deleted original file: {downloadedFile}")
+                    except Exception as e:
+                        print(f"❌ Error deleting original file: {e}")
+                
+                # Delete mobile file
+                if os.path.exists(mobileFile):
+                    try:
+                        os.remove(mobileFile)
+                        print(f"✅ Deleted mobile file: {mobileFile}")
+                    except Exception as e:
+                        print(f"❌ Error deleting mobile file: {e}")
+                
+                # Delete the entire downloads directory
+                try:
+                    import shutil
+                    if os.path.exists(outputDir):
+                        shutil.rmtree(outputDir)
+                        print(f"✅ Deleted downloads directory: {outputDir}")
+                except Exception as e:
+                    print(f"❌ Error deleting downloads directory: {e}")
+                
+                print("🎉 Cleanup completed!")
 
 
 if __name__ == "__main__":
