@@ -335,19 +335,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script, onDelete, onUpdate, cha
                     fontSize: '0.75rem',
                   }}
                 />
-                {script.hasAudio && (
-                  <Chip
-                    size="small"
-                    icon={<VideoIcon sx={{ fontSize: '12px !important' }} />}
-                    label="Ready"
-                    sx={{
-                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                      color: '#f59e0b',
-                      fontWeight: 600,
-                      fontSize: '0.75rem',
-                    }}
-                  />
-                )}
+
                 
                 {/* Character Chips */}
                 {script.selectedCharacters.map((charId) => (
@@ -1351,7 +1339,7 @@ export const ScriptsTab: React.FC = () => {
       
       intervalRef.current = setInterval(() => {
         fetchScripts(false); // Silent refresh without loader
-      }, 5000); // Poll every 3 seconds
+      }, 3000); // Poll every 3 seconds
     } else {
       console.log('✅ No active video jobs - stopping polling');
     }

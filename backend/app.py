@@ -18,6 +18,8 @@ from gradio_client import Client, handle_file
 from pydub import AudioSegment
 import warnings
 import re
+from PIL import Image
+import io
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -42,7 +44,7 @@ from models import (
 # Import Services
 from utils import (
     loadUserProfiles, saveUserProfiles, generateCharacterId, getDefaultConfig,
-    validateAudioFile, validateImageFile, loadScripts, saveScripts, generateScriptId
+    validateAudioFile, validateImageFile, trimImageTransparency, loadScripts, saveScripts, generateScriptId
 )
 from audio_service import (
     checkF5ttsConnection, generateAudioFilename, generateAudioForScript, F5TTSClient
@@ -652,11 +654,15 @@ async def update_character(
                         image_filename = f"{character_id}_{next_index}{image_extension}"
                         image_path = os.path.join(IMAGES_DIR, image_filename)
                         
+                        # Trim transparency/blank areas from the image
+                        logger.info(f"✂️ Trimming new image: {img.filename}")
+                        trimmed_image_bytes = trimImageTransparency(img)
+                        
                         with open(image_path, "wb") as buffer:
-                            shutil.copyfileobj(img.file, buffer)
+                            buffer.write(trimmed_image_bytes)
                         
                         existing_images[str(next_index)] = image_path
-                        logger.info(f"✅ Added new image: {image_filename}")
+                        logger.info(f"✅ Added new trimmed image: {image_filename}")
                         next_index += 1
                         
                     except Exception as e:
@@ -879,8 +885,12 @@ async def create_complete_character(
                 image_filename = f"{character_id}_{index}{image_extension}"
                 image_path = os.path.join(IMAGES_DIR, image_filename)
                 
+                # Trim transparency/blank areas from the image
+                logger.info(f"✂️ Trimming image {index + 1}/{len(valid_images)}: {img.filename}")
+                trimmed_image_bytes = trimImageTransparency(img)
+                
                 with open(image_path, "wb") as buffer:
-                    shutil.copyfileobj(img.file, buffer)
+                    buffer.write(trimmed_image_bytes)
                 
                 images_dict[str(index)] = image_path
                 uploaded_images.append(image_path)

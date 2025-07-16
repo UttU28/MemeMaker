@@ -73,7 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
         background: 'rgba(15, 23, 42, 0.95)',
         backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(148, 163, 184, 0.1)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
       }}
     >
@@ -90,17 +90,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
         <Box
           sx={{
             opacity: isCollapsed ? 0 : 1,
-            transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: isCollapsed ? 'translateX(-10px)' : 'translateX(0)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             overflow: 'hidden',
             width: isCollapsed ? 0 : 'auto',
             whiteSpace: 'nowrap',
           }}
         >
-          {!isCollapsed && (
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-              Dashboard
-            </Typography>
-          )}
+          <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+            Dashboard
+          </Typography>
         </Box>
         <IconButton
           onClick={onToggleCollapse}
@@ -133,8 +132,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
                   minHeight: 48,
                   px: isCollapsed ? 1.5 : 2,
                   py: 1.5,
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  justifyContent: 'flex-start',
                   '&:hover': {
                     backgroundColor: 'rgba(99, 102, 241, 0.1)',
                     transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
@@ -153,8 +152,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
                   sx={{
                     minWidth: isCollapsed ? 'auto' : 40,
                     color: activeTab === item.id ? 'primary.main' : 'text.secondary',
-                    justifyContent: 'center',
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
                     mr: isCollapsed ? 0 : 2,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transitionDelay: isCollapsed ? '0.15s' : '0s', // Delay centering when collapsing
+                    width: isCollapsed ? '100%' : 'auto',
                   }}
                 >
                   {item.icon}
@@ -162,26 +164,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
                 <Box
                   sx={{
                     opacity: isCollapsed ? 0 : 1,
-                    transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: isCollapsed ? 'translateX(-10px)' : 'translateX(0)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     overflow: 'hidden',
                     width: isCollapsed ? 0 : 'auto',
                     whiteSpace: 'nowrap',
+                    pointerEvents: isCollapsed ? 'none' : 'auto',
                   }}
                 >
-                  {!isCollapsed && (
-                    <ListItemText
-                      primary={item.label}
-                      sx={{
-                        margin: 0,
-                        '& .MuiListItemText-primary': {
-                          fontWeight: activeTab === item.id ? 600 : 500,
-                          color: activeTab === item.id ? 'primary.main' : 'text.primary',
-                          fontSize: '0.9rem',
-                          lineHeight: 1.2,
-                        },
-                      }}
-                    />
-                  )}
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      margin: 0,
+                      '& .MuiListItemText-primary': {
+                        fontWeight: activeTab === item.id ? 600 : 500,
+                        color: activeTab === item.id ? 'primary.main' : 'text.primary',
+                        fontSize: '0.9rem',
+                        lineHeight: 1.2,
+                      },
+                    }}
+                  />
                 </Box>
               </ListItemButton>
             </Tooltip>
@@ -205,8 +207,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
                 minHeight: 48,
                 px: isCollapsed ? 1.5 : 2,
                 py: 1.5,
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                justifyContent: 'flex-start',
                 '&:hover': {
                   backgroundColor: 'rgba(99, 102, 241, 0.1)',
                   transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
@@ -225,8 +227,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
                 sx={{
                   minWidth: isCollapsed ? 'auto' : 40,
                   color: activeTab === aboutUsItem.id ? 'primary.main' : 'text.secondary',
-                  justifyContent: 'center',
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
                   mr: isCollapsed ? 0 : 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transitionDelay: isCollapsed ? '0.15s' : '0s', // Delay centering when collapsing
+                  width: isCollapsed ? '100%' : 'auto',
                 }}
               >
                 {aboutUsItem.icon}
@@ -234,26 +239,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
               <Box
                 sx={{
                   opacity: isCollapsed ? 0 : 1,
-                  transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: isCollapsed ? 'translateX(-10px)' : 'translateX(0)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   overflow: 'hidden',
                   width: isCollapsed ? 0 : 'auto',
                   whiteSpace: 'nowrap',
+                  pointerEvents: isCollapsed ? 'none' : 'auto',
                 }}
               >
-                {!isCollapsed && (
-                  <ListItemText
-                    primary={aboutUsItem.label}
-                    sx={{
-                      margin: 0,
-                      '& .MuiListItemText-primary': {
-                        fontWeight: activeTab === aboutUsItem.id ? 600 : 500,
-                        color: activeTab === aboutUsItem.id ? 'primary.main' : 'text.primary',
-                        fontSize: '0.9rem',
-                        lineHeight: 1.2,
-                      },
-                    }}
-                  />
-                )}
+                <ListItemText
+                  primary={aboutUsItem.label}
+                  sx={{
+                    margin: 0,
+                    '& .MuiListItemText-primary': {
+                      fontWeight: activeTab === aboutUsItem.id ? 600 : 500,
+                      color: activeTab === aboutUsItem.id ? 'primary.main' : 'text.primary',
+                      fontSize: '0.9rem',
+                      lineHeight: 1.2,
+                    },
+                  }}
+                />
               </Box>
             </ListItemButton>
           </Tooltip>
@@ -268,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
       sx={{
         width: isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
         flexShrink: 0,
-        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         '& .MuiDrawer-paper': {
           width: isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
           height: '100vh',
@@ -277,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
           top: 0,
           left: 0,
           zIndex: (theme) => theme.zIndex.drawer,
-          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           border: 'none',
           background: 'transparent',
           overflow: 'hidden',

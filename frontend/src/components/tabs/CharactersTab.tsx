@@ -29,9 +29,6 @@ import {
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   Image as ImageIcon,
-  NavigateBefore as PrevIcon,
-  NavigateNext as NextIcon,
-  FiberManualRecord as DotIcon,
   Speed as SpeedIcon,
   Settings as SettingsIcon,
   Close as CloseIcon,
@@ -47,33 +44,26 @@ import {
   AudioFile as AudioFormatIcon,
   PhotoLibrary as PhotoLibraryIcon,
   AutoFixHigh as AutoFixHighIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { characterAPI, type Character, API_BASE_URL } from '../../services/api';
 import ConfirmDialog from '../ConfirmDialog';
 
-interface ImageCarouselProps {
+// Simple single image display component
+interface SingleImageDisplayProps {
   images: Record<string, string>;
   characterName: string;
+  imageOverride?: string; // For preview functionality
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, characterName }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+const SingleImageDisplay: React.FC<SingleImageDisplayProps> = ({ images, characterName, imageOverride }) => {
   const imageArray = Object.entries(images);
-  const totalImages = imageArray.length;
+  const hasImages = imageArray.length > 0;
+  
+  // Use override if provided, otherwise use first image
+  const imageUrl = imageOverride || (hasImages ? `${API_BASE_URL}${imageArray[0][1]}` : null);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % totalImages);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
-  };
-
-  const goToImage = (index: number) => {
-    setCurrentImageIndex(index);
-  };
-
-  if (totalImages === 0) {
+  if (!imageUrl) {
     return (
       <Box
         sx={{
@@ -93,111 +83,28 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, characterName }) 
   }
 
   return (
-    <Box sx={{ position: 'relative' }}>
-      {/* Main Image */}
-      <Box
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: 200,
+        borderRadius: 2,
+        overflow: 'hidden',
+        mb: 2,
+      }}
+    >
+      <CardMedia
+        component="img"
+        height="200"
+        image={imageUrl}
+        alt={`${characterName} - Image`}
         sx={{
-          position: 'relative',
           width: '100%',
-          height: 240,
-          borderRadius: 2,
-          overflow: 'hidden',
-          mb: 1,
+          height: '100%',
+          objectFit: 'contain', // Changed from 'cover' to 'contain' to show full image without cropping
+          backgroundColor: 'rgba(30, 41, 59, 0.3)', // Add background color for letterboxing
         }}
-      >
-        <CardMedia
-          component="img"
-          height="200"
-          image={`${API_BASE_URL}${imageArray[currentImageIndex][1]}`}
-          alt={`${characterName} - Image ${currentImageIndex + 1}`}
-          sx={{
-            objectFit: 'cover',
-            transition: 'all 0.3s ease-in-out',
-          }}
-        />
-        
-        {/* Navigation Arrows - Only show if more than 1 image */}
-        {totalImages > 1 && (
-          <>
-            <IconButton
-              onClick={prevImage}
-              disableRipple
-              sx={{
-                position: 'absolute',
-                left: 8,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  transform: 'translateY(-50%)',
-                },
-              }}
-              size="small"
-            >
-              <PrevIcon />
-            </IconButton>
-            <IconButton
-              onClick={nextImage}
-              disableRipple
-              sx={{
-                position: 'absolute',
-                right: 8,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  transform: 'translateY(-50%)',
-                },
-              }}
-              size="small"
-            >
-              <NextIcon />
-            </IconButton>
-            
-            {/* Image Counter - Only show if more than 1 image */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                color: 'white',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 2,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-              }}
-            >
-              {currentImageIndex + 1} / {totalImages}
-            </Box>
-          </>
-        )}
-      </Box>
-
-      {/* Dot Indicators - Always reserve space for consistent height */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, minHeight: 32 }}>
-        {totalImages > 1 && imageArray.map((_, index) => (
-          <IconButton
-            key={index}
-            onClick={() => goToImage(index)}
-            size="small"
-            sx={{ p: 0.5 }}
-          >
-            <DotIcon
-              sx={{
-                fontSize: 12,
-                color: index === currentImageIndex ? 'primary.main' : 'text.secondary',
-                transition: 'color 0.2s ease',
-              }}
-            />
-          </IconButton>
-        ))}
-      </Box>
+      />
     </Box>
   );
 };
@@ -223,6 +130,10 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
     nfeSteps: character.config.nfeSteps,
     crossFadeDuration: character.config.crossFadeDuration,
   });
+  
+  // Image update states
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   const handleStarToggle = async () => {
     setIsStarring(true);
@@ -264,10 +175,30 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
       nfeSteps: character.config.nfeSteps,
       crossFadeDuration: character.config.crossFadeDuration,
     });
+    // Clear image preview when cancelling
+    setPreviewImage(null);
+    setSelectedImageFile(null);
   };
 
   const handleEditValueChange = (field: string, value: number) => {
     setEditValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handle image upload for preview
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate that it's a PNG file
+      if (file.type !== 'image/png') {
+        alert('Only PNG format is accepted for transparency support');
+        return;
+      }
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+      setSelectedImageFile(file);
+    }
   };
 
   // Reset edit values when editing state changes
@@ -278,6 +209,12 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
         nfeSteps: character.config.nfeSteps,
         crossFadeDuration: character.config.crossFadeDuration,
       });
+      // Clear image preview when editing is closed
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+        setPreviewImage(null);
+      }
+      setSelectedImageFile(null);
     }
   }, [isEditing, character.config]);
 
@@ -289,17 +226,45 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
       formData.append('nfeSteps', editValues.nfeSteps.toString());
       formData.append('crossFadeDuration', editValues.crossFadeDuration.toString());
       
+      // If there's a new image, handle image replacement
+      if (selectedImageFile) {
+        // Remove all existing images
+        const existingImageKeys = Object.keys(character.images);
+        if (existingImageKeys.length > 0) {
+          formData.append('removeImageKeys', existingImageKeys.join(','));
+        }
+        
+        // Add the new image
+        formData.append('newImageFiles', selectedImageFile);
+      }
+      
       await characterAPI.updateCharacter(character.id, formData);
       
       // Update the character data dynamically
-      onUpdate(character.id, {
+      const updatedData: Partial<Character> = {
         config: {
           ...character.config,
           speed: editValues.speed,
           nfeSteps: editValues.nfeSteps,
           crossFadeDuration: editValues.crossFadeDuration,
         }
-      });
+      };
+      
+      // If image was updated, we need to refresh to get the new image URL from server
+      if (selectedImageFile) {
+        // For now, we'll trigger a full refresh by updating the character
+        // The actual new image URLs will come from the server response
+        window.location.reload(); // Simple approach to get updated image URLs
+      } else {
+        onUpdate(character.id, updatedData);
+      }
+      
+      // Clean up preview
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+        setPreviewImage(null);
+      }
+      setSelectedImageFile(null);
       
       onEditClose(character.id);
     } catch (error) {
@@ -314,7 +279,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
       <Card
         elevation={0}
         sx={{
-          minHeight: 360,
+          minHeight: 320,
           borderRadius: 3,
           background: 'rgba(30, 41, 59, 0.6)',
           backdropFilter: 'blur(20px)',
@@ -326,8 +291,12 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
         }}
       >
         <CardContent sx={{ p: 2 }}>
-          {/* Image Carousel */}
-          <ImageCarousel images={character.images} characterName={character.displayName} />
+          {/* Single Image Display */}
+          <SingleImageDisplay 
+            images={character.images} 
+            characterName={character.displayName}
+            imageOverride={previewImage || undefined} 
+          />
 
           {/* Header with Name and Star/Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, mt: 1 }}>
@@ -425,7 +394,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
           </Box>
 
           {/* Owner and Stats */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 1 }}>
             {character.isOwner ? (
               <Chip
                 size="small"
@@ -471,17 +440,6 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
                 fontWeight: 600,
               }}
             />
-
-            <Chip
-              size="small"
-              icon={<ImageIcon sx={{ fontSize: '14px !important', color: 'inherit' }} />}
-              label={character.imageCount}
-              sx={{
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                color: 'primary.main',
-                fontWeight: 600,
-              }}
-            />
           </Box>
 
           {/* Character Info */}
@@ -493,9 +451,64 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
               border: '1px solid rgba(99, 102, 241, 0.15)',
               mt: 2
             }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem', mb: 1 }}>
                 Edit Settings
               </Typography>
+              
+              {/* Image Update Section */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, fontSize: '0.75rem' }}>
+                  Update Image:
+                </Typography>
+                <Box
+                  component="label"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 2,
+                    cursor: 'pointer',
+                    border: '1px dashed rgba(99, 102, 241, 0.4)',
+                    borderRadius: '8px',
+                    background: 'rgba(99, 102, 241, 0.03)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      border: '1px dashed rgba(99, 102, 241, 0.6)',
+                      background: 'rgba(99, 102, 241, 0.08)',
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '6px',
+                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <EditIcon sx={{ fontSize: 16, color: 'white' }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', fontSize: '0.75rem' }}>
+                      {selectedImageFile ? 'Change Image' : 'Click to update image'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                      {selectedImageFile ? selectedImageFile.name : 'PNG format only'}
+                    </Typography>
+                  </Box>
+                  <input
+                    type="file"
+                    accept="image/png"
+                    onChange={handleImageUpload}
+                    disabled={isUpdating}
+                    style={{ display: 'none' }}
+                  />
+                </Box>
+              </Box>
               
               {/* Speed Slider */}
               <Box>
@@ -565,9 +578,9 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
                 <Slider
                   value={editValues.crossFadeDuration}
                   onChange={(_, value) => handleEditValueChange('crossFadeDuration', value as number)}
-                  min={0}
-                  max={1}
-                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  step={0.01}
                   size="small"
                   sx={{
                     height: 4,
@@ -588,8 +601,6 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onStarToggle, 
               </Box>
             </Box>
           )}
-
-
 
           {/* Delete Confirmation Dialog */}
           <ConfirmDialog
@@ -1634,7 +1645,7 @@ export const CharactersTab: React.FC = () => {
               key={idx}
               elevation={0}
               sx={{
-                minHeight: 360,
+                minHeight: 320,
                 borderRadius: 3,
                 background: 'rgba(30, 41, 59, 0.6)',
                 backdropFilter: 'blur(20px)',
@@ -1642,20 +1653,14 @@ export const CharactersTab: React.FC = () => {
               }}
             >
               <CardContent sx={{ p: 2 }}>
-                {/* Image Carousel Skeleton */}
+                {/* Image Skeleton */}
                 <Box sx={{ position: 'relative', mb: 2 }}>
                   <Skeleton 
                     variant="rectangular" 
                     width="100%" 
-                    height={240} 
-                    sx={{ borderRadius: 2, mb: 1 }} 
+                    height={200} 
+                    sx={{ borderRadius: 2 }} 
                   />
-                  {/* Dot indicators placeholder */}
-                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, minHeight: 32 }}>
-                    <Skeleton variant="circular" width={12} height={12} />
-                    <Skeleton variant="circular" width={12} height={12} />
-                    <Skeleton variant="circular" width={12} height={12} />
-                  </Box>
                 </Box>
 
                 {/* Header with Name and Action Buttons */}

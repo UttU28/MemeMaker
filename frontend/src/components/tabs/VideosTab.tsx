@@ -94,7 +94,7 @@ const DynamicProcessingMessage: React.FC<DynamicProcessingMessageProps> = ({ cur
       
       // Cycle through messages
       setCurrentMessageIndex((prev) => (prev + 1) % encouragingMessages.length);
-    }, 5000); // Change message every 3 seconds
+    }, 3000); // Change message every 3 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -637,7 +637,7 @@ export const VideosTab: React.FC = () => {
       if (hasActiveJobs) {
         fetchScripts(false); // Silent refresh without loader
       }
-    }, 5000); // Refresh every 3 seconds
+    }, 3000); // Refresh every 3 seconds
 
     return () => clearInterval(interval);
   }, [scripts.length]); // Only depend on scripts.length to avoid infinite loops

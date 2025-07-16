@@ -3,9 +3,11 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
+import io
 from fastapi import UploadFile, HTTPException
 from models import CharacterConfig
 from firebase_service import getFirebaseService
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +117,62 @@ def validateImageFile(file: UploadFile) -> bool:
         return False
     
     return True
+
+
+def trimImageTransparency(image_file: UploadFile) -> bytes:
+    """
+    Trim transparent/blank areas from uploaded image and return cropped image bytes.
+    
+    Args:
+        image_file: UploadFile containing the image
+        
+    Returns:
+        bytes: Cropped image data in PNG format
+    """
+    try:
+        # Read the uploaded file content
+        image_content = image_file.file.read()
+        image_file.file.seek(0)  # Reset file pointer for potential re-reading
+        
+        # Open image with PIL
+        image = Image.open(io.BytesIO(image_content))
+        
+        # Convert to RGBA if not already (to handle transparency)
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        
+        # Get the bounding box of non-transparent pixels
+        # getbbox() returns (left, top, right, bottom) of the non-zero pixels
+        bbox = image.getbbox()
+        
+        if bbox is None:
+            # Image is completely transparent, return original
+            logger.warning("⚠️ Image is completely transparent, returning original")
+            return image_content
+        
+        # Crop the image to the bounding box
+        cropped_image = image.crop(bbox)
+        
+        # Convert back to bytes
+        output_buffer = io.BytesIO()
+        cropped_image.save(output_buffer, format='PNG', optimize=True)
+        cropped_bytes = output_buffer.getvalue()
+        
+        # Log the trimming results
+        original_size = image.size
+        cropped_size = cropped_image.size
+        size_reduction = ((original_size[0] * original_size[1] - cropped_size[0] * cropped_size[1]) / 
+                         (original_size[0] * original_size[1])) * 100
+        
+        logger.info(f"✂️ Image trimmed: {original_size} → {cropped_size} ({size_reduction:.1f}% reduction)")
+        
+        return cropped_bytes
+        
+    except Exception as e:
+        logger.error(f"❌ Error trimming image: {str(e)}")
+        # Return original content if trimming fails
+        image_file.file.seek(0)
+        return image_file.file.read()
 
 def loadScripts(scriptsFile: str = None) -> Dict[str, Any]:
     try:

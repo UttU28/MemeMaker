@@ -201,21 +201,33 @@ export const Auth: React.FC = () => {
                   <ArrowBackIcon />
                 </Button>
 
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 800,
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    textAlign: 'center',
-                    flex: 1,
-                    mx: 2,
-                  }}
-                >
-                  MemeVoiceClone-inator
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}>
+                  <Box
+                    component="img"
+                    src="/doofenshmirtz-flipped.png"
+                    alt="Dr. Doofenshmirtz"
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid rgba(99, 102, 241, 0.3)',
+                      boxShadow: '0 0 10px rgba(99, 102, 241, 0.3)',
+                    }}
+                  />
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    MemeVoiceClone-inator
+                  </Typography>
+                </Box>
 
                 {/* Invisible spacer for balance */}
                 <Box sx={{ width: 48, height: 48 }} />

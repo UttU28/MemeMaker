@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, Fade } from '@mui/material';
-import { Dashboard as DashboardIcon } from '@mui/icons-material';
 
 interface LoadingScreenProps {
   message?: string;
@@ -86,7 +85,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               }}
             />
             
-            {/* Inner pulsing circle */}
+            {/* Inner pulsing circle with Doofenshmirtz image */}
             <Box
               sx={{
                 width: 60,
@@ -110,7 +109,17 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 },
               }}
             >
-              <DashboardIcon sx={{ fontSize: 32, color: 'white' }} />
+              <Box
+                component="img"
+                src="/doofenshmirtz-flipped.png"
+                alt="Dr. Doofenshmirtz"
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                }}
+              />
             </Box>
           </Box>
 

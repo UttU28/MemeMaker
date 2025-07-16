@@ -272,22 +272,58 @@ class VideoGenerator:
             print(f"🖼️ Added {validImages}/{len(timeline)} images")
             
             try:
-                filterParts.append(f"[0:v]scale=1080:1920:force_original_aspect_ratio=disable,setsar=1,trim=duration={totalDuration},setpts=PTS-STARTPTS[bg]")
+                # Video dimensions
+                video_width = 1080
+                video_height = 1920
+                
+                # Image positioning calculations  
+                target_image_height = int(video_height * 2 / 5)  # 2/5 of video height = 768px
+                image_bottom_position = int(video_height * 6 / 7)  # Bottom of image at 1/7 from bottom = 1646px
+                y_position = image_bottom_position - target_image_height  # Top of image = 1646 - 768 = 878px
+                left_x_position = 0  # Touch left edge completely
+                right_x_position = video_width  # Touch right edge (will subtract image width)
+                
+                filterParts.append(f"[0:v]scale={video_width}:{video_height}:force_original_aspect_ratio=disable,setsar=1,trim=duration={totalDuration},setpts=PTS-STARTPTS[bg]")
                 currentBase = "[bg]"
                 
                 overlayCount = 0
                 subtitleCount = 0
+                
+                print(f"🖼️ Image positioning: height={target_image_height}px, bottom_at={image_bottom_position}px (1/7 from bottom), top_y={y_position}px, left_x={left_x_position}px (touch edges)")
                 
                 for item in timeline:
                     lineIndex = item.get("lineIndex", 0)
                     
                     if lineIndex in imageInputs:
                         imgInput = imageInputs[lineIndex]
-                        filterParts.append(
-                            f"{currentBase}[{imgInput}:v]overlay=0:0:enable='between(t,{item['startTime']},{item['endTime']})'[overlay{overlayCount}]"
-                        )
+                        
+                        # Determine if this should be left or right positioned (alternating)
+                        # First dialogue should be LEFT, second should be RIGHT
+                        is_left_position = (lineIndex % 2 == 0)  # Even indices (0,2,4...) go left, odd (1,3,5...) go right
+                        print(f"🔍 Debug: lineIndex={lineIndex}, is_left_position={is_left_position}")
+                        
+                        if is_left_position:
+                            # Left positioning: scale image and place touching left edge
+                            filterParts.append(
+                                f"[{imgInput}:v]scale=-1:{target_image_height}[scaled_img_{overlayCount}]"
+                            )
+                            filterParts.append(
+                                f"{currentBase}[scaled_img_{overlayCount}]overlay={left_x_position}:{y_position}:enable='between(t,{item['startTime']},{item['endTime']})'[overlay{overlayCount}]"
+                            )
+                        else:
+                            # Right positioning: scale image and place touching right edge
+                            filterParts.append(
+                                f"[{imgInput}:v]scale=-1:{target_image_height}[scaled_img_{overlayCount}]"
+                            )
+                            filterParts.append(
+                                f"{currentBase}[scaled_img_{overlayCount}]overlay=main_w-overlay_w:{y_position}:enable='between(t,{item['startTime']},{item['endTime']})'[overlay{overlayCount}]"
+                            )
+                        
                         currentBase = f"[overlay{overlayCount}]"
                         overlayCount += 1
+                        
+                        position_side = "left" if is_left_position else "right"
+                        print(f"🎭 Line {lineIndex}: Positioned {position_side} (touching edge), bottom at {image_bottom_position}px (1/7 from bottom), top at {y_position}px")
                     
                     if "subtitleSegments" in item and item["subtitleSegments"]:
                         for segment in item["subtitleSegments"]:
@@ -306,7 +342,7 @@ class VideoGenerator:
                             currentBase = f"[sub{subtitleCount}]"
                             subtitleCount += 1
                 
-                print(f"🎭 Added {overlayCount} overlays, {subtitleCount} subtitles")
+                print(f"🎭 Added {overlayCount} positioned overlays (alternating left/right), {subtitleCount} subtitles")
                 
                 filterParts.append(f"{currentBase}setpts=PTS-STARTPTS[final_video]")
                 outputMapping = ['-map', '[final_video]', '-map', '1:a']
@@ -338,6 +374,10 @@ class VideoGenerator:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                 
                 if result.returncode != 0:
+                    print(f"❌ FFmpeg Error (return code {result.returncode}):")
+                    print(f"📝 STDERR: {result.stderr}")
+                    print(f"📝 STDOUT: {result.stdout}")
+                    logger.error(f"FFmpeg failed with return code {result.returncode}: {result.stderr}")
                     return (False, None)
                 
                 if not os.path.exists(outputVideo) or os.path.getsize(outputVideo) == 0:
