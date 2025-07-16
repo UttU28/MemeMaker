@@ -1239,15 +1239,16 @@ export const ScriptsTab: React.FC = () => {
       if (showLoader) {
         setLoading(true);
       }
-      const [scriptsResponse, myCharactersData, myFavoritesData] = await Promise.all([
+      
+      // Use combined endpoint to reduce API calls from 3 to 2
+      const [scriptsResponse, charactersData] = await Promise.all([
         scriptAPI.getMyScripts(),
-        characterAPI.getMyCharacters(),
-        characterAPI.getMyFavorites(),
+        characterAPI.getCharactersCombined(),
       ]);
       
       // Combine owned characters and favorites, avoiding duplicates
-      const combinedCharacters = [...myCharactersData];
-      myFavoritesData.forEach(favoriteChar => {
+      const combinedCharacters = [...charactersData.my_characters];
+      charactersData.my_favorites.forEach(favoriteChar => {
         // Only add if not already in the list (user hasn't favorited their own character)
         if (!combinedCharacters.some(char => char.id === favoriteChar.id)) {
           combinedCharacters.push(favoriteChar);

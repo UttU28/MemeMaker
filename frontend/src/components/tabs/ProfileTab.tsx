@@ -41,38 +41,28 @@ export const ProfileTab: React.FC = () => {
   const [loadingStats, setLoadingStats] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivities = async () => {
+  const fetchActivitiesAndStats = async () => {
     try {
       setLoadingActivities(true);
+      setLoadingStats(true);
       setError(null);
-      const response = await activityAPI.getMyActivities(10); // Get latest 10 activities
+      
+      // Use combined endpoint to reduce API calls from 2 to 1
+      const response = await activityAPI.getMyActivitiesCombined(10); // Get latest 10 activities
       setActivities(response.activities);
+      setActivityStats(response.stats);
     } catch (err) {
-      console.error('Error fetching activities:', err);
+      console.error('Error fetching activities and stats:', err);
       setError('Failed to load activities');
     } finally {
       setLoadingActivities(false);
-    }
-  };
-
-  const fetchActivityStats = async () => {
-    try {
-      setLoadingStats(true);
-      const stats = await activityAPI.getMyActivityStats();
-      setActivityStats(stats);
-    } catch (err) {
-      console.error('Error fetching activity stats:', err);
-    } finally {
       setLoadingStats(false);
     }
   };
 
-
-
   useEffect(() => {
     if (user) {
-      fetchActivities();
-      fetchActivityStats();
+      fetchActivitiesAndStats();
     }
   }, [user]);
 
@@ -387,7 +377,7 @@ export const ProfileTab: React.FC = () => {
             </Typography>
             <Tooltip title="Refresh Activities">
               <IconButton 
-                onClick={fetchActivities}
+                onClick={fetchActivitiesAndStats}
                 disabled={loadingActivities}
                 size="small"
                 sx={{ 
@@ -465,7 +455,7 @@ export const ProfileTab: React.FC = () => {
               severity="error" 
               sx={{ mb: 3 }}
               action={
-                <Button color="inherit" size="small" onClick={fetchActivities}>
+                <Button color="inherit" size="small" onClick={fetchActivitiesAndStats}>
                   Retry
                 </Button>
               }

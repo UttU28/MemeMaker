@@ -1527,10 +1527,15 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
         isOwner = script.get("createdBy") == currentUser['id']
         ownerInfo = " (Your script)" if isOwner else f" (Owner: {script.get('createdByName', 'Unknown')})"
         
+        # Get queue status before queuing
+        backgroundService = get_background_video_service()
+        queue_status = backgroundService.get_queue_status()
+        current_queue_size = queue_status['queue_size']
+        
         logger.info(f"🎥 Queuing video generation for script {scriptId}{ownerInfo} with {len(dialogueLines)} dialogue lines")
+        logger.info(f"📊 Current queue status: {current_queue_size} jobs waiting, Sequential processing mode")
         
         # Queue video generation job
-        backgroundService = get_background_video_service()
         jobId = await backgroundService.queue_video_generation(
             scriptId, currentUser['id'], backgroundVideo
         )
@@ -1548,14 +1553,15 @@ async def generateScriptVideo(scriptId: str, currentUser: dict = Depends(get_cur
             script.get("originalPrompt", "")[:50] + "..." if len(script.get("originalPrompt", "")) > 50 else script.get("originalPrompt", scriptId)
         )
         
-        logger.info(f"✅ Video generation job queued for script {scriptId} for user {currentUser['email']} (Job ID: {jobId})")
+        position_message = f"Position {current_queue_size + 1} in queue" if current_queue_size > 0 else "Processing next"
+        logger.info(f"✅ Video generation job queued for script {scriptId} for user {currentUser['email']} (Job ID: {jobId}) - {position_message}")
         
         # Convert to Pydantic model
         job = VideoGenerationJob(**job_data)
         
         return VideoGenerationJobResponse(
             job=job,
-            message=f"Video generation started successfully! Job ID: {jobId}"
+            message=f"Video generation queued successfully! Job ID: {jobId}. {position_message} (Sequential processing mode - one video at a time)"
         )
         
     except HTTPException:
@@ -1711,6 +1717,50 @@ async def get_my_characters(request: Request, current_user: dict = Depends(get_c
     except Exception as e:
         logger.error(f"💥 Error getting user characters: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get user's characters: {str(e)}")
+
+@app.get("/api/characters-combined", response_model=Dict[str, List[CharacterResponse]])
+async def get_characters_combined(request: Request, current_user: dict = Depends(get_current_user)):
+    """Get all characters, user's characters, and favorites in one API call"""
+    try:
+        firebase_service = getFirebaseService()
+        
+        # Load user profiles once (will use cache if available)
+        profiles = loadUserProfiles(USER_PROFILES_FILE)
+        users = profiles.get("users", {})
+        
+        # Get all characters
+        all_characters = []
+        for char_id, char_data in users.items():
+            character = build_character_response(char_id, char_data, request, current_user)
+            all_characters.append(character)
+        
+        # Get user's characters
+        user_characters = firebase_service.getUserCharacters(current_user['id'])
+        my_characters = []
+        for char_data in user_characters:
+            char_id = char_data['id']
+            character = build_character_response(char_id, char_data, request, current_user)
+            my_characters.append(character)
+        
+        # Get user's favorites
+        favorite_characters = firebase_service.getUserFavoriteCharacters(current_user['id'])
+        my_favorites = []
+        for char_data in favorite_characters:
+            char_id = char_data['id']
+            character = build_character_response(char_id, char_data, request, current_user)
+            my_favorites.append(character)
+        
+        logger.info(f"📄 Combined response: {len(all_characters)} all, {len(my_characters)} owned, {len(my_favorites)} favorites")
+        
+        return {
+            "all": all_characters,
+            "my_characters": my_characters,
+            "my_favorites": my_favorites
+        }
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting combined characters: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get characters: {str(e)}")
 
 @app.get("/api/my-scripts", response_model=MyScriptsResponse)
 async def getMyScripts(currentUser: dict = Depends(get_current_user)):
@@ -1929,48 +1979,45 @@ async def get_my_activities(current_user: dict = Depends(get_current_user), limi
 
 @app.get("/api/my-activity-stats", response_model=ActivityStats)
 async def get_my_activity_stats(current_user: dict = Depends(get_current_user)):
-    """Get current user's activity statistics"""
+    """Get current user's activity statistics (requires authentication)"""
     try:
         logger.info(f"📊 Getting activity stats for user {current_user['id']}")
         
         firebase_service = getFirebaseService()
-        activities_data = firebase_service.getUserActivities(current_user['id'], limit=None)  # Get all activities
+        stats = firebase_service.getUserActivityStats(current_user['id'])
         
-        script_activities = 0
-        character_activities = 0
-        video_activities = 0
-        last_activity_at = None
-        
-        for activity in activities_data:
-            activity_type = activity.get('type', '')
-            
-            if activity_type.startswith('script_'):
-                script_activities += 1
-            elif activity_type.startswith('character_'):
-                character_activities += 1
-            elif activity_type.startswith('video_'):
-                video_activities += 1
-            
-            # Get the most recent activity timestamp
-            timestamp = convert_datetime_to_string(activity.get('timestamp', ''))
-            if not last_activity_at or (timestamp > last_activity_at):
-                last_activity_at = timestamp
-        
-        total_activities = len(activities_data)
-        
-        logger.info(f"✅ Activity stats for user {current_user['id']}: {total_activities} total activities")
-        
-        return ActivityStats(
-            scriptActivities=script_activities,
-            characterActivities=character_activities,
-            videoActivities=video_activities,
-            totalActivities=total_activities,
-            lastActivityAt=last_activity_at
-        )
+        logger.info(f"✅ Activity stats for user {current_user['id']}: {stats.totalActivities} total activities")
+        return stats
         
     except Exception as e:
         logger.error(f"💥 Error getting activity stats: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get activity stats: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get activity statistics")
+
+@app.get("/api/my-activities-combined")
+async def get_my_activities_combined(
+    limit: int = 50, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user activities and stats in one API call"""
+    try:
+        logger.info(f"📋 Getting combined activities and stats for user {current_user['id']} (limit: {limit})")
+        
+        firebase_service = getFirebaseService()
+        
+        # Get both activities and stats
+        activities_response = firebase_service.getUserActivities(current_user['id'], limit)
+        stats = firebase_service.getUserActivityStats(current_user['id'])
+        
+        logger.info(f"✅ Combined response: {len(activities_response)} activities, {stats.totalActivities} total")
+        
+        return {
+            "activities": activities_response,
+            "stats": stats
+        }
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting combined activities: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get activities and stats")
 
 @app.delete("/api/my-activities")
 async def clear_my_activities(current_user: dict = Depends(get_current_user)):
@@ -2027,7 +2074,7 @@ async def getVideoGenerationJob(jobId: str, currentUser: dict = Depends(get_curr
 
 @app.get("/api/my-video-jobs", response_model=List[VideoGenerationJob])
 async def getMyVideoGenerationJobs(currentUser: dict = Depends(get_current_user), limit: int = 10):
-    """Get all video generation jobs for the current user"""
+    """Get all video generation jobs for the current user with queue position info"""
     try:
         logger.info(f"📋 User {currentUser['email']} requesting their video generation jobs (limit: {limit})")
         
@@ -2035,6 +2082,17 @@ async def getMyVideoGenerationJobs(currentUser: dict = Depends(get_current_user)
         jobs_data = firebaseService.getUserVideoGenerationJobs(currentUser['id'], limit)
         
         jobs = [VideoGenerationJob(**job_data) for job_data in jobs_data]
+        
+        # Add queue position for queued jobs
+        background_service = get_background_video_service()
+        queue_status = background_service.get_queue_status()
+        
+        for job in jobs:
+            if job.status == "queued":
+                # Estimate queue position (rough estimate)
+                job.message = f"Queued for processing (Sequential mode: {queue_status['queue_size']} jobs ahead)"
+            elif job.status == "in_progress" and job.jobId == queue_status.get("current_job_id"):
+                job.message = f"Currently processing: {job.currentStep}"
         
         logger.info(f"✅ Retrieved {len(jobs)} video generation jobs for user {currentUser['email']}")
         return jobs
@@ -2176,6 +2234,44 @@ async def mark_feedback_as_read(feedback_id: str, current_user: dict = Depends(g
     except Exception as e:
         logger.error(f"💥 Error marking feedback as read: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to mark feedback as read: {str(e)}")
+
+@app.get("/api/video-queue/status")
+async def get_video_queue_status(current_user: dict = Depends(get_current_user)):
+    """Get current video generation queue status"""
+    try:
+        logger.info(f"📊 User {current_user['email']} requesting video queue status")
+        
+        background_service = get_background_video_service()
+        queue_status = background_service.get_queue_status()
+        
+        # Get additional info from Firebase
+        firebase_service = getFirebaseService()
+        active_jobs_details = []
+        
+        for job_id in queue_status.get("active_jobs", []):
+            job_data = firebase_service.getVideoGenerationJob(job_id)
+            if job_data:
+                active_jobs_details.append({
+                    "jobId": job_id,
+                    "scriptId": job_data.get("scriptId"),
+                    "status": job_data.get("status"),
+                    "currentStep": job_data.get("currentStep"),
+                    "overallProgress": job_data.get("overallProgress", 0.0),
+                    "createdAt": job_data.get("createdAt")
+                })
+        
+        result = {
+            **queue_status,
+            "active_jobs_details": active_jobs_details,
+            "message": "Sequential video processing (one at a time)" if queue_status.get("is_processing") else "Queue processor not running"
+        }
+        
+        logger.info(f"✅ Queue status for {current_user['email']}: {queue_status['queue_size']} queued, {len(active_jobs_details)} active")
+        return result
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting video queue status for {current_user['email']}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get queue status: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")

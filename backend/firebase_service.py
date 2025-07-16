@@ -1004,6 +1004,7 @@ class FirebaseService:
         # Video Activities
         VIDEO_GENERATION_STARTED = "video_generation_started"
         VIDEO_GENERATION_COMPLETED = "video_generation_completed"
+        VIDEO_GENERATION_FAILED = "video_generation_failed"
         
         # Token Activities
         TOKEN_DEDUCTED = "token_deducted"
@@ -1076,6 +1077,58 @@ class FirebaseService:
         except Exception as e:
             logger.error(f"💥 Error getting activities for user {userId}: {str(e)}")
             return []
+
+    def getUserActivityStats(self, userId: str):
+        """Get user's activity statistics"""
+        try:
+            from models import ActivityStats
+            
+            userRef = self.db.collection('users').document(userId)
+            userDoc = userRef.get()
+            
+            if not userDoc.exists:
+                logger.warning(f"⚠️ User {userId} not found for activity stats")
+                return ActivityStats()
+            
+            userData = userDoc.to_dict()
+            activities = userData.get('activities', [])
+            
+            script_activities = 0
+            character_activities = 0
+            video_activities = 0
+            last_activity_at = None
+            
+            for activity in activities:
+                activity_type = activity.get('type', '')
+                
+                if activity_type.startswith('script_'):
+                    script_activities += 1
+                elif activity_type.startswith('character_'):
+                    character_activities += 1
+                elif activity_type.startswith('video_') or activity_type.startswith('token_'):
+                    video_activities += 1
+                
+                # Get the most recent activity timestamp
+                timestamp = activity.get('timestamp', '')
+                if not last_activity_at or (timestamp > last_activity_at):
+                    last_activity_at = timestamp
+            
+            total_activities = len(activities)
+            
+            logger.info(f"📊 Activity stats for user {userId}: {total_activities} total activities")
+            
+            return ActivityStats(
+                scriptActivities=script_activities,
+                characterActivities=character_activities,
+                videoActivities=video_activities,
+                totalActivities=total_activities,
+                lastActivityAt=last_activity_at
+            )
+            
+        except Exception as e:
+            logger.error(f"💥 Error getting activity stats for user {userId}: {str(e)}")
+            from models import ActivityStats
+            return ActivityStats()
 
     def clearUserActivities(self, userId: str) -> bool:
         """Clear all activities for a specific user"""
@@ -1447,6 +1500,76 @@ class FirebaseService:
         except Exception as e:
             logger.error(f"💥 Error getting active video generation jobs: {str(e)}")
             return []
+
+    def cleanupIncompleteJobsOnStartup(self) -> int:
+        """Mark all incomplete (queued/in_progress) video generation jobs as failed on backend startup"""
+        try:
+            logger.info("🧹 Starting cleanup of incomplete video generation jobs...")
+            
+            # Get all incomplete jobs
+            incompleteJobs = self.getActiveVideoGenerationJobs()
+            
+            if not incompleteJobs:
+                logger.info("✅ No incomplete video generation jobs found")
+                return 0
+            
+            failed_count = 0
+            startup_time = datetime.now().isoformat()
+            
+            for job in incompleteJobs:
+                job_id = job.get('jobId')
+                script_id = job.get('scriptId')
+                user_id = job.get('userId')
+                old_status = job.get('status')
+                
+                logger.info(f"🔄 Marking job {job_id} as failed (was: {old_status})")
+                
+                try:
+                    # Mark job as failed in Firebase
+                    success = self.failVideoGenerationJob(
+                        job_id, 
+                        f"Backend restarted while job was {old_status}. Please retry video generation."
+                    )
+                    
+                    if success:
+                        failed_count += 1
+                        
+                        # Also update the associated script to reflect the failure
+                        if script_id:
+                            script = self.getScript(script_id)
+                            if script and script.get('currentVideoJobId') == job_id:
+                                script.update({
+                                    'videoJobStatus': 'failed',
+                                    'videoJobErrorMessage': f'Backend restarted while job was {old_status}',
+                                    'videoJobCompletedAt': startup_time,
+                                    'updatedAt': startup_time
+                                })
+                                self.saveScript(script_id, script)
+                                logger.info(f"✅ Updated script {script_id} with failure status")
+                        
+                        # Log activity for user
+                        if user_id:
+                            self.addVideoActivity(
+                                user_id,
+                                self.ActivityType.VIDEO_GENERATION_FAILED,
+                                script_id,
+                                f"Job failed due to backend restart (was {old_status})"
+                            )
+                        
+                        logger.info(f"✅ Successfully marked job {job_id} as failed")
+                    else:
+                        logger.error(f"❌ Failed to mark job {job_id} as failed")
+                        
+                except Exception as job_error:
+                    logger.error(f"💥 Error processing job {job_id}: {str(job_error)}")
+                    continue
+            
+            logger.info(f"🧹 Cleanup completed: {failed_count}/{len(incompleteJobs)} jobs marked as failed")
+            return failed_count
+            
+        except Exception as e:
+            logger.error(f"💥 Error during startup cleanup: {str(e)}")
+            return 0
 
 firebaseService = None
 

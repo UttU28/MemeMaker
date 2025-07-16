@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor
-from threading import Thread
+from threading import Thread, Lock
 import threading
 import queue
 
@@ -21,18 +21,23 @@ logger = logging.getLogger(__name__)
 
 class BackgroundVideoService:
     def __init__(self):
-        self.executor = ThreadPoolExecutor(max_workers=2)  # Limit concurrent video generations
+        # CHANGED: Use only 1 worker for sequential processing
+        self.executor = ThreadPoolExecutor(max_workers=1)  # Process videos one at a time
         self.active_jobs = {}
         self.job_queue = queue.Queue()  # Thread-safe queue
         self.processing_jobs = set()  # Track jobs being processed
         self.stop_event = threading.Event()  # Stop event for graceful shutdown
         self.is_processing = False
+        self.current_job_id = None  # Track currently processing job
+        self.queue_lock = Lock()  # Thread-safe queue operations
         
     async def start_background_processor(self):
-        """Start processing video generation jobs in the background"""
-        logger.info("🚀 Starting background video processor...")
+        """Start processing video generation jobs in the background - ONE AT A TIME"""
+        logger.info("🚀 Starting background video processor (SEQUENTIAL MODE)...")
+        self.is_processing = True
         
         while not self.stop_event.is_set():
+            job_id = None  # Initialize job_id to avoid UnboundLocalError
             try:
                 # Get job from queue (with timeout)
                 try:
@@ -41,10 +46,24 @@ class BackgroundVideoService:
                     continue  # Queue is empty, continue loop
                 
                 if job_id in self.processing_jobs:
+                    logger.warning(f"⚠️ Job {job_id} already being processed, skipping")
                     continue  # Job already being processed
                 
-                # Add to processing set
-                self.processing_jobs.add(job_id)
+                # CRITICAL: Check if any job is currently being processed
+                with self.queue_lock:
+                    if self.current_job_id is not None:
+                        logger.warning(f"⚠️ Another job {self.current_job_id} is still processing, requeueing {job_id}")
+                        self.job_queue.put(job_id)  # Put job back in queue
+                        await asyncio.sleep(2)  # Wait before checking again
+                        continue
+                        
+                    # Add to processing set
+                    self.processing_jobs.add(job_id)
+                    self.current_job_id = job_id
+                
+                # Get queue status for logging
+                queue_size = self.job_queue.qsize()
+                logger.info(f"🎬 Processing job {job_id} (Queue: {queue_size} remaining)")
                 
                 # Get job data from Firebase
                 firebase_service = getFirebaseService()
@@ -52,15 +71,27 @@ class BackgroundVideoService:
                 
                 if not job_data:
                     logger.error(f"❌ Job {job_id} not found in database")
-                    self.processing_jobs.discard(job_id)
+                    with self.queue_lock:
+                        self.processing_jobs.discard(job_id)
+                        self.current_job_id = None
                     continue
                 
-                # Process the job
+                # Process the job (this will block until completion)
                 await self._process_video_generation_job(job_data)
+                
+                # Mark job as done in queue
+                self.job_queue.task_done()
+                logger.info(f"✅ Completed job {job_id}")
                 
             except Exception as e:
                 logger.error(f"💥 Background processor error: {str(e)}")
                 await asyncio.sleep(1)  # Wait before continuing
+            finally:
+                # Always clean up current job tracking
+                with self.queue_lock:
+                    if job_id:
+                        self.processing_jobs.discard(job_id)
+                    self.current_job_id = None
         
         logger.info("🛑 Background video processor stopped")
     
@@ -69,6 +100,17 @@ class BackgroundVideoService:
         self.is_processing = False
         self.stop_event.set()  # Signal the processor to stop
         logger.info("🛑 Stopped background video processor")
+    
+    def get_queue_status(self) -> Dict[str, Any]:
+        """Get current queue status"""
+        with self.queue_lock:
+            return {
+                "queue_size": self.job_queue.qsize(),
+                "is_processing": self.is_processing,
+                "current_job_id": self.current_job_id,
+                "processing_jobs_count": len(self.processing_jobs),
+                "active_jobs": list(self.processing_jobs)
+            }
     
     async def queue_video_generation(self, script_id: str, user_id: str, background_video: Optional[str] = None) -> str:
         """Queue a new video generation job"""
@@ -109,9 +151,11 @@ class BackgroundVideoService:
         firebase_service.saveScript(script_id, {**script, **script_updates})
         
         # Add to active jobs queue
-        self.job_queue.put(job_id)
+        with self.queue_lock:
+            self.job_queue.put(job_id)
+            queue_position = self.job_queue.qsize()
         
-        logger.info(f"✅ Queued video generation job: {job_id} for script {script_id}")
+        logger.info(f"✅ Queued video generation job: {job_id} for script {script_id} (Position: {queue_position} in queue)")
         return job_id
     
     async def _process_video_generation_job(self, job_data: Dict[str, Any]):
@@ -219,7 +263,9 @@ class BackgroundVideoService:
                 
         finally:
             # Always remove from processing set
-            self.processing_jobs.discard(job_id)
+            with self.queue_lock:
+                self.processing_jobs.discard(job_id)
+                self.current_job_id = None
     
     def _update_script_progress(self, script_id: str, status: str, progress: float, current_step: str = None):
         """Update script document with current video generation progress"""
@@ -283,12 +329,12 @@ class BackgroundVideoService:
             raise
     
     async def _step_audio_generation(self, job_id: str, script_id: str):
-        """Step 2: Generate missing audio files"""
+        """Step 2: Generate missing audio files - SEQUENTIAL F5-TTS ACCESS"""
         firebase_service = getFirebaseService()
         
         try:
             firebase_service.updateVideoGenerationJobProgress(
-                job_id, 'audio_generation', 'in_progress', 10.0, 'Generating audio files...'
+                job_id, 'audio_generation', 'in_progress', 10.0, 'Connecting to F5-TTS...'
             )
             self._update_script_progress(script_id, 'in_progress', 25.0, 'audio_generation')
             
@@ -296,38 +342,58 @@ class BackgroundVideoService:
             scripts_data = firebase_service.getAllScripts()
             user_profiles = loadUserProfiles("apiData/userProfiles.json")
             
+            # Log F5-TTS connection attempt
+            logger.info(f"🔌 Job {job_id}: Connecting to F5-TTS (EXCLUSIVE ACCESS)")
+            
             # Define progress callback
             def audio_progress_callback(progress_percent: float, message: str):
                 # Map 0-100% audio progress to 10-90% within the audio generation step
                 mapped_progress = 10.0 + (progress_percent * 0.8)  # 10% to 90%
                 firebase_service.updateVideoGenerationJobProgress(
-                    job_id, 'audio_generation', 'in_progress', mapped_progress, message
+                    job_id, 'audio_generation', 'in_progress', mapped_progress, f"🎤 {message}"
                 )
                 # Overall progress: audio generation is 25-70%, so map accordingly for better granularity
                 overall_progress = 25.0 + (progress_percent * 0.45)  # 25% to 70%
                 self._update_script_progress(script_id, 'in_progress', overall_progress, 'audio_generation')
+                
+                # Log progress for sequential processing
+                if progress_percent % 25 == 0:  # Log every 25%
+                    logger.info(f"🎵 Job {job_id}: Audio generation {progress_percent:.0f}% - {message}")
             
-            # Generate audio with progress tracking
+            # Generate audio with progress tracking - SINGLE CONNECTION
             from app import GENERATED_AUDIO_DIR
+            logger.info(f"🎤 Job {job_id}: Starting audio generation with F5-TTS")
+            
             result = await generateAudioForScript(
                 script_id, scripts_data, user_profiles, GENERATED_AUDIO_DIR, audio_progress_callback
             )
             
-            # Save updated scripts data
-            firebase_service.saveScripts(scripts_data)
+            if result.status != "completed":
+                if result.status == "partial":
+                    firebase_service.updateVideoGenerationJobProgress(
+                        job_id, 'audio_generation', 'completed', 90.0, 
+                        f"⚠️ Partial success: {result.completedLines}/{result.totalLines} lines"
+                    )
+                    logger.warning(f"⚠️ Job {job_id}: Partial audio generation - {result.message}")
+                else:
+                    raise Exception(f"Audio generation failed: {result.message}")
+            else:
+                firebase_service.updateVideoGenerationJobProgress(
+                    job_id, 'audio_generation', 'completed', 100.0, 
+                    f"✅ Generated audio for {result.completedLines} lines"
+                )
+                logger.info(f"✅ Job {job_id}: Audio generation completed successfully")
             
-            firebase_service.updateVideoGenerationJobProgress(
-                job_id, 'audio_generation', 'completed', 100.0, 
-                f'Generated audio: {result.message}',
-                overallProgress=70.0, currentStep='timeline_creation'
-            )
-            self._update_script_progress(script_id, 'in_progress', 70.0, 'timeline_creation')
+            self._update_script_progress(script_id, 'in_progress', 70.0, 'audio_generation')
+            firebase_service.saveScript(script_id, scripts_data["scripts"][script_id])
             
         except Exception as e:
+            error_message = f"Audio generation failed: {str(e)}"
+            logger.error(f"💥 Job {job_id}: {error_message}")
             firebase_service.updateVideoGenerationJobProgress(
-                job_id, 'audio_generation', 'failed', 0.0, str(e)
+                job_id, 'audio_generation', 'failed', 0.0, error_message
             )
-            self._update_script_progress(script_id, 'failed', 70.0)
+            self._update_script_progress(script_id, 'failed', 0.0)
             raise
     
     async def _step_timeline_creation(self, job_id: str, script_id: str):
@@ -463,20 +529,41 @@ def get_background_video_service() -> BackgroundVideoService:
 
 def initialize_background_video_service():
     """Initialize and start the background video service"""
+    global background_video_service
+    
+    # Prevent multiple initialization in development mode
+    if background_video_service is not None and background_video_service.is_processing:
+        logger.info("⚠️ Background video service already running, skipping initialization")
+        return
+        
     service = get_background_video_service()
     
-    # Start background processor in a separate thread
-    def run_processor():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(service.start_background_processor())
-        except Exception as e:
-            logger.error(f"💥 Background processor error: {str(e)}")
-        finally:
-            loop.close()
+    # First, cleanup any incomplete jobs from previous backend instance
+    try:
+        firebase_service = getFirebaseService()
+        failed_jobs_count = firebase_service.cleanupIncompleteJobsOnStartup()
+        if failed_jobs_count > 0:
+            logger.info(f"🧹 Marked {failed_jobs_count} incomplete video jobs as failed on startup")
+        else:
+            logger.info("✅ No incomplete video jobs found during startup cleanup")
+    except Exception as e:
+        logger.error(f"💥 Error during startup cleanup: {str(e)}")
     
-    processor_thread = Thread(target=run_processor, daemon=True)
-    processor_thread.start()
-    
-    logger.info("🚀 Background video service initialized") 
+    # Only start if not already processing
+    if not service.is_processing:
+        # Start background processor in a separate thread
+        def run_processor():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(service.start_background_processor())
+            except Exception as e:
+                logger.error(f"💥 Background processor error: {str(e)}")
+            finally:
+                loop.close()
+        
+        processor_thread = Thread(target=run_processor, daemon=True)
+        processor_thread.start()
+        logger.info("🚀 Background video service initialized")
+    else:
+        logger.info("⚠️ Background processor already running, skipping thread creation") 

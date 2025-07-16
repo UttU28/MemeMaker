@@ -176,6 +176,16 @@ export const characterAPI = {
     return response.data;
   },
 
+  // New combined endpoint to reduce API calls
+  getCharactersCombined: async (): Promise<{
+    all: Character[];
+    my_characters: Character[];
+    my_favorites: Character[];
+  }> => {
+    const response = await api.get('/api/characters-combined');
+    return response.data;
+  },
+
   starCharacter: async (characterId: string): Promise<StarResponse> => {
     const response = await api.post(`/api/characters/${characterId}/star`);
     return response.data;
@@ -313,6 +323,15 @@ export const activityAPI = {
 
   getMyActivityStats: async (): Promise<ActivityStats> => {
     const response = await api.get<ActivityStats>('/api/my-activity-stats');
+    return response.data;
+  },
+
+  // New combined endpoint to reduce API calls
+  getMyActivitiesCombined: async (limit: number = 50): Promise<{
+    activities: UserActivity[];
+    stats: ActivityStats;
+  }> => {
+    const response = await api.get(`/api/my-activities-combined?limit=${limit}`);
     return response.data;
   },
 

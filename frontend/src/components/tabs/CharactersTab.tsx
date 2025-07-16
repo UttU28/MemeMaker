@@ -1450,45 +1450,17 @@ export const CharactersTab: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCharacterId, setEditingCharacterId] = useState<string | null>(null);
 
-  const fetchAllCharacters = async () => {
-    try {
-      const data = await characterAPI.getAllCharacters();
-      setAllCharacters(data);
-    } catch (err) {
-      console.error('Error fetching all characters:', err);
-      throw err;
-    }
-  };
-
-  const fetchMyCharacters = async () => {
-    try {
-      const data = await characterAPI.getMyCharacters();
-      setMyCharacters(data);
-    } catch (err) {
-      console.error('Error fetching my characters:', err);
-      throw err;
-    }
-  };
-
-  const fetchMyFavorites = async () => {
-    try {
-      const data = await characterAPI.getMyFavorites();
-      setMyFavorites(data);
-    } catch (err) {
-      console.error('Error fetching my favorites:', err);
-      throw err;
-    }
-  };
-
   const fetchCharacters = async () => {
     try {
       setLoading(true);
       setError(null);
-      await Promise.all([
-        fetchAllCharacters(),
-        fetchMyCharacters(),
-        fetchMyFavorites(),
-      ]);
+      
+      // Use combined endpoint to reduce API calls from 3 to 1
+      const combinedData = await characterAPI.getCharactersCombined();
+      setAllCharacters(combinedData.all);
+      setMyCharacters(combinedData.my_characters);
+      setMyFavorites(combinedData.my_favorites);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch characters');
       console.error('Error fetching characters:', err);

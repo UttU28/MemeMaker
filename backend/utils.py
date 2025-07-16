@@ -1,8 +1,8 @@
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import io
 from fastapi import UploadFile, HTTPException
 from models import CharacterConfig
@@ -11,8 +11,33 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
+# Simple in-memory cache for user profiles
+_user_profiles_cache: Optional[Dict[str, Any]] = None
+_cache_timestamp: Optional[datetime] = None
+CACHE_DURATION_MINUTES = 5  # Cache for 5 minutes
+
+def _is_cache_valid() -> bool:
+    """Check if the cache is still valid"""
+    if _user_profiles_cache is None or _cache_timestamp is None:
+        return False
+    
+    return datetime.now() - _cache_timestamp < timedelta(minutes=CACHE_DURATION_MINUTES)
+
+def _clear_cache():
+    """Clear the cache"""
+    global _user_profiles_cache, _cache_timestamp
+    _user_profiles_cache = None
+    _cache_timestamp = None
+
 def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
+    global _user_profiles_cache, _cache_timestamp
+    
     try:
+        # Return cached data if available and valid
+        if _is_cache_valid():
+            logger.debug(f"📋 Using cached user profiles ({len(_user_profiles_cache.get('users', {}))} profiles)")
+            return _user_profiles_cache
+        
         firebase_service = getFirebaseService()
         profiles_data = firebase_service.getAllUserProfiles()
         
@@ -34,6 +59,10 @@ def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
                 "createdAt": datetime.now().isoformat() + 'Z'
             }
             firebase_service.saveUserProfiles(defaultData)
+            
+            # Cache the default data
+            _user_profiles_cache = defaultData
+            _cache_timestamp = datetime.now()
             return defaultData
         
         if "default" not in profiles_data:
@@ -49,6 +78,11 @@ def loadUserProfiles(userProfilesFile: str = None) -> Dict[str, Any]:
                 "defaultOutputPrefix": "defaultGenerated"
             }
         
+        # Cache the profiles data
+        _user_profiles_cache = profiles_data
+        _cache_timestamp = datetime.now()
+        logger.info(f"📋 Loaded and cached {len(profiles_data.get('users', {}))} user profiles")
+        
         return profiles_data
     except Exception as e:
         logger.error(f"💥 Failed to load user profiles: {str(e)}")
@@ -61,6 +95,10 @@ def saveUserProfiles(data: Dict[str, Any], userProfilesFile: str = None) -> None
         
         if not success:
             raise Exception("Failed to save user profiles to Firebase")
+        
+        # Clear cache after saving to ensure fresh data on next load
+        _clear_cache()
+        logger.info("🗑️ Cleared user profiles cache after save")
             
     except Exception as e:
         logger.error(f"💥 Failed to save user profiles: {str(e)}")
