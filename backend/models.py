@@ -249,3 +249,37 @@ class UserFeedbackResponse(BaseModel):
     success: bool
     message: str
     feedbackId: Optional[str] = None
+
+
+# Admin Dashboard Models
+
+class AdminStats(BaseModel):
+    totalUsers: int = 0
+    totalCharacters: int = 0
+    totalScripts: int = 0
+    totalVideos: int = 0
+    totalTokens: int = 0
+    tokensUsedToday: int = 0
+    newUsersToday: int = 0
+    charactersCreatedToday: int = 0
+    scriptsGeneratedToday: int = 0
+    videosCreatedToday: int = 0
+    topTokenUser: Optional[Dict[str, Any]] = None
+    averageTokensPerUser: float = 0.0
+
+
+class RecentUser(BaseModel):
+    id: str
+    name: str
+    email: str
+    createdAt: str
+    tokens: int
+    lastActivity: Optional[str] = None
+
+
+class SystemAlert(BaseModel):
+    id: str
+    type: str  # 'warning', 'error', 'info', 'success'
+    message: str
+    timestamp: str
+    severity: str = "medium"  # 'low', 'medium', 'high'

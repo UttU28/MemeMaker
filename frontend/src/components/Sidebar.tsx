@@ -19,7 +19,10 @@ import {
   VideoLibrary as VideoIcon,
   ChevronLeft as ChevronLeftIcon,
   Info as InfoIcon,
+  AdminPanelSettings as AdminIcon,
+  AccountTree as FlowIcon,
 } from '@mui/icons-material';
+import { useAuth } from '../hooks/useAuth';
 
 interface SidebarProps {
   activeTab: string;
@@ -33,6 +36,10 @@ export const SIDEBAR_WIDTH = 280;
 export const SIDEBAR_COLLAPSED_WIDTH = 73;
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isCollapsed, onToggleCollapse }) => {
+  const { user } = useAuth();
+
+  // Check if user has admin privileges
+  const isAdmin = user?.subscription === 'ADMI';
 
   const menuItems = [
     {
@@ -55,7 +62,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
       label: 'Videos',
       icon: <VideoIcon />,
     },
+    {
+      id: 'flow',
+      label: 'Flow',
+      icon: <FlowIcon />,
+    },
   ];
+
+  const adminItem = {
+    id: 'admin',
+    label: 'Admin',
+    icon: <AdminIcon />,
+  };
 
   const aboutUsItem = {
     id: 'about',
@@ -191,8 +209,83 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isColl
         ))}
       </List>
 
-      {/* About Us Section - Bottom */}
+      {/* Admin and About Us Section - Bottom */}
       <Box sx={{ px: 1, pb: 2 }}>
+        {/* Admin Item - Only show for admin users */}
+        {isAdmin && (
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <Tooltip
+              title={isCollapsed ? adminItem.label : ''}
+              placement="right"
+              arrow
+            >
+              <ListItemButton
+                selected={activeTab === adminItem.id}
+                onClick={() => onTabChange(adminItem.id)}
+                sx={{
+                  borderRadius: 2,
+                  minHeight: 48,
+                  px: isCollapsed ? 1.5 : 2,
+                  py: 1.5,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  justifyContent: 'flex-start',
+                  '&:hover': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderLeft: isCollapsed ? 'none' : '3px solid #6366f1',
+                    border: isCollapsed ? '2px solid #6366f1' : 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(99, 102, 241, 0.25)',
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: isCollapsed ? 'auto' : 40,
+                    color: activeTab === adminItem.id ? 'primary.main' : 'text.secondary',
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                    mr: isCollapsed ? 0 : 2,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transitionDelay: isCollapsed ? '0.15s' : '0s', // Delay centering when collapsing
+                    width: isCollapsed ? '100%' : 'auto',
+                  }}
+                >
+                  {adminItem.icon}
+                </ListItemIcon>
+                <Box
+                  sx={{
+                    opacity: isCollapsed ? 0 : 1,
+                    transform: isCollapsed ? 'translateX(-10px)' : 'translateX(0)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    overflow: 'hidden',
+                    width: isCollapsed ? 0 : 'auto',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: isCollapsed ? 'none' : 'auto',
+                  }}
+                >
+                  <ListItemText
+                    primary={adminItem.label}
+                    sx={{
+                      margin: 0,
+                      '& .MuiListItemText-primary': {
+                        fontWeight: activeTab === adminItem.id ? 600 : 500,
+                        color: activeTab === adminItem.id ? 'primary.main' : 'text.primary',
+                        fontSize: '0.9rem',
+                        lineHeight: 1.2,
+                      },
+                    }}
+                  />
+                </Box>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+
+        {/* About Us Item */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <Tooltip
             title={isCollapsed ? aboutUsItem.label : ''}

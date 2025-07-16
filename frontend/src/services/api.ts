@@ -62,6 +62,83 @@ export interface AuthResponse {
   expiresIn?: number;
 }
 
+// Admin Dashboard interfaces
+export interface SystemStatus {
+  status: string;
+  totalCharacters: number;
+  timestamp: string;
+  apiDataDir: string;
+}
+
+export interface ServiceStatus {
+  status: string;
+  url?: string;
+  message?: string;
+  timestamp: string;
+  error?: string;
+}
+
+export interface VideoQueueStatus {
+  queue_size: number;
+  is_processing: boolean;
+  current_job_id: string | null;
+  processing_jobs_count: number;
+  active_jobs: string[];
+  active_jobs_details: Array<{
+    jobId: string;
+    scriptId: string;
+    status: string;
+    currentStep: string;
+    overallProgress: number;
+    createdAt: string;
+  }>;
+  message: string;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalCharacters: number;
+  totalScripts: number;
+  totalVideos: number;
+  totalTokens: number;
+  tokensUsedToday: number;
+  newUsersToday: number;
+  charactersCreatedToday: number;
+  scriptsGeneratedToday: number;
+  videosCreatedToday: number;
+  topTokenUser: {
+    name: string;
+    email: string;
+    tokens: number;
+  } | null;
+  averageTokensPerUser: number;
+}
+
+export interface RecentUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  tokens: number;
+  lastActivity?: string;
+}
+
+export interface SystemAlert {
+  id: string;
+  type: 'warning' | 'error' | 'info' | 'success';
+  message: string;
+  timestamp: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+export interface UserFeedback {
+  userName: string;
+  userEmail: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 // Character interfaces
 export interface CharacterConfig {
   speed: number;
@@ -98,25 +175,14 @@ export interface StarResponse {
 
 // Auth API
 export const authAPI = {
-  signup: async (data: SignupRequest): Promise<AuthResponse> => {
-    const response = await api.post('/api/signup', data);
-    return response.data;
-  },
-
-  login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await api.post('/api/login', data);
-    return response.data;
-  },
-
-  getCurrentUser: async (): Promise<User> => {
-    const response = await api.get('/api/me');
-    return response.data;
-  },
-
-  refreshToken: async (): Promise<AuthResponse> => {
-    const response = await api.post('/api/refresh-token');
-    return response.data;
-  },
+  signup: (data: SignupRequest): Promise<AuthResponse> =>
+    api.post('/api/signup', data).then(res => res.data),
+  
+  login: (data: LoginRequest): Promise<AuthResponse> =>
+    api.post('/api/login', data).then(res => res.data),
+  
+  getCurrentUser: (): Promise<User> =>
+    api.get('/api/me').then(res => res.data),
 };
 
 // Script interfaces
@@ -408,6 +474,55 @@ export const feedbackAPI = {
     const response = await api.post('/api/feedback', { message });
     return response.data;
   },
+};
+
+// Admin API functions
+export const adminAPI = {
+  // System Status
+  getSystemStatus: (): Promise<SystemStatus> =>
+    api.get('/api/system/status').then(res => res.data),
+  
+  getF5TTSStatus: (): Promise<ServiceStatus> =>
+    api.get('/api/f5tts/status').then(res => res.data),
+  
+  getFFmpegStatus: (): Promise<ServiceStatus> =>
+    api.get('/api/system/ffmpeg-status').then(res => res.data),
+  
+  // Statistics
+  getAdminStats: (): Promise<AdminStats> =>
+    api.get('/api/admin/stats').then(res => res.data),
+  
+  // Video Queue
+  getVideoQueueStatus: (): Promise<VideoQueueStatus> =>
+    api.get('/api/video-queue/status').then(res => res.data),
+  
+  // Recent Users
+  getRecentUsers: (limit: number = 10): Promise<RecentUser[]> =>
+    api.get(`/api/admin/recent-users?limit=${limit}`).then(res => res.data),
+  
+  // System Alerts
+  getSystemAlerts: (limit: number = 10): Promise<SystemAlert[]> =>
+    api.get(`/api/admin/alerts?limit=${limit}`).then(res => res.data),
+  
+  // User Feedback
+  getUserFeedback: (limit: number = 50): Promise<UserFeedback[]> =>
+    api.get(`/api/admin/feedback?limit=${limit}`).then(res => res.data),
+  
+  markFeedbackAsRead: (feedbackId: string): Promise<{ success: boolean; message: string }> =>
+    api.put(`/api/admin/feedback/${feedbackId}/mark-read`).then(res => res.data),
+  
+  // System Actions
+  restartServices: (): Promise<{ success: boolean; message: string }> =>
+    api.post('/api/admin/restart-services').then(res => res.data),
+  
+  clearCache: (): Promise<{ success: boolean; message: string }> =>
+    api.post('/api/admin/clear-cache').then(res => res.data),
+  
+  exportData: (type: 'users' | 'characters' | 'scripts' | 'videos' = 'users'): Promise<Blob> =>
+    api.get(`/api/admin/export/${type}`, { responseType: 'blob' }).then(res => res.data),
+  
+  sendAlert: (message: string, type: 'info' | 'warning' | 'error' = 'info'): Promise<{ success: boolean; message: string }> =>
+    api.post('/api/admin/send-alert', { message, type }).then(res => res.data),
 };
 
 export default api; 

@@ -10,6 +10,8 @@ import { CharactersPage } from './pages/CharactersPage';
 import { ScriptsPage } from './pages/ScriptsPage';
 import { VideosPage } from './pages/VideosPage';
 import { AboutUsPage } from './pages/AboutUsPage';
+import { FlowPage } from './pages/FlowPage';
+import { AdminPage } from './pages/AdminPage';
 import { Auth } from './pages/Auth';
 import { LoadingScreen } from './components/LoadingScreen';
 
@@ -22,6 +24,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/auth" replace />;
+};
+
+// Admin Route Component (requires admin privileges)
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen message="Verifying your credentials..." />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (user?.subscription !== 'ADMI') {
+    return <Navigate to="/profile" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 // Public Route Component (redirect to profile if authenticated)
@@ -86,6 +107,22 @@ const AppRoutes: React.FC = () => {
             <ProtectedRoute>
               <VideosPage />
             </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/flow" 
+          element={
+            <ProtectedRoute>
+              <FlowPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin" 
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
           } 
         />
         <Route 

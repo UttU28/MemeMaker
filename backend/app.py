@@ -38,7 +38,8 @@ from models import (
     VideoGenerationJob, VideoGenerationJobResponse,
     SignupRequest, LoginRequest, UserResponse, AuthResponse,
     StarResponse, UserActivity, UserActivityResponse, ActivityStats,
-    MyScriptsResponse, UserFeedbackRequest, UserFeedbackResponse, UserFeedback
+    MyScriptsResponse, UserFeedbackRequest, UserFeedbackResponse, UserFeedback,
+    AdminStats, RecentUser, SystemAlert
 )
 
 # Import Services
@@ -54,6 +55,7 @@ from openai_service import getOpenaiClient, generateScriptWithOpenai
 from firebase_service import initializeFirebaseService, getFirebaseService
 from jwt_service import getJwtService
 from background_video_service import get_background_video_service, initialize_background_video_service
+from google.cloud import firestore
 
 load_dotenv()
 
@@ -162,6 +164,15 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             detail="Authentication failed",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+async def get_admin_user(current_user: dict = Depends(get_current_user)):
+    """Admin authentication dependency - requires admin privileges"""
+    if current_user.get('subscription') != 'ADMI':
+        raise HTTPException(
+            status_code=403,
+            detail="Admin privileges required"
+        )
+    return current_user
 
 # Add validation error handler
 @app.exception_handler(RequestValidationError)
@@ -2272,6 +2283,267 @@ async def get_video_queue_status(current_user: dict = Depends(get_current_user))
     except Exception as e:
         logger.error(f"💥 Error getting video queue status for {current_user['email']}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get queue status: {str(e)}")
+
+# Admin Endpoints
+
+@app.get("/api/admin/stats", response_model=AdminStats)
+async def get_admin_stats(admin_user: dict = Depends(get_admin_user)):
+    """Get comprehensive admin statistics"""
+    try:
+        logger.info(f"👨‍💼 Admin {admin_user['email']} requesting admin stats")
+        
+        firebase_service = getFirebaseService()
+        
+        # Get all data
+        profiles = loadUserProfiles(USER_PROFILES_FILE)
+        scripts_data = firebase_service.getAllScripts()
+        
+        # Count totals
+        total_characters = len(profiles.get("users", {}))
+        total_scripts = len(scripts_data.get("scripts", {}))
+        
+        # Get all users from Firebase
+        users_ref = firebase_service.db.collection('users')
+        users_docs = users_ref.stream()
+        
+        users_list = []
+        total_tokens = 0
+        for doc in users_docs:
+            user_data = doc.to_dict()
+            user_data['id'] = doc.id
+            users_list.append(user_data)
+            total_tokens += user_data.get('tokens', 0)
+        
+        total_users = len(users_list)
+        
+        # Count videos (files in video output directory)
+        total_videos = 0
+        try:
+            video_files = [f for f in os.listdir(VIDEO_OUTPUT_DIR) if f.endswith('.mp4')]
+            total_videos = len(video_files)
+        except:
+            total_videos = 0
+        
+        # Calculate today's stats
+        today = datetime.now().date()
+        new_users_today = 0
+        characters_created_today = 0
+        scripts_generated_today = 0
+        videos_created_today = 0
+        
+        for user in users_list:
+            created_at = user.get('createdAt', '')
+            try:
+                if datetime.fromisoformat(created_at.replace('Z', '+00:00')).date() == today:
+                    new_users_today += 1
+            except:
+                pass
+        
+        for char_data in profiles.get("users", {}).values():
+            created_at = char_data.get('createdAt', '')
+            try:
+                if datetime.fromisoformat(created_at.replace('Z', '+00:00')).date() == today:
+                    characters_created_today += 1
+            except:
+                pass
+        
+        for script_data in scripts_data.get("scripts", {}).values():
+            created_at = script_data.get('createdAt', '')
+            try:
+                if datetime.fromisoformat(created_at.replace('Z', '+00:00')).date() == today:
+                    scripts_generated_today += 1
+            except:
+                pass
+        
+        # Count today's videos by checking file modification time
+        try:
+            for filename in os.listdir(VIDEO_OUTPUT_DIR):
+                if filename.endswith('.mp4'):
+                    filepath = os.path.join(VIDEO_OUTPUT_DIR, filename)
+                    mod_time = datetime.fromtimestamp(os.path.getmtime(filepath)).date()
+                    if mod_time == today:
+                        videos_created_today += 1
+        except:
+            pass
+        
+        # Find top token user
+        top_user = None
+        if users_list:
+            top_user_data = max(users_list, key=lambda u: u.get('tokens', 0))
+            if top_user_data.get('tokens', 0) > 0:
+                top_user = {
+                    'name': top_user_data.get('name', 'Unknown'),
+                    'email': top_user_data.get('email', 'unknown@example.com'),
+                    'tokens': top_user_data.get('tokens', 0)
+                }
+        
+        # Calculate average tokens
+        avg_tokens = total_tokens / total_users if total_users > 0 else 0
+        
+        stats = AdminStats(
+            totalUsers=total_users,
+            totalCharacters=total_characters,
+            totalScripts=total_scripts,
+            totalVideos=total_videos,
+            totalTokens=total_tokens,
+            tokensUsedToday=0,  # TODO: Implement token usage tracking
+            newUsersToday=new_users_today,
+            charactersCreatedToday=characters_created_today,
+            scriptsGeneratedToday=scripts_generated_today,
+            videosCreatedToday=videos_created_today,
+            topTokenUser=top_user,
+            averageTokensPerUser=round(avg_tokens, 1)
+        )
+        
+        logger.info(f"✅ Admin stats: {total_users} users, {total_characters} chars, {total_scripts} scripts, {total_videos} videos")
+        return stats
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting admin stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get admin stats: {str(e)}")
+
+@app.get("/api/admin/recent-users", response_model=List[RecentUser])
+async def get_recent_users(limit: int = 10, admin_user: dict = Depends(get_admin_user)):
+    """Get recent users for admin dashboard"""
+    try:
+        logger.info(f"👨‍💼 Admin {admin_user['email']} requesting recent users (limit: {limit})")
+        
+        firebase_service = getFirebaseService()
+        
+        # Get users ordered by creation date
+        users_ref = firebase_service.db.collection('users').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(limit)
+        users_docs = users_ref.stream()
+        
+        recent_users = []
+        for doc in users_docs:
+            user_data = doc.to_dict()
+            
+            # Get last activity from activities array
+            activities = user_data.get('activities', [])
+            last_activity = None
+            if activities:
+                # Activities are stored newest first
+                last_activity = activities[0].get('timestamp')
+            
+            recent_user = RecentUser(
+                id=doc.id,
+                name=user_data.get('name', 'Unknown'),
+                email=user_data.get('email', 'unknown@example.com'),
+                createdAt=user_data.get('createdAt', ''),
+                tokens=user_data.get('tokens', 0),
+                lastActivity=last_activity
+            )
+            recent_users.append(recent_user)
+        
+        logger.info(f"✅ Retrieved {len(recent_users)} recent users for admin")
+        return recent_users
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting recent users: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get recent users: {str(e)}")
+
+@app.get("/api/admin/alerts", response_model=List[SystemAlert])
+async def get_system_alerts(limit: int = 10, admin_user: dict = Depends(get_admin_user)):
+    """Get system alerts for admin dashboard"""
+    try:
+        logger.info(f"👨‍💼 Admin {admin_user['email']} requesting system alerts")
+        
+        alerts = []
+        
+        # Check F5-TTS status
+        try:
+            is_connected = checkF5ttsConnection()
+            if not is_connected:
+                alerts.append(SystemAlert(
+                    id="f5tts_down",
+                    type="error",
+                    message="F5-TTS service is not responding",
+                    timestamp=datetime.now().isoformat(),
+                    severity="high"
+                ))
+        except:
+            alerts.append(SystemAlert(
+                id="f5tts_error",
+                type="warning", 
+                message="F5-TTS status check failed",
+                timestamp=datetime.now().isoformat(),
+                severity="medium"
+            ))
+        
+        # Check video queue
+        try:
+            background_service = get_background_video_service()
+            queue_status = background_service.get_queue_status()
+            
+            if queue_status['queue_size'] > 10:
+                alerts.append(SystemAlert(
+                    id="high_queue",
+                    type="warning",
+                    message=f"High video queue: {queue_status['queue_size']} jobs pending",
+                    timestamp=datetime.now().isoformat(),
+                    severity="medium"
+                ))
+        except:
+            pass
+        
+        # If no alerts, add all clear
+        if not alerts:
+            alerts.append(SystemAlert(
+                id="all_clear",
+                type="success",
+                message="All systems operational",
+                timestamp=datetime.now().isoformat(),
+                severity="low"
+            ))
+        
+        # Limit results
+        alerts = alerts[:limit]
+        
+        logger.info(f"✅ Retrieved {len(alerts)} system alerts for admin")
+        return alerts
+        
+    except Exception as e:
+        logger.error(f"💥 Error getting system alerts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get system alerts: {str(e)}")
+
+@app.post("/api/admin/clear-cache")
+async def clear_system_cache(admin_user: dict = Depends(get_admin_user)):
+    """Clear system caches"""
+    try:
+        logger.info(f"👨‍💼 Admin {admin_user['email']} clearing system cache")
+        
+        # Clear user profiles cache
+        from utils import _clear_cache
+        _clear_cache()
+        
+        logger.info("✅ System cache cleared successfully")
+        return {"success": True, "message": "System cache cleared successfully"}
+        
+    except Exception as e:
+        logger.error(f"💥 Error clearing cache: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to image.pnghe: {str(e)}")
+
+@app.post("/api/admin/send-alert")
+async def send_system_alert(
+    request: dict,
+    admin_user: dict = Depends(get_admin_user)
+):
+    """Send a system alert/notification"""
+    try:
+        message = request.get('message', '')
+        alert_type = request.get('type', 'info')
+        
+        logger.info(f"👨‍💼 Admin {admin_user['email']} sending alert: {message}")
+        
+        # For now, just log the alert
+        # In production, you might send to monitoring systems, email alerts, etc.
+        logger.warning(f"🚨 ADMI ALERT [{alert_type.upper()}]: {message}")
+        
+        return {"success": True, "message": f"Alert sent successfully: {message}"}
+        
+    except Exception as e:
+        logger.error(f"💥 Error sending alert: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to send alert: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Character Management API...")
