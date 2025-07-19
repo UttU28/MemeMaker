@@ -21,7 +21,6 @@ import {
   MonetizationOn as TokenIcon,
   AutoAwesome as MagicIcon,
   Queue as ProcessingIcon,
-  Celebration as SuccessIcon,
   CheckCircle as CheckIcon,
   PlayArrow as PlayIcon,
   PersonAdd as PersonAddIcon,
